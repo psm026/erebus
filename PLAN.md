@@ -41,10 +41,13 @@ the site. A bad room is a bad JSON file, not a crash.
 4. **IONOS Deploy Now** auto-publishes the commit to JC's existing IONOS hosting
 5. World grew. Nobody touched anything.
 
-## Pipeline (uses hosting JC already pays for)
+## Pipeline (LIVE since 2026-07-12)
 
-GitHub repo → IONOS Deploy Now (free add-on: connects repo, auto-deploys every
-commit, free SSL, staging branches). Docs: https://docs.ionos.space
+GitHub repo **psm026/erebus** → **Vercel** (team: EMRA01/emra1, Hobby = free forever)
+→ live at **https://erebus-emra1.vercel.app** — every commit to `main` auto-deploys.
+
+Note: IONOS Deploy Now was rejected ($0 first month, then $4/mo). IONOS still
+useful for domains/email — point a custom domain at Vercel when ready.
 
 ## Division of labor
 
@@ -56,11 +59,16 @@ scheduled growth runs, testing in Chrome, content drafting, deploy babysitting.
 
 ## Phases
 
-1. **Ship v1** — portfolio drift live on IONOS (this week)
-2. **Rooms refactor** — engine reads manifest; portfolio becomes room #1 (next)
+1. **Ship v1** — portfolio drift live ✅ (2026-07-12, Vercel)
+2. **Rooms refactor** — engine reads world.json; rooms = data; JC feeds ideas/
+   images/thoughts → new rooms (IN PROGRESS). Portfolio = placeholder pages for
+   now (JC finishing real projects separately).
 3. **Growth agent** — scheduled run + WORLD-LOG + first auto-generated room
-4. **$150k polish** — bloom post-processing, free-look camera, sound design,
-   custom cursor, page transitions, per-room palettes (ongoing, compounding)
+4. **Commerce rooms** — product pages that ARE rooms; buy inside the experience.
+   Start: Shopify checkout links/buy buttons inside rooms (zero backend).
+   Later: full backend — accounts/login, cart, purchases in-world.
+5. **$150k polish** — bloom post-processing, free-look camera, sound design,
+   custom cursor, page transitions (ongoing, compounding)
 
 ## Trusted resources (vetted)
 

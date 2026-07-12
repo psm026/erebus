@@ -164,11 +164,13 @@ body.world-ready .hud, body.world-ready .hud-bottom { opacity: 1; }
   pointer-events: auto;
 }
 
+.panel { --accent: var(--cyan); }
+
 .eyebrow {
   font-size: 11px;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: var(--cyan);
+  color: var(--accent, var(--cyan));
   margin-bottom: 1.2rem;
 }
 
@@ -208,9 +210,12 @@ h2 {
   font-size: 11px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--violet);
+  color: var(--accent, var(--violet));
   margin-bottom: 1.1rem;
 }
+
+/* room-title panels read a touch bigger and airier */
+.panel.room-title h2 { font-size: clamp(2.6rem, 5.4vw, 4.2rem); font-style: italic; }
 
 .p-desc { color: var(--dim); max-width: 46ch; margin-bottom: 1.6rem; }
 
@@ -230,6 +235,28 @@ h2 {
 .p-link:focus-visible { outline: 1px dashed var(--cyan); outline-offset: 6px; }
 
 .contact-link { font-size: 15px; text-transform: none; letter-spacing: 0.05em; }
+
+/* ---------- easter-egg veil ---------- */
+#egg-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 2, 6, 0.88);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease), visibility 0.6s;
+}
+body.egg-open #egg-veil { opacity: 1; visibility: visible; }
+.egg-card {
+  max-width: min(520px, 84vw);
+  text-align: center;
+  padding: 2rem;
+}
+.egg-card .p-desc { margin-left: auto; margin-right: auto; }
+.egg-close { background: none; border: none; border-bottom: 1px solid var(--ghost); cursor: pointer; font-family: var(--font-body); }
 
 /* ---------- scroll runway ---------- */
 #scroll-space { position: relative; z-index: -1; width: 1px; }

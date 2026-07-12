@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
 
   <script type="importmap">
     {
@@ -23,10 +23,10 @@
       }
     }
   </script>
-  <script type="module" src="script.js"></script>
+  <script type="module" src="script.js?v=2"></script>
 </head>
 <body>
-  <a class="skip" href="#work">Skip to selected work</a>
+  <a class="skip" href="#content">Skip to content</a>
 
   <!-- The world -->
   <canvas id="erebus" aria-hidden="true"></canvas>
@@ -57,61 +57,18 @@
     <span class="hud-hint" id="hud-hint">Scroll to drift</span>
   </div>
 
-  <!-- Content panels (edit these — this is your portfolio copy) -->
-  <main id="content">
-    <section class="panel intro is-active" data-stop="0">
-      <p class="eyebrow">Somewhere in the dark</p>
-      <h1>JC — designer &amp; developer building digital dream&nbsp;spaces.</h1>
-      <p class="lede">Five pieces of selected work float ahead. Scroll to drift toward them.</p>
-    </section>
+  <!-- Panels are built by script.js from world.json — the world is data -->
+  <main id="content"></main>
 
-    <section class="panel project" data-stop="1" id="work">
-      <span class="p-num" aria-hidden="true">01</span>
-      <h2>Project One</h2>
-      <p class="p-tags">Brand identity / Web</p>
-      <p class="p-desc">Replace me — one or two lines on what you made, for whom, and why it mattered.</p>
-      <a class="p-link" href="#">View project</a>
-    </section>
-
-    <section class="panel project" data-stop="2">
-      <span class="p-num" aria-hidden="true">02</span>
-      <h2>Project Two</h2>
-      <p class="p-tags">Web design / Build</p>
-      <p class="p-desc">Replace me — what was the problem, what did you ship, what changed after.</p>
-      <a class="p-link" href="#">View project</a>
-    </section>
-
-    <section class="panel project" data-stop="3">
-      <span class="p-num" aria-hidden="true">03</span>
-      <h2>Project Three</h2>
-      <p class="p-tags">Print-on-demand / Product</p>
-      <p class="p-desc">Replace me — a product line, a drop, a store. Numbers help if you have them.</p>
-      <a class="p-link" href="#">View project</a>
-    </section>
-
-    <section class="panel project" data-stop="4">
-      <span class="p-num" aria-hidden="true">04</span>
-      <h2>Project Four</h2>
-      <p class="p-tags">Social / Content system</p>
-      <p class="p-desc">Replace me — a content system or campaign. Show the thinking, not just the posts.</p>
-      <a class="p-link" href="#">View project</a>
-    </section>
-
-    <section class="panel project" data-stop="5">
-      <span class="p-num" aria-hidden="true">05</span>
-      <h2>Project Five</h2>
-      <p class="p-tags">Experiment / WebGL</p>
-      <p class="p-desc">Replace me — this site itself can be project five. Built in the open, inside Erebus.</p>
-      <a class="p-link" href="#">View project</a>
-    </section>
-
-    <section class="panel contact" data-stop="6">
-      <p class="eyebrow">Approaching the planet</p>
-      <h2>Let&rsquo;s build yours.</h2>
-      <p class="p-desc">Branding, websites, products — say hello and tell me what you&rsquo;re making.</p>
-      <a class="p-link contact-link" href="mailto:psm026@gmail.com">psm026@gmail.com</a>
-    </section>
-  </main>
+  <!-- Hidden-thing overlay (easter eggs) -->
+  <div id="egg-veil" role="dialog" aria-modal="true" aria-label="Hidden discovery">
+    <div class="egg-card">
+      <p class="eyebrow egg-eyebrow"></p>
+      <h2 class="egg-title"></h2>
+      <p class="p-desc egg-body"></p>
+      <button class="p-link egg-close" type="button">Return to the dark</button>
+    </div>
+  </div>
 
   <!-- Invisible scroll runway; height is set by script.js -->
   <div id="scroll-space" aria-hidden="true"></div>

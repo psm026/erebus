@@ -1,0 +1,145 @@
+{
+  "meta": {
+    "title": "EREBUS",
+    "version": 2,
+    "note": "The world is data. Each room here is rendered by script.js. Add a room, commit, and the world grows. Colors are hex. 'stops' are places the camera pauses (each gets a text panel). 'structures' are what floats in that room's stretch of space."
+  },
+  "rooms": [
+    {
+      "id": "drift",
+      "sector": "EREBUS // DRIFT",
+      "accentA": "#8b7bff",
+      "accentB": "#7de8ff",
+      "fog": "#030307",
+      "nebulaA": "#1a1048",
+      "nebulaB": "#0a2a33",
+      "dust": "#8b7bff",
+      "stops": [
+        {
+          "variant": "intro",
+          "eyebrow": "Somewhere in the dark",
+          "title": "JC — designer & developer building digital dream spaces.",
+          "body": "This world grows new rooms over time. Scroll to drift through what exists so far."
+        },
+        {
+          "num": "01",
+          "title": "Project One",
+          "tags": "Coming soon",
+          "body": "A placeholder shard. Real selected work docks here when it's ready for show.",
+          "link": { "label": "In progress", "href": "#" }
+        },
+        {
+          "num": "02",
+          "title": "Project Two",
+          "tags": "Coming soon",
+          "body": "Another shard holding orbit. The work exists — it's being finished properly.",
+          "link": { "label": "In progress", "href": "#" }
+        },
+        {
+          "num": "03",
+          "title": "Project Three",
+          "tags": "Coming soon",
+          "body": "Reserved. Every empty shard is a promise, not an apology.",
+          "link": { "label": "In progress", "href": "#" }
+        }
+      ],
+      "structures": [
+        { "kind": "shard", "count": 3, "scale": [2.4, 3.2], "rim": "A", "anchor": true },
+        { "kind": "shard", "count": 8, "scale": [0.6, 1.8], "rim": "A", "intensity": 0.45 }
+      ]
+    },
+    {
+      "id": "bloom",
+      "sector": "EREBUS // BLOOM",
+      "accentA": "#4ef0c0",
+      "accentB": "#b8ff5c",
+      "fog": "#020806",
+      "nebulaA": "#06231c",
+      "nebulaB": "#122b06",
+      "dust": "#4ef0c0",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Second chamber",
+          "title": "The Bloom",
+          "body": "A garden that grows without light. Ideas seed here before they become rooms — some of them glow, some of them wait."
+        },
+        {
+          "num": "??",
+          "title": "Something is growing",
+          "tags": "Living room / evolves",
+          "body": "This chamber rearranges itself as the world learns. What you see today is not what you'll find next month. Look closely — not everything here is asleep."
+        }
+      ],
+      "structures": [
+        { "kind": "orb", "count": 6, "scale": [0.8, 2.0], "rim": "A", "intensity": 1.6 },
+        { "kind": "swarm", "count": 2, "scale": [7, 10], "rim": "B" },
+        { "kind": "ring", "count": 2, "scale": [5, 9], "rim": "A", "opacity": 0.25 },
+        {
+          "kind": "egg",
+          "scale": [0.4, 0.4],
+          "rim": "B",
+          "intensity": 3.0,
+          "secret": {
+            "eyebrow": "EGG-001 // FOUND",
+            "title": "You looked closer.",
+            "body": "This is the first hidden thing in EREBUS. There will be others, buried deeper, as the agents keep building rooms. Screenshot this — you were here before the world grew."
+          }
+        }
+      ]
+    },
+    {
+      "id": "relics",
+      "sector": "EREBUS // RELICS",
+      "accentA": "#ff9d5c",
+      "accentB": "#ffd27d",
+      "fog": "#070403",
+      "nebulaA": "#2b1206",
+      "nebulaB": "#1f0a14",
+      "dust": "#ff9d5c",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Third chamber",
+          "title": "The Relics",
+          "body": "Monuments to things not built yet. This hall becomes the marketplace — rooms you can buy inside, products floating where paintings would hang."
+        },
+        {
+          "num": "◆",
+          "title": "Future artifacts",
+          "tags": "Products / collections / drops",
+          "body": "Print-on-demand lines, collaborations, limited pieces — each will get its own monolith in this hall. Checkout happens without leaving the dark.",
+          "link": { "label": "Nothing for sale yet", "href": "#" }
+        }
+      ],
+      "structures": [
+        { "kind": "monolith", "count": 5, "scale": [6, 13], "rim": "A", "anchor": true },
+        { "kind": "ring", "count": 3, "scale": [4, 8], "rim": "B", "opacity": 0.2 },
+        { "kind": "shard", "count": 5, "scale": [0.5, 1.2], "rim": "B", "intensity": 0.4 }
+      ]
+    },
+    {
+      "id": "approach",
+      "sector": "EREBUS // APPROACH",
+      "accentA": "#6f9fff",
+      "accentB": "#8b7bff",
+      "fog": "#030307",
+      "nebulaA": "#0d1240",
+      "nebulaB": "#1a1048",
+      "dust": "#6f9fff",
+      "planet": true,
+      "stops": [
+        {
+          "variant": "contact",
+          "eyebrow": "Approaching the planet",
+          "title": "Let's build yours.",
+          "body": "Branding, websites, products, worlds. Say hello and tell me what you're making.",
+          "link": { "label": "psm026@gmail.com", "href": "mailto:psm026@gmail.com" }
+        }
+      ],
+      "structures": [
+        { "kind": "shard", "count": 4, "scale": [0.8, 1.6], "rim": "A", "intensity": 0.5 }
+      ]
+    }
+  ]
+}
