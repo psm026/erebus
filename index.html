@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>JC — Designer &amp; Developer</title>
+  <meta name="description" content="Selected design and development work by JC — interactive dream spaces, brands, and web experiences." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#030307" />
+  <meta property="og:title" content="JC — Designer &amp; Developer" />
+  <meta property="og:description" content="A portfolio descending through Erebus. Selected work by JC." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js"
+      }
+    }
+  </script>
+  <script type="module" src="script.js"></script>
+</head>
+<body>
+  <a class="skip" href="#work">Skip to selected work</a>
+
+  <!-- The world -->
+  <canvas id="erebus" aria-hidden="true"></canvas>
+
+  <!-- Loader -->
+  <div id="loader" role="status" aria-live="polite">
+    <div class="loader-inner">
+      <span class="loader-label">Descending into Erebus</span>
+      <span class="loader-count" id="loader-count">000</span>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <header class="hud">
+    <div class="hud-left">
+      <span class="hud-mono">JC</span>
+      <span class="hud-sub">Designer &amp; Developer</span>
+    </div>
+    <div class="hud-right">
+      <span id="hud-sector">EREBUS // DRIFT</span>
+      <span id="hud-time">00:00</span>
+    </div>
+  </header>
+
+  <div class="hud-bottom">
+    <span id="hud-index">00 / 05</span>
+    <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+    <span class="hud-hint" id="hud-hint">Scroll to drift</span>
+  </div>
+
+  <!-- Content panels (edit these — this is your portfolio copy) -->
+  <main id="content">
+    <section class="panel intro is-active" data-stop="0">
+      <p class="eyebrow">Somewhere in the dark</p>
+      <h1>JC — designer &amp; developer building digital dream&nbsp;spaces.</h1>
+      <p class="lede">Five pieces of selected work float ahead. Scroll to drift toward them.</p>
+    </section>
+
+    <section class="panel project" data-stop="1" id="work">
+      <span class="p-num" aria-hidden="true">01</span>
+      <h2>Project One</h2>
+      <p class="p-tags">Brand identity / Web</p>
+      <p class="p-desc">Replace me — one or two lines on what you made, for whom, and why it mattered.</p>
+      <a class="p-link" href="#">View project</a>
+    </section>
+
+    <section class="panel project" data-stop="2">
+      <span class="p-num" aria-hidden="true">02</span>
+      <h2>Project Two</h2>
+      <p class="p-tags">Web design / Build</p>
+      <p class="p-desc">Replace me — what was the problem, what did you ship, what changed after.</p>
+      <a class="p-link" href="#">View project</a>
+    </section>
+
+    <section class="panel project" data-stop="3">
+      <span class="p-num" aria-hidden="true">03</span>
+      <h2>Project Three</h2>
+      <p class="p-tags">Print-on-demand / Product</p>
+      <p class="p-desc">Replace me — a product line, a drop, a store. Numbers help if you have them.</p>
+      <a class="p-link" href="#">View project</a>
+    </section>
+
+    <section class="panel project" data-stop="4">
+      <span class="p-num" aria-hidden="true">04</span>
+      <h2>Project Four</h2>
+      <p class="p-tags">Social / Content system</p>
+      <p class="p-desc">Replace me — a content system or campaign. Show the thinking, not just the posts.</p>
+      <a class="p-link" href="#">View project</a>
+    </section>
+
+    <section class="panel project" data-stop="5">
+      <span class="p-num" aria-hidden="true">05</span>
+      <h2>Project Five</h2>
+      <p class="p-tags">Experiment / WebGL</p>
+      <p class="p-desc">Replace me — this site itself can be project five. Built in the open, inside Erebus.</p>
+      <a class="p-link" href="#">View project</a>
+    </section>
+
+    <section class="panel contact" data-stop="6">
+      <p class="eyebrow">Approaching the planet</p>
+      <h2>Let&rsquo;s build yours.</h2>
+      <p class="p-desc">Branding, websites, products — say hello and tell me what you&rsquo;re making.</p>
+      <a class="p-link contact-link" href="mailto:psm026@gmail.com">psm026@gmail.com</a>
+    </section>
+  </main>
+
+  <!-- Invisible scroll runway; height is set by script.js -->
+  <div id="scroll-space" aria-hidden="true"></div>
+
+  <noscript>
+    <style>
+      #loader, #erebus { display: none; }
+      .panel { position: static !important; opacity: 1 !important; transform: none !important; margin: 18vh 7vw; }
+      #scroll-space { display: none; }
+    </style>
+    <p style="position:fixed;bottom:1rem;left:1rem;font-size:12px;opacity:.6">This site renders Erebus in real time with JavaScript — showing the plain version.</p>
+  </noscript>
+</body>
+</html>
