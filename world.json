@@ -120,6 +120,38 @@
       ]
     },
     {
+      "id": "mycelium",
+      "sector": "EREBUS // MYCELIUM",
+      "accentA": "#c9a2ff",
+      "accentB": "#7df2c8",
+      "fog": "#04030a",
+      "nebulaA": "#1a0d3e",
+      "nebulaB": "#07261d",
+      "dust": "#c9a2ff",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Fifth chamber",
+          "title": "The Mycelium",
+          "body": "Mushrooms think in threads. Galaxies hang on the same web. One network at every scale — forests below, superclusters above, and you, a node between them."
+        },
+        {
+          "num": "∞",
+          "title": "We are all network",
+          "tags": "5D / biological / cosmic",
+          "body": "Filaments under the forest floor. Filaments between the stars. The world grows the way mycelium grows — toward whatever feeds it. Feed it.",
+          "link": { "label": "Feed the world", "href": "mailto:psm026@gmail.com?subject=A%20seed%20for%20EREBUS" }
+        }
+      ],
+      "structures": [
+        { "kind": "network", "count": 3, "scale": [8, 14], "rim": "A", "intensity": 1.2, "nodes": 30 },
+        { "kind": "network", "count": 2, "scale": [4, 7], "rim": "B", "opacity": 0.22, "nodes": 18 },
+        { "kind": "orb", "count": 5, "scale": [0.5, 1.1], "rim": "B", "intensity": 1.9 },
+        { "kind": "swarm", "count": 2, "scale": [6, 9], "rim": "A" },
+        { "kind": "ring", "count": 1, "scale": [9, 12], "rim": "B", "opacity": 0.15 }
+      ]
+    },
+    {
       "id": "approach",
       "sector": "EREBUS // APPROACH",
       "accentA": "#6f9fff",

@@ -481,6 +481,31 @@ async function boot() {
           rim.scale.setScalar(1.14);
           group.add(rim);
 
+        } else if (spec.kind === 'network') {
+          // mycelium: nodes joined to their nearest neighbors by glowing filaments
+          const nodeCount = Math.min(spec.nodes || 26, 40);
+          const pts = [];
+          for (let n = 0; n < nodeCount; n++) {
+            pts.push(new THREE.Vector3().randomDirection().multiplyScalar(Math.cbrt(Math.random()) * s));
+          }
+          const segs = [];
+          for (let a = 0; a < pts.length; a++) {
+            const near = pts
+              .map((p, idx) => ({ idx, dist: p.distanceTo(pts[a]) }))
+              .filter((x) => x.idx !== a)
+              .sort((x, y) => x.dist - y.dist);
+            for (let k = 0; k < 2 && k < near.length; k++) {
+              segs.push(pts[a], pts[near[k].idx]);
+            }
+          }
+          const lineGeo = new THREE.BufferGeometry().setFromPoints(segs);
+          group.add(new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
+            color: col, transparent: true, opacity: spec.opacity != null ? spec.opacity : 0.32,
+            blending: THREE.AdditiveBlending, depthWrite: false,
+          })));
+          let ni = 0;
+          group.add(pointsCloud(pts.length, () => pts[ni++], col, [1.2, 2.4], 0.9, 0.12));
+
         } else if (spec.kind === 'swarm') {
           group.add(pointsCloud(
             isMobile ? 140 : 260,
