@@ -60,9 +60,11 @@ scheduled growth runs, testing in Chrome, content drafting, deploy babysitting.
 ## Phases
 
 1. **Ship v1** — portfolio drift live ✅ (2026-07-12, Vercel)
-2. **Rooms refactor** — engine reads world.json; rooms = data; JC feeds ideas/
-   images/thoughts → new rooms (IN PROGRESS). Portfolio = placeholder pages for
-   now (JC finishing real projects separately).
+2. **Rooms refactor** ✅ (v2 shipped 2026-07-12) — engine reads world.json; rooms
+   = data. Live rooms: The Drift (placeholder portfolio), The Bloom (teal garden,
+   contains EGG-001), The Relics (amber marketplace-to-be), The Approach (planet
+   + contact). Palette crossfades between rooms. JC feeds ideas/images/thoughts
+   → new rooms. Portfolio stays placeholder until JC's projects are show-ready.
 3. **Growth agent** — scheduled run + WORLD-LOG + first auto-generated room
 4. **Commerce rooms** — product pages that ARE rooms; buy inside the experience.
    Start: Shopify checkout links/buy buttons inside rooms (zero backend).
