@@ -114,7 +114,7 @@
         }
       ],
       "structures": [
-        { "kind": "monolith", "count": 5, "scale": [6, 13], "rim": "A", "anchor": true },
+        { "kind": "monolith", "count": 4, "scale": [6, 11], "rim": "A", "anchor": true },
         { "kind": "ring", "count": 3, "scale": [4, 8], "rim": "B", "opacity": 0.2 },
         { "kind": "shard", "count": 5, "scale": [0.5, 1.2], "rim": "B", "intensity": 0.4 }
       ]

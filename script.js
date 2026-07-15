@@ -444,7 +444,7 @@ async function boot() {
     color: 0x0b0a12, roughness: 0.12, metalness: 0.92, flatShading: true, envMapIntensity: 0.9,
   });
   const monoMat = new THREE.MeshStandardMaterial({
-    color: 0x08070d, roughness: 0.3, metalness: 0.7, envMapIntensity: 0.6,
+    color: 0x08070d, roughness: 0.35, metalness: 0.7, envMapIntensity: 0.35,
   });
   const texLoader = new THREE.TextureLoader();
 
@@ -527,7 +527,8 @@ async function boot() {
     if (spec.anchor) {
       const stopIdx = room.firstStop + 1 + (i % Math.max(1, room.stops.length - 1));
       const p = W.curve.getPointAt(stopT(Math.min(stopIdx, W.totalStops - 1)));
-      group.position.set(p.x + 8 + (i % 3) * 1.5, p.y + rand(-1.5, 2.5), p.z - 12);
+      // 11+ units off-path: the camera weaves ±sway, never fly THROUGH a hero piece
+      group.position.set(p.x + 11 + (i % 3) * 2, p.y + rand(-1.5, 2.5), p.z - 12);
     } else {
       group.position.copy(besidePath(room, 11, 30, i));
     }
