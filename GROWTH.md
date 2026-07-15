@@ -3,10 +3,17 @@
 
 ## The loop (every run)
 
+0. **Check the seeds first.** Look in `seeds/` (this folder). If JC dropped
+   anything — images, notes, moodboards — those are this run's assignment and
+   outrank everything below. Turn each seed (or named image+note pair) into a
+   room: extract palette from images, mood from words. Move consumed seeds to
+   `seeds/used/`. Images that should float in a room get optimized (webp,
+   ≤1200px, ≤300KB) and uploaded to the repo root as `asset-<name>.webp`,
+   referenced via `{ "kind": "image", "src": "./asset-<name>.webp" }`.
 1. **Remember.** Read `WORLD-LOG.md` and `world.json` in this folder
-   (`.../Vibe#1/erebus/`). The last log entry contains a **NEXT INTENTION** —
-   that intention is this run's assignment. JC's ideas (if he left any in the
-   log under "Feed") take priority over the intention.
+   (`.../Vibe#1/erebus/`). If no seeds existed, the last log entry's
+   **NEXT INTENTION** is this run's assignment. "Feed" lines in the log also
+   outrank the intention.
 2. **Design one new room** as a *consequence* of what was built last — the world
    grows like a story, not a playlist. Correlate: reuse one motif from the
    previous room (a color, a structure kind, a word) and mutate everything else.
@@ -23,10 +30,24 @@
    `pending-rooms/` in this folder and note it in the log — the next run (or JC's
    next chat session) publishes it.
 
+## Sub-worlds & portals (v4 engine)
+
+- A structure `{ "kind": "portal", "to": "<world-id>", "scale": [2.6, 2.6], "rim": "B", "intensity": 1.5 }`
+  is a clickable burning ring that fades the visitor into `world-<world-id>.json`
+  (same schema as world.json). The LAST room of every sub-world MUST contain a
+  return portal: `{ "kind": "portal", "to": "main", ... }`.
+- Sub-worlds are where deep ideas live: a room in the main world is a door;
+  the world behind it can be 1-3 rooms. Prefer growing a sub-world behind an
+  existing room over endlessly lengthening the main drift. Keep the main world
+  ≤ 9 rooms; go deeper, not longer.
+- Sub-world files are committed exactly like world.json (flat file in repo root).
+
 ## Hard rules (never break)
 
-- **Data only.** Touch ONLY `world.json` and `WORLD-LOG.md`. Never edit
-  `script.js`, `index.html`, or `styles.css` on an autonomous run.
+- **Data only.** Touch ONLY `world.json`, `world-*.json`, and `WORLD-LOG.md`.
+  Never edit `script.js`, `index.html`, or `styles.css` on an autonomous run.
+- The engine skips malformed rooms instead of crashing — but don't lean on it.
+  Validate JSON before publishing (`python3 -c "import json; json.load(open('world.json'))"`).
 - Valid JSON. Test mentally against the schema below; a trailing comma kills the world.
 - The `approach` room (planet + contact) is always the final room.
 - Max 1 new room per run. Max 2 stops per room. Keep structure counts modest

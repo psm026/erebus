@@ -1,9 +1,10 @@
 /* ============================================================
-   EREBUS v3 — the world engine, cinematic pass
-   - Winding spline flight path (side-to-side, banked turns)
-   - Mouse look-around: you search the dark, it doesn't scroll past you
-   - UnrealBloom post-processing + environment reflections
-   - Rooms are still DATA (world.json): add a room → world grows
+   EREBUS v4 — the multi-world engine
+   - Worlds are data files: world.json (main) + world-<id>.json (sub-worlds)
+   - PORTALS: clickable structures that fade you into another world
+   - Resilient: a malformed room is skipped and logged, never fatal
+   - Winding spline flight, look-around camera, bloom, reflections
+   - #w=<id> hash routing: portals are linkable, browser Back works
    ============================================================ */
 
 import * as THREE from 'three';
@@ -16,21 +17,28 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 // boot beacon: index.html rescues the page if this module never runs
 window.__erebusBooted = true;
 
-const PR_CAP = 1.5; // bloom hides the softness; retina DPR 2 kills the frame budget
+const PR_CAP = 1.5;
+const VERSION = 4;
 
 /* ---------- tuning ---------- */
 const CONFIG = {
   segment: 34,
-  weaveX: 14,        // how far the flight path swings side to side
-  weaveY: 4.5,       // vertical drift of the path
+  weaveX: 14,
+  weaveY: 4.5,
   camLerp: 0.055,
   paletteLerp: 0.035,
-  lookYaw: 0.42,     // radians of head-turn from mouse (≈24°)
+  lookYaw: 0.42,
   lookPitch: 0.22,
-  bank: 0.55,        // how hard the camera rolls into turns
+  bank: 0.55,
   starCount: 2200,
-  dustCount: 800,
+  dustPerStop: 90,
   bloom: { strength: 0.55, radius: 0.75, threshold: 0.2 },
+};
+
+const ROOM_DEFAULTS = {
+  sector: 'EREBUS',
+  accentA: '#8b7bff', accentB: '#7de8ff',
+  fog: '#030307', nebulaA: '#1a1048', nebulaB: '#0a2a33', dust: '#8b7bff',
 };
 
 const canvas = document.getElementById('erebus');
@@ -43,7 +51,6 @@ const loaderCount = document.getElementById('loader-count');
 const eggVeil = document.getElementById('egg-veil');
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-// coarse pointer OR narrow viewport = the lean render tier (covers landscape phones + tablets)
 const isMobile = window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 720px)').matches;
 
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -60,7 +67,6 @@ function webglOK() {
 function fallback(err) {
   if (err) console.error('[erebus] falling back to static:', err);
   document.body.classList.add('no-webgl', 'world-ready');
-  // if panels never got built (e.g. world.json failed), never show a blank page
   if (content && !content.children.length) {
     content.innerHTML = '<section class="panel intro is-active" style="position:static;opacity:1;transform:none;filter:none;margin:18vh 7vw">' +
       '<p class="eyebrow">EREBUS</p><h1>The dark is resting.</h1>' +
@@ -169,13 +175,12 @@ const RIM_FRAG = /* glsl */ `
   varying float vFres;
   varying float vFogDepth;
   void main() {
-    // additive materials must obey the fog too, or distant rooms leak their glow
     float fogF = exp(-uFogDensity * uFogDensity * vFogDepth * vFogDepth * 1.442695);
     gl_FragColor = vec4(uColor * vFres * uIntensity * fogF, vFres * fogF);
   }
 `;
 
-/* ---------- geometry helpers ---------- */
+/* ---------- helpers ---------- */
 function strHash(s) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) {
@@ -186,7 +191,6 @@ function strHash(s) {
 }
 
 function shardGeometry(radius) {
-  // detail 2 + gentler displacement = jewel-cut, not rubble
   const g = new THREE.IcosahedronGeometry(radius, 2);
   const pos = g.attributes.position;
   const v = new THREE.Vector3();
@@ -248,7 +252,6 @@ function pointsCloud(count, positionFn, color, sizeRange, alpha, drift, fogDensi
   return new THREE.Points(geo, mat);
 }
 
-/* ---------- panel DOM ---------- */
 function buildPanel(stop, room, globalIndex) {
   const sec = document.createElement('section');
   const variant = stop.variant || 'panel';
@@ -262,7 +265,7 @@ function buildPanel(stop, room, globalIndex) {
   if (stop.num) html += `<span class="p-num" aria-hidden="true">${stop.num}</span>`;
   if (stop.eyebrow) html += `<p class="eyebrow">${stop.eyebrow}</p>`;
   const H = variant === 'intro' ? 'h1' : 'h2';
-  html += `<${H}>${stop.title}</${H}>`;
+  html += `<${H}>${stop.title || ''}</${H}>`;
   if (stop.tags) html += `<p class="p-tags">${stop.tags}</p>`;
   if (stop.body) html += `<p class="${variant === 'intro' ? 'lede' : 'p-desc'}">${stop.body}</p>`;
   if (stop.link) html += `<a class="p-link${variant === 'contact' ? ' contact-link' : ''}" href="${stop.link.href}">${stop.link.label}</a>`;
@@ -271,61 +274,46 @@ function buildPanel(stop, room, globalIndex) {
   return sec;
 }
 
-/* ---------- the world ---------- */
-async function init() {
-  const opts = ('timeout' in AbortSignal) ? { signal: AbortSignal.timeout(9000) } : {};
-  const world = await fetch('./world.json?v=3', opts).then((r) => {
-    if (!r.ok) throw new Error('world.json HTTP ' + r.status);
-    return r.json();
+/* room sanitizer: broken rooms are skipped, never fatal */
+function sanitizeRooms(raw) {
+  const rooms = [];
+  (Array.isArray(raw) ? raw : []).forEach((r, i) => {
+    try {
+      if (!r || typeof r !== 'object') throw new Error('not an object');
+      const room = Object.assign({}, ROOM_DEFAULTS, r);
+      room.id = room.id || 'room-' + i;
+      room.stops = (Array.isArray(room.stops) ? room.stops : []).filter((s) => s && typeof s.title === 'string');
+      room.structures = Array.isArray(room.structures) ? room.structures : [];
+      if (!room.stops.length) throw new Error('no valid stops');
+      rooms.push(room);
+    } catch (err) {
+      console.warn('[erebus] skipping malformed room #' + i + ':', err.message);
+    }
   });
-  const rooms = world.rooms;
-  rooms.forEach((r) => { r.stops = r.stops || []; r.structures = r.structures || []; });
+  return rooms;
+}
 
-  /* --- flatten stops --- */
-  const CAM_BASE_Z = 10;
-  const seg = CONFIG.segment;
-  const allStops = [];
-  rooms.forEach((room) => {
-    room.firstStop = allStops.length;
-    room.stops.forEach((stop) => allStops.push({ stop, room }));
-    room.lastStop = allStops.length - 1;
-    room.zStart = CAM_BASE_Z - (room.firstStop - 0.5) * seg;
-    room.zEnd = CAM_BASE_Z - (room.lastStop + 0.5) * seg;
-  });
-  const totalStops = allStops.length;
-  const pathLength = (totalStops - 1) * seg;
-
-  /* --- the flight path: a winding spline through every stop --- */
-  const stopPoint = (i) => new THREE.Vector3(
-    Math.sin(i * 1.7) * CONFIG.weaveX,
-    Math.cos(i * 1.3) * CONFIG.weaveY,
-    CAM_BASE_Z - i * seg
-  );
-  const pathPoints = [];
-  for (let i = 0; i < totalStops; i++) pathPoints.push(stopPoint(i));
-  const curve = new THREE.CatmullRomCurve3(pathPoints, false, 'catmullrom', 0.4);
-  const stopT = (i) => totalStops > 1 ? i / (totalStops - 1) : 0;
-
-  /* --- panels --- */
-  const panels = allStops.map((s, i) => buildPanel(s.stop, s.room, i));
-
-  /* --- renderer / scene / camera --- */
+/* ============================================================
+   ENGINE
+   ============================================================ */
+async function boot() {
+  /* --- persistent core (survives world swaps) --- */
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, PR_CAP));
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; // stops bloom highlights hard-clipping to flat white
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(rooms[0].fog, 0.010);
+  scene.fog = new THREE.FogExp2(ROOM_DEFAULTS.fog, 0.010);
 
-  // environment reflections: obsidian becomes black glass
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const envScene = new RoomEnvironment();
+  scene.environment = pmrem.fromScene(envScene, 0.04).texture;
   scene.environmentIntensity = 0.25;
+  pmrem.dispose();
 
   const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 600);
   camera.rotation.order = 'YXZ';
-  camera.position.copy(pathPoints[0]);
   scene.add(camera);
 
   scene.add(new THREE.AmbientLight(0x24203f, 0.7));
@@ -339,7 +327,6 @@ async function init() {
   lightB.position.set(7, -4, -10);
   camera.add(lightB);
 
-  /* --- post-processing: bloom is the money --- */
   let composer = null;
   if (!isMobile) {
     composer = new EffectComposer(renderer);
@@ -353,14 +340,13 @@ async function init() {
     composer.addPass(new OutputPass());
   }
 
-  /* --- sky --- */
   const sky = new THREE.Group();
   scene.add(sky);
   const nebulaMat = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColA: { value: new THREE.Color(rooms[0].nebulaA) },
-      uColB: { value: new THREE.Color(rooms[0].nebulaB) },
+      uColA: { value: new THREE.Color(ROOM_DEFAULTS.nebulaA) },
+      uColB: { value: new THREE.Color(ROOM_DEFAULTS.nebulaB) },
     },
     vertexShader: NEBULA_VERT,
     fragmentShader: NEBULA_FRAG,
@@ -371,161 +357,308 @@ async function init() {
   const stars = pointsCloud(
     CONFIG.starCount,
     () => new THREE.Vector3().randomDirection().multiplyScalar(rand(90, 240)),
-    0xdfe6ff, [0.8, 2.2], 0.9, 0.0, 0.0 // stars are sky: exempt from fog
+    0xdfe6ff, [0.8, 2.2], 0.9, 0.0, 0.0
   );
   sky.add(stars);
 
-  /* --- dust, widened for the weaving path --- */
-  const dust = pointsCloud(
-    CONFIG.dustCount,
-    () => new THREE.Vector3(rand(-52, 52), rand(-24, 24), 30 - Math.random() * (pathLength + 110)),
-    rooms[0].dust, [0.5, 1.3], 0.5, 1.6
-  );
-  scene.add(dust);
-
-  /* --- structures --- */
   const shardMat = new THREE.MeshStandardMaterial({
-    color: 0x0b0a12, roughness: 0.12, metalness: 0.92, flatShading: true,
-    envMapIntensity: 0.9,
+    color: 0x0b0a12, roughness: 0.12, metalness: 0.92, flatShading: true, envMapIntensity: 0.9,
   });
   const monoMat = new THREE.MeshStandardMaterial({
     color: 0x08070d, roughness: 0.3, metalness: 0.7, envMapIntensity: 0.6,
   });
-  const animated = [];
-  const eggMeshes = [];
   const texLoader = new THREE.TextureLoader();
 
-  function accent(room, key) { return key === 'B' ? room.accentB : room.accentA; }
+  /* --- world state (rebuilt on every world swap) --- */
+  const W = {
+    id: null, rooms: [], allStops: [], panels: [],
+    curve: null, totalStops: 0, pathLength: 0,
+    animated: [], clickables: [], dust: null, planetGroup: null,
+    disposables: [], groups: [],
+  };
+  const CAM_BASE_Z = 10;
+  const seg = CONFIG.segment;
+  let targetProgress = 0, progress = 0, activeStop = -1;
+  let swapping = false;
 
-  // random point beside the flight path within a room's stretch
+  const worldFile = (id) => (!id || id === 'main') ? 'world.json' : `world-${id}.json`;
+  const worldIdFromHash = () => (location.hash.match(/^#w=([\w-]+)/) || [])[1] || 'main';
+
+  function track(obj) { W.disposables.push(obj); return obj; }
+
+  function disposeWorld() {
+    for (const g of W.groups) scene.remove(g);
+    if (W.dust) scene.remove(W.dust);
+    if (W.planetGroup) scene.remove(W.planetGroup);
+    for (const d of W.disposables) {
+      if (d.geometry) d.geometry.dispose();
+      if (d.material) {
+        if (d.material.map) d.material.map.dispose();
+        d.material.dispose();
+      }
+    }
+    W.rooms = []; W.allStops = []; W.panels = [];
+    W.animated = []; W.clickables = []; W.disposables = []; W.groups = [];
+    W.dust = null; W.planetGroup = null; W.curve = null;
+    content.innerHTML = '';
+    activeStop = -1;
+  }
+
+  function accent(room, key) { return key === 'B' ? room.accentB : room.accentA; }
+  const stopT = (i) => W.totalStops > 1 ? i / (W.totalStops - 1) : 0;
+
   function besidePath(room, lateralMin, lateralMax, i) {
     const t = stopT(rand(room.firstStop, room.lastStop));
-    const p = curve.getPointAt(Math.min(1, Math.max(0, t)));
+    const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
     const side = i % 2 ? 1 : -1;
     p.x += side * rand(lateralMin, lateralMax);
     p.y += rand(-13, 13);
     return p;
   }
 
+  function registerGroup(group, baseY, rotSpeed, bobSpeed) {
+    scene.add(group);
+    W.groups.push(group);
+    group.traverse((o) => { if (o.geometry || o.material) track(o); });
+    W.animated.push({
+      group, baseY,
+      rotSpeed: rotSpeed != null ? rotSpeed : rand(0.05, 0.17),
+      bobSpeed: bobSpeed != null ? bobSpeed : rand(0.2, 0.5),
+      bobPhase: Math.random() * Math.PI * 2,
+    });
+  }
+
   function place(group, room, i, spec) {
     if (spec.anchor) {
       const stopIdx = room.firstStop + 1 + (i % Math.max(1, room.stops.length - 1));
-      const p = curve.getPointAt(stopT(Math.min(stopIdx, totalStops - 1)));
+      const p = W.curve.getPointAt(stopT(Math.min(stopIdx, W.totalStops - 1)));
       group.position.set(p.x + 8 + (i % 3) * 1.5, p.y + rand(-1.5, 2.5), p.z - 12);
     } else {
       group.position.copy(besidePath(room, 11, 30, i));
     }
     group.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-    animated.push({
-      group,
-      baseY: group.position.y,
-      rotSpeed: rand(0.05, 0.17),
-      bobSpeed: rand(0.2, 0.5),
-      bobPhase: Math.random() * Math.PI * 2,
-    });
+    registerGroup(group, group.position.y);
   }
 
   function buildStructure(spec, room) {
-    const count = spec.count || 1;
-    const col = accent(room, spec.rim || 'A');
-    const intensity = spec.intensity != null ? spec.intensity : 1.0;
-    for (let i = 0; i < count; i++) {
-      const s = rand(spec.scale[0], spec.scale[1]);
-      const group = new THREE.Group();
+    try {
+      const count = spec.count || 1;
+      const col = accent(room, spec.rim || 'A');
+      const intensity = spec.intensity != null ? spec.intensity : 1.0;
+      const scale = Array.isArray(spec.scale) ? spec.scale : [1, 2];
 
-      if (spec.kind === 'shard') {
-        const geo = shardGeometry(s);
-        group.add(new THREE.Mesh(geo, shardMat));
-        const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.85));
-        rim.scale.setScalar(1.04);
-        group.add(rim);
+      for (let i = 0; i < count; i++) {
+        const s = rand(scale[0], scale[1]);
+        const group = new THREE.Group();
 
-      } else if (spec.kind === 'monolith') {
-        const geo = new THREE.BoxGeometry(s * 0.22, s, s * 0.1);
-        group.add(new THREE.Mesh(geo, monoMat));
-        const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.7));
-        rim.scale.setScalar(1.03);
-        group.add(rim);
+        if (spec.kind === 'shard') {
+          const geo = shardGeometry(s);
+          group.add(new THREE.Mesh(geo, shardMat));
+          const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.85));
+          rim.scale.setScalar(1.04);
+          group.add(rim);
 
-      } else if (spec.kind === 'ring') {
-        const geo = new THREE.TorusGeometry(s, s * 0.008, 8, 128);
-        const mat = new THREE.MeshBasicMaterial({
-          color: col, transparent: true, opacity: spec.opacity != null ? spec.opacity : 0.3,
-          blending: THREE.AdditiveBlending, depthWrite: false,
-        });
-        group.add(new THREE.Mesh(geo, mat));
+        } else if (spec.kind === 'monolith') {
+          const geo = new THREE.BoxGeometry(s * 0.22, s, s * 0.1);
+          group.add(new THREE.Mesh(geo, monoMat));
+          const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.7));
+          rim.scale.setScalar(1.03);
+          group.add(rim);
 
-      } else if (spec.kind === 'orb') {
-        const geo = new THREE.SphereGeometry(s * 0.5, 32, 32);
-        group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-          color: 0x05050a, roughness: 0.25, metalness: 0.4, envMapIntensity: 0.7,
-        })));
-        const rim = new THREE.Mesh(geo, rimMaterial(col, intensity));
-        rim.scale.setScalar(1.14);
-        group.add(rim);
+        } else if (spec.kind === 'ring') {
+          const geo = new THREE.TorusGeometry(s, s * 0.008, 8, 128);
+          group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+            color: col, transparent: true, opacity: spec.opacity != null ? spec.opacity : 0.3,
+            blending: THREE.AdditiveBlending, depthWrite: false,
+          })));
 
-      } else if (spec.kind === 'swarm') {
-        group.add(pointsCloud(
-          isMobile ? 140 : 260,
-          () => new THREE.Vector3().randomDirection().multiplyScalar(Math.cbrt(Math.random()) * s),
-          col, [0.4, 1.0], 0.75, 2.2
-        ));
+        } else if (spec.kind === 'orb') {
+          const geo = new THREE.SphereGeometry(s * 0.5, 32, 32);
+          group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+            color: 0x05050a, roughness: 0.25, metalness: 0.4, envMapIntensity: 0.7,
+          })));
+          const rim = new THREE.Mesh(geo, rimMaterial(col, intensity));
+          rim.scale.setScalar(1.14);
+          group.add(rim);
 
-      } else if (spec.kind === 'image' && spec.src) {
-        const tex = texLoader.load(spec.src);
-        tex.colorSpace = THREE.SRGBColorSpace;
-        const geo = new THREE.PlaneGeometry(s, s * (spec.ratio || 0.66));
-        group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-          map: tex, transparent: true, opacity: 0.92, side: THREE.DoubleSide,
-        })));
+        } else if (spec.kind === 'swarm') {
+          group.add(pointsCloud(
+            isMobile ? 140 : 260,
+            () => new THREE.Vector3().randomDirection().multiplyScalar(Math.cbrt(Math.random()) * s),
+            col, [0.4, 1.0], 0.75, 2.2
+          ));
 
-      } else if (spec.kind === 'egg') {
-        const geo = new THREE.SphereGeometry(spec.scale[0], 16, 16);
-        const core = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
-        const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.8));
-        rim.scale.setScalar(2.0);
-        group.add(core);
-        group.add(rim);
-        core.userData.secret = spec.secret;
-        eggMeshes.push(core);
-        const t = stopT(rand(room.firstStop, room.lastStop));
-        const p = curve.getPointAt(Math.min(1, Math.max(0, t)));
-        group.position.set(p.x + rand(-7, 7), p.y + rand(9, 14) * (Math.random() > 0.5 ? 1 : -1), p.z - 4);
-        scene.add(group);
-        animated.push({ group, baseY: group.position.y, rotSpeed: 0.1, bobSpeed: 0.6, bobPhase: Math.random() * 6 });
-        continue;
-      } else {
-        continue;
+        } else if (spec.kind === 'image' && spec.src) {
+          const tex = texLoader.load(spec.src);
+          tex.colorSpace = THREE.SRGBColorSpace;
+          const geo = new THREE.PlaneGeometry(s, s * (spec.ratio || 0.66));
+          group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+            map: tex, transparent: true, opacity: 0.92, side: THREE.DoubleSide,
+          })));
+
+        } else if (spec.kind === 'egg') {
+          const geo = new THREE.SphereGeometry(scale[0], 16, 16);
+          const core = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
+          const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.8));
+          rim.scale.setScalar(2.0);
+          group.add(core); group.add(rim);
+          core.userData = { type: 'egg', secret: spec.secret };
+          W.clickables.push(core);
+          const t = stopT(rand(room.firstStop, room.lastStop));
+          const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
+          group.position.set(p.x + rand(-7, 7), p.y + rand(9, 14) * (Math.random() > 0.5 ? 1 : -1), p.z - 4);
+          registerGroup(group, group.position.y, 0.1, 0.6);
+          continue;
+
+        } else if (spec.kind === 'portal') {
+          // a gate to another world: ring + burning core, clickable
+          const ringGeo = new THREE.TorusGeometry(s, s * 0.02, 12, 128);
+          group.add(new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+            color: col, transparent: true, opacity: 0.85,
+            blending: THREE.AdditiveBlending, depthWrite: false,
+          })));
+          const coreGeo = new THREE.SphereGeometry(s * 0.34, 24, 24);
+          const core = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({ color: col }));
+          const rim = new THREE.Mesh(coreGeo, rimMaterial(col, intensity * 1.2));
+          rim.scale.setScalar(1.9);
+          group.add(core); group.add(rim);
+          core.userData = { type: 'portal', to: spec.to || 'main' };
+          // the ring is clickable too — bigger target
+          group.children[0].userData = core.userData;
+          W.clickables.push(core, group.children[0]);
+          if (spec.anchor !== false) {
+            const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
+            const p = W.curve.getPointAt(stopT(stopIdx));
+            group.position.set(p.x - 9 - (i % 2) * 2, p.y + rand(-1, 2), p.z - 10);
+          } else {
+            group.position.copy(besidePath(room, 9, 16, i));
+          }
+          registerGroup(group, group.position.y, 0.22, 0.35);
+          continue;
+        } else {
+          continue;
+        }
+
+        place(group, room, i, spec);
       }
-
-      scene.add(group);
-      place(group, room, i, spec);
+    } catch (err) {
+      console.warn('[erebus] skipping structure in "' + room.id + '":', err.message);
     }
   }
 
-  rooms.forEach((room) => room.structures.forEach((spec) => buildStructure(spec, room)));
+  function buildWorld(data, id) {
+    W.id = id;
+    W.rooms = sanitizeRooms(data.rooms);
+    if (!W.rooms.length) throw new Error('world "' + id + '" has no valid rooms');
 
-  /* --- planet --- */
-  const planetRoom = rooms.find((r) => r.planet);
-  let planetGroup = null;
-  if (planetRoom) {
-    const endP = curve.getPointAt(1);
-    planetGroup = new THREE.Group();
-    const geo = new THREE.SphereGeometry(46, 64, 64);
-    planetGroup.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-      color: 0x05050c, roughness: 0.9, metalness: 0.1, envMapIntensity: 0.35,
-    })));
-    const atmo = new THREE.Mesh(geo, rimMaterial(planetRoom.accentA, 1.15));
-    atmo.scale.setScalar(1.06);
-    planetGroup.add(atmo);
-    planetGroup.position.set(endP.x + 30, endP.y - 36, endP.z - 62);
-    scene.add(planetGroup);
+    W.rooms.forEach((room) => {
+      room.firstStop = W.allStops.length;
+      room.stops.forEach((stop) => W.allStops.push({ stop, room }));
+      room.lastStop = W.allStops.length - 1;
+      room.zStart = CAM_BASE_Z - (room.firstStop - 0.5) * seg;
+      room.zEnd = CAM_BASE_Z - (room.lastStop + 0.5) * seg;
+    });
+    W.totalStops = W.allStops.length;
+    W.pathLength = (W.totalStops - 1) * seg;
+
+    const pts = [];
+    for (let i = 0; i < W.totalStops; i++) {
+      pts.push(new THREE.Vector3(
+        Math.sin(i * 1.7) * CONFIG.weaveX,
+        Math.cos(i * 1.3) * CONFIG.weaveY,
+        CAM_BASE_Z - i * seg
+      ));
+    }
+    // a 1-stop world still needs a line to fly
+    if (pts.length === 1) pts.push(pts[0].clone().add(new THREE.Vector3(0, 0, -seg)));
+    W.curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.4);
+
+    W.panels = W.allStops.map((s, i) => buildPanel(s.stop, s.room, i));
+
+    W.dust = pointsCloud(
+      Math.max(200, CONFIG.dustPerStop * W.totalStops),
+      () => new THREE.Vector3(rand(-52, 52), rand(-24, 24), 30 - Math.random() * (W.pathLength + 110)),
+      W.rooms[0].dust, [0.5, 1.3], 0.5, 1.6
+    );
+    scene.add(W.dust);
+    track(W.dust);
+
+    W.rooms.forEach((room) => room.structures.forEach((spec) => buildStructure(spec, room)));
+
+    const planetRoom = W.rooms.find((r) => r.planet);
+    if (planetRoom) {
+      const endP = W.curve.getPointAt(1);
+      W.planetGroup = new THREE.Group();
+      const geo = new THREE.SphereGeometry(46, 64, 64);
+      W.planetGroup.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+        color: 0x05050c, roughness: 0.9, metalness: 0.1, envMapIntensity: 0.35,
+      })));
+      const atmo = new THREE.Mesh(geo, rimMaterial(planetRoom.accentA, 1.15));
+      atmo.scale.setScalar(1.06);
+      W.planetGroup.add(atmo);
+      W.planetGroup.position.set(endP.x + 30, endP.y - 36, endP.z - 62);
+      scene.add(W.planetGroup);
+      W.planetGroup.traverse((o) => { if (o.geometry || o.material) track(o); });
+    }
+
+    document.getElementById('scroll-space').style.height = `${W.totalStops * 120}vh`;
+
+    // palette snap targets to the first room of the new world
+    const r0 = W.rooms[0];
+    fogTarget.set(r0.fog); nebATarget.set(r0.nebulaA); nebBTarget.set(r0.nebulaB);
+    dustTarget.set(r0.dust); lightATarget.set(r0.accentA); lightBTarget.set(r0.accentB);
   }
 
-  /* --- scroll / progress --- */
-  document.getElementById('scroll-space').style.height = `${totalStops * 120}vh`;
-  let targetProgress = 0, progress = 0, activeStop = -1;
+  async function fetchWorld(id) {
+    const opts = ('timeout' in AbortSignal) ? { signal: AbortSignal.timeout(9000) } : {};
+    const r = await fetch('./' + worldFile(id) + '?v=' + VERSION, opts);
+    if (!r.ok) throw new Error(worldFile(id) + ' HTTP ' + r.status);
+    return r.json();
+  }
 
+  async function swapWorld(id, pushHash) {
+    if (swapping || id === W.id) return;
+    swapping = true;
+    document.body.classList.add('world-jump');
+    try {
+      const data = await fetchWorld(id);
+      await new Promise((res) => setTimeout(res, 620)); // let the fade land
+      disposeWorld();
+      buildWorld(data, id);
+      window.scrollTo(0, 0);
+      progress = 0; targetProgress = 0;
+      onScroll();
+      setActiveStop(0);
+      if (pushHash) {
+        history.pushState({ w: id }, '', id === 'main' ? location.pathname : '#w=' + id);
+      }
+    } catch (err) {
+      console.error('[erebus] world swap failed:', err);
+      // stay in the current world; the dark forgives
+    } finally {
+      document.body.classList.remove('world-jump');
+      swapping = false;
+    }
+  }
+
+  window.addEventListener('popstate', () => {
+    swapWorld(worldIdFromHash(), false);
+  });
+
+  /* --- palette state --- */
+  const fogTarget = new THREE.Color(ROOM_DEFAULTS.fog);
+  const nebATarget = new THREE.Color(ROOM_DEFAULTS.nebulaA);
+  const nebBTarget = new THREE.Color(ROOM_DEFAULTS.nebulaB);
+  const dustTarget = new THREE.Color(ROOM_DEFAULTS.dust);
+  const lightATarget = new THREE.Color(ROOM_DEFAULTS.accentA);
+  const lightBTarget = new THREE.Color(ROOM_DEFAULTS.accentB);
+
+  function roomAtZ(z) {
+    for (const r of W.rooms) if (z <= r.zStart && z >= r.zEnd) return r;
+    return W.rooms.length ? (z > W.rooms[0].zEnd ? W.rooms[0] : W.rooms[W.rooms.length - 1]) : null;
+  }
+
+  /* --- scroll --- */
   function onScroll() {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     targetProgress = max > 0 ? window.scrollY / max : 0;
@@ -534,21 +667,21 @@ async function init() {
 
   window.addEventListener('keydown', (e) => {
     if (e.metaKey || e.altKey || e.ctrlKey) return;
-    const idx = Math.round(progress * (totalStops - 1));
+    const idx = Math.round(progress * (W.totalStops - 1));
     let next = null;
-    if (e.key === 'ArrowDown' || e.key === 'PageDown') next = Math.min(totalStops - 1, idx + 1);
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') next = Math.min(W.totalStops - 1, idx + 1);
     if (e.key === 'ArrowUp' || e.key === 'PageUp') next = Math.max(0, idx - 1);
     if (next !== null) {
       e.preventDefault();
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      window.scrollTo({ top: (next / (totalStops - 1)) * max, behavior: reduced ? 'auto' : 'smooth' });
+      window.scrollTo({ top: (next / (W.totalStops - 1)) * max, behavior: reduced ? 'auto' : 'smooth' });
     }
   });
 
-  /* --- pointer: look-around + egg raycast --- */
+  /* --- pointer --- */
   let mouseTX = 0, mouseTY = 0, mouseX = 0, mouseY = 0;
   window.addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'touch') return; // touch scroll must not yank the camera
+    if (e.pointerType === 'touch') return;
     mouseTX = (e.clientX / window.innerWidth - 0.5) * 2;
     mouseTY = (e.clientY / window.innerHeight - 0.5) * 2;
   }, { passive: true });
@@ -556,18 +689,22 @@ async function init() {
   const raycaster = new THREE.Raycaster();
   const clickNDC = new THREE.Vector2();
   window.addEventListener('pointerdown', (e) => {
-    if (!eggMeshes.length) return;
+    if (swapping || !W.clickables.length) return;
     if (document.body.classList.contains('egg-open')) return;
     if (e.target.closest && e.target.closest('.panel, .hud, .hud-bottom, #egg-veil')) return;
     clickNDC.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(clickNDC, camera);
-    const hits = raycaster.intersectObjects(eggMeshes, false);
-    if (hits.length) {
-      const secret = hits[0].object.userData.secret || {};
+    const hits = raycaster.intersectObjects(W.clickables, false);
+    if (!hits.length) return;
+    const data = hits[0].object.userData || {};
+    if (data.type === 'egg') {
+      const secret = data.secret || {};
       eggVeil.querySelector('.egg-eyebrow').textContent = secret.eyebrow || 'FOUND';
       eggVeil.querySelector('.egg-title').textContent = secret.title || '';
       eggVeil.querySelector('.egg-body').textContent = secret.body || '';
       document.body.classList.add('egg-open');
+    } else if (data.type === 'portal') {
+      swapWorld(data.to === '__back' ? 'main' : data.to, true);
     }
   });
   eggVeil.querySelector('.egg-close').addEventListener('click', () => {
@@ -578,9 +715,9 @@ async function init() {
   function setActiveStop(idx) {
     if (idx === activeStop) return;
     activeStop = idx;
-    panels.forEach((p, i) => p.classList.toggle('is-active', i === idx));
-    hudSector.textContent = allStops[idx] ? allStops[idx].room.sector : '';
-    hudIndex.textContent = `${pad(idx)} / ${pad(totalStops - 1)}`;
+    W.panels.forEach((p, i) => p.classList.toggle('is-active', i === idx));
+    hudSector.textContent = W.allStops[idx] ? W.allStops[idx].room.sector : '';
+    hudIndex.textContent = `${pad(idx)} / ${pad(Math.max(0, W.totalStops - 1))}`;
   }
   function updateClock() {
     const d = new Date();
@@ -588,19 +725,6 @@ async function init() {
   }
   updateClock();
   setInterval(updateClock, 30000);
-
-  /* --- palette crossfade --- */
-  const fogTarget = new THREE.Color(rooms[0].fog);
-  const nebATarget = new THREE.Color(rooms[0].nebulaA);
-  const nebBTarget = new THREE.Color(rooms[0].nebulaB);
-  const dustTarget = new THREE.Color(rooms[0].dust);
-  const lightATarget = new THREE.Color(rooms[0].accentA);
-  const lightBTarget = new THREE.Color(rooms[0].accentB);
-
-  function roomAtZ(z) {
-    for (const r of rooms) if (z <= r.zStart && z >= r.zEnd) return r;
-    return z > rooms[0].zEnd ? rooms[0] : rooms[rooms.length - 1];
-  }
 
   /* --- loader --- */
   function runLoader() {
@@ -618,8 +742,6 @@ async function init() {
   const clock = new THREE.Clock();
   let running = true;
   let firstFrame = true;
-  // NOTE: no visibilitychange restart — rAF self-pauses in background tabs;
-  // restarting manually stacks duplicate render loops.
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault();
     running = false;
@@ -633,54 +755,52 @@ async function init() {
   function tick() {
     if (!running) return;
     requestAnimationFrame(tick);
+    if (!W.curve) return;
     const t = clock.getElapsedTime() * (reduced ? 0.15 : 1);
 
     progress = reduced ? targetProgress : lerp(progress, targetProgress, CONFIG.camLerp);
     mouseX = lerp(mouseX, mouseTX, 0.045);
     mouseY = lerp(mouseY, mouseTY, 0.045);
 
-    /* fly the spline */
-    const pT = Math.min(0.9995, Math.max(0, progress)); // never let lookAt degenerate at t=1
-    curve.getPointAt(pT, camPos);
-    const aheadT = Math.min(1, pT + 0.018);
-    curve.getPointAt(aheadT, lookPos);
-    curve.getTangentAt(pT, tangent);
+    const pT = Math.min(0.9995, Math.max(0, progress));
+    W.curve.getPointAt(pT, camPos);
+    W.curve.getPointAt(Math.min(1, pT + 0.018), lookPos);
+    W.curve.getTangentAt(pT, tangent);
 
     camera.position.copy(camPos);
     camera.lookAt(lookPos);
-    // head-turn: the mouse looks around the space, not just parallax
     camera.rotateY(-mouseX * CONFIG.lookYaw);
     camera.rotateX(-mouseY * CONFIG.lookPitch);
-    // bank into the turn like a slow aircraft
     camera.rotateZ(-tangent.x * CONFIG.bank);
 
     sky.position.copy(camera.position);
 
-    /* palette crossfade toward the current room */
     const room = roomAtZ(camPos.z);
-    fogTarget.set(room.fog); nebATarget.set(room.nebulaA); nebBTarget.set(room.nebulaB);
-    dustTarget.set(room.dust); lightATarget.set(room.accentA); lightBTarget.set(room.accentB);
+    if (room) {
+      fogTarget.set(room.fog); nebATarget.set(room.nebulaA); nebBTarget.set(room.nebulaB);
+      dustTarget.set(room.dust); lightATarget.set(room.accentA); lightBTarget.set(room.accentB);
+    }
     const pl = CONFIG.paletteLerp;
     scene.fog.color.lerp(fogTarget, pl);
     nebulaMat.uniforms.uColA.value.lerp(nebATarget, pl);
     nebulaMat.uniforms.uColB.value.lerp(nebBTarget, pl);
-    dust.material.uniforms.uColor.value.lerp(dustTarget, pl);
+    if (W.dust) W.dust.material.uniforms.uColor.value.lerp(dustTarget, pl);
     lightA.color.lerp(lightATarget, pl);
     lightB.color.lerp(lightBTarget, pl);
 
     nebulaMat.uniforms.uTime.value = t;
     stars.material.uniforms.uTime.value = t;
-    dust.material.uniforms.uTime.value = t;
-    for (const s of animated) {
+    if (W.dust) W.dust.material.uniforms.uTime.value = t;
+    for (const s of W.animated) {
       s.group.rotation.y += s.rotSpeed * 0.004;
       s.group.rotation.x += s.rotSpeed * 0.002;
       s.group.position.y = s.baseY + Math.sin(t * s.bobSpeed + s.bobPhase) * 0.5;
       const first = s.group.children[0];
       if (first && first.isPoints) first.material.uniforms.uTime.value = t;
     }
-    if (planetGroup) planetGroup.rotation.y += 0.0003;
+    if (W.planetGroup) W.planetGroup.rotation.y += 0.0003;
 
-    setActiveStop(Math.round(progress * (totalStops - 1)));
+    setActiveStop(Math.round(progress * (W.totalStops - 1)));
     progressFill.style.width = `${(progress * 100).toFixed(2)}%`;
 
     if (composer) composer.render();
@@ -688,33 +808,44 @@ async function init() {
     if (firstFrame) { firstFrame = false; runLoader(); }
   }
 
+  /* --- resize --- */
   let lastW = window.innerWidth, lastH = window.innerHeight;
   window.addEventListener('resize', () => {
-    // mobile URL-bar collapse fires resize constantly while scrolling — ignore small height-only changes
     if (window.innerWidth === lastW && Math.abs(window.innerHeight - lastH) < 140) return;
     lastW = window.innerWidth; lastH = window.innerHeight;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    if (composer) {
-      composer.setSize(window.innerWidth, window.innerHeight);
-      composer.setPixelRatio(Math.min(window.devicePixelRatio, PR_CAP));
-    }
     const pr = Math.min(window.devicePixelRatio, PR_CAP);
     renderer.setPixelRatio(pr);
+    if (composer) {
+      composer.setSize(window.innerWidth, window.innerHeight);
+      composer.setPixelRatio(pr);
+    }
     stars.material.uniforms.uPixelRatio.value = pr;
-    dust.material.uniforms.uPixelRatio.value = pr;
+    if (W.dust) W.dust.material.uniforms.uPixelRatio.value = pr;
     onScroll();
   });
 
+  /* --- go --- */
+  const startId = worldIdFromHash();
+  let data;
+  try {
+    data = await fetchWorld(startId);
+  } catch (err) {
+    if (startId !== 'main') data = await fetchWorld('main'); // bad hash → main world
+    else throw err;
+  }
+  buildWorld(data, startId);
+  camera.position.copy(W.curve.getPointAt(0));
   onScroll();
   setActiveStop(0);
   tick();
 }
 
-/* ---------- go ---------- */
+/* ---------- ignition ---------- */
 if (!webglOK()) {
   fallback();
 } else {
-  init().catch(fallback);
+  boot().catch(fallback);
 }

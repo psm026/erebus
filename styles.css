@@ -236,6 +236,29 @@ h2 {
 
 .contact-link { font-size: 15px; text-transform: none; letter-spacing: 0.05em; }
 
+/* ---------- cinematic vignette ---------- */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: radial-gradient(ellipse 120% 90% at 50% 48%, transparent 55%, rgba(1, 1, 4, 0.55) 100%);
+}
+
+/* ---------- world-jump fade (portal transitions) ---------- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  background: #010103;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+body.world-jump::before { opacity: 1; }
+
 /* ---------- easter-egg veil ---------- */
 #egg-veil {
   position: fixed;

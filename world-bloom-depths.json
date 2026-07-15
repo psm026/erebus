@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "title": "EREBUS — Bloom Depths",
+    "version": 1,
+    "note": "First sub-world. Entered through the portal in The Bloom. The last room's portal with to:'main' returns to the surface."
+  },
+  "rooms": [
+    {
+      "id": "roots",
+      "sector": "DEPTHS // ROOTS",
+      "accentA": "#2fe6a8",
+      "accentB": "#0f8f70",
+      "fog": "#010504",
+      "nebulaA": "#02241a",
+      "nebulaB": "#03170f",
+      "dust": "#2fe6a8",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Beneath the bloom",
+          "title": "The Roots",
+          "body": "You went through. This is where the garden drinks — everything above is fed by something below. The world builds more of these doors when it has secrets worth burying."
+        },
+        {
+          "num": "⌄",
+          "title": "Deeper systems",
+          "tags": "Sub-world / first descent",
+          "body": "Rooms behind rooms. Products behind artifacts. Whole worlds behind a single glowing ring. This is how EREBUS folds."
+        }
+      ],
+      "structures": [
+        { "kind": "swarm", "count": 3, "scale": [6, 12], "rim": "A" },
+        { "kind": "shard", "count": 7, "scale": [0.5, 2.2], "rim": "B", "intensity": 0.6 },
+        { "kind": "ring", "count": 4, "scale": [3, 10], "rim": "A", "opacity": 0.18 }
+      ]
+    },
+    {
+      "id": "hollow",
+      "sector": "DEPTHS // HOLLOW",
+      "accentA": "#7de8ff",
+      "accentB": "#2fe6a8",
+      "fog": "#010407",
+      "nebulaA": "#041c2b",
+      "nebulaB": "#02241a",
+      "dust": "#7de8ff",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "The bottom, for now",
+          "title": "The Hollow",
+          "body": "Nothing lives this deep yet. The world will change that without asking. The burning ring returns you to the surface."
+        }
+      ],
+      "structures": [
+        { "kind": "orb", "count": 3, "scale": [1.2, 2.6], "rim": "A", "intensity": 1.3 },
+        { "kind": "monolith", "count": 3, "scale": [5, 9], "rim": "B", "intensity": 0.5 },
+        { "kind": "portal", "to": "main", "scale": [2.6, 2.6], "rim": "A", "intensity": 1.5 }
+      ]
+    }
+  ]
+}

@@ -68,13 +68,14 @@
           "num": "??",
           "title": "Something is growing",
           "tags": "Living room / evolves",
-          "body": "This chamber rearranges itself as the world learns. What you see today is not what you'll find next month. Look closely — not everything here is asleep."
+          "body": "This chamber rearranges itself as the world learns. Look closely — not everything here is asleep. A burning ring to your left goes deeper."
         }
       ],
       "structures": [
         { "kind": "orb", "count": 6, "scale": [0.8, 2.0], "rim": "A", "intensity": 1.6 },
         { "kind": "swarm", "count": 2, "scale": [7, 10], "rim": "B" },
         { "kind": "ring", "count": 2, "scale": [5, 9], "rim": "A", "opacity": 0.25 },
+        { "kind": "portal", "to": "bloom-depths", "scale": [2.6, 2.6], "rim": "B", "intensity": 1.5 },
         {
           "kind": "egg",
           "scale": [0.4, 0.4],
