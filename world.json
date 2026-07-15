@@ -18,8 +18,8 @@
         {
           "variant": "intro",
           "eyebrow": "Somewhere in the dark",
-          "title": "JC — designer & developer building digital dream spaces.",
-          "body": "This world grows new rooms over time. Scroll to drift through what exists so far."
+          "title": "PSM — dark, beautiful fantasies.",
+          "body": "A world that grows while you're away. Will you take the dive?"
         },
         {
           "num": "01",
@@ -45,14 +45,14 @@
       ],
       "structures": [
         { "kind": "shard", "count": 3, "scale": [2.4, 3.2], "rim": "A", "anchor": true },
-        { "kind": "shard", "count": 8, "scale": [0.6, 1.8], "rim": "A", "intensity": 0.45 }
+        { "kind": "shard", "count": 6, "scale": [0.5, 1.4], "rim": "A", "intensity": 0.35 }
       ]
     },
     {
       "id": "bloom",
       "sector": "EREBUS // BLOOM",
-      "accentA": "#4ef0c0",
-      "accentB": "#b8ff5c",
+      "accentA": "#3fd9ad",
+      "accentB": "#9fe86e",
       "fog": "#020806",
       "nebulaA": "#06231c",
       "nebulaB": "#122b06",
@@ -72,15 +72,15 @@
         }
       ],
       "structures": [
-        { "kind": "orb", "count": 6, "scale": [0.8, 2.0], "rim": "A", "intensity": 1.6 },
+        { "kind": "orb", "count": 5, "scale": [0.8, 1.8], "rim": "A", "intensity": 1.15 },
         { "kind": "swarm", "count": 2, "scale": [7, 10], "rim": "B" },
         { "kind": "ring", "count": 2, "scale": [5, 9], "rim": "A", "opacity": 0.25 },
         { "kind": "portal", "to": "bloom-depths", "scale": [2.6, 2.6], "rim": "B", "intensity": 1.5 },
         {
           "kind": "egg",
-          "scale": [0.4, 0.4],
+          "scale": [0.32, 0.32],
           "rim": "B",
-          "intensity": 3.0,
+          "intensity": 2.1,
           "secret": {
             "eyebrow": "EGG-001 // FOUND",
             "title": "You looked closer.",
@@ -144,9 +144,9 @@
         }
       ],
       "structures": [
-        { "kind": "network", "count": 3, "scale": [8, 14], "rim": "A", "intensity": 1.2, "nodes": 30 },
-        { "kind": "network", "count": 2, "scale": [4, 7], "rim": "B", "opacity": 0.22, "nodes": 18 },
-        { "kind": "orb", "count": 5, "scale": [0.5, 1.1], "rim": "B", "intensity": 1.9 },
+        { "kind": "network", "count": 3, "scale": [8, 14], "rim": "A", "intensity": 1.1, "nodes": 24 },
+        { "kind": "network", "count": 2, "scale": [4, 7], "rim": "B", "intensity": 0.7, "nodes": 14 },
+        { "kind": "orb", "count": 4, "scale": [0.5, 1.0], "rim": "B", "intensity": 1.4 },
         { "kind": "swarm", "count": 2, "scale": [6, 9], "rim": "A" },
         { "kind": "ring", "count": 1, "scale": [9, 12], "rim": "B", "opacity": 0.15 }
       ]

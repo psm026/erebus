@@ -56,6 +56,12 @@
 - Palettes: always dark. Base near-black, one dominant accent family per room.
   No pure white, no pastels. This is EREBUS.
 - Copy voice: short, moody, confident. No exclamation marks. No corporate speak.
+- **JC's aesthetic law (never violate):** subtle over literal. Fewer, dimmer,
+  slower elements — "moving but not." Things fade in and out of existence
+  (the engine's presence system does this; don't fight it with max intensities).
+  Intensities ≤1.5 for almost everything. Tapered/organic lines, never uniform
+  wires. Any shape that doesn't earn its place gets cut. If it feels safe, go
+  subtler. The identity is PSM — never use JC's real name anywhere on the site.
 
 ## Room schema (copy this shape)
 

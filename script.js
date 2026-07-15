@@ -30,9 +30,9 @@ const CONFIG = {
   lookYaw: 0.42,
   lookPitch: 0.22,
   bank: 0.55,
-  starCount: 2200,
-  dustPerStop: 90,
-  bloom: { strength: 0.55, radius: 0.75, threshold: 0.2 },
+  starCount: 2000,
+  dustPerStop: 70,
+  bloom: { strength: 0.5, radius: 0.75, threshold: 0.25 },
 };
 
 const ROOM_DEFAULTS = {
@@ -135,7 +135,7 @@ const POINTS_VERT = /* glsl */ `
     p.x += sin(uTime * 0.12 + aPhase * 6.2831) * uDrift;
     p.y += cos(uTime * 0.09 + aPhase * 12.566) * uDrift * 0.75;
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    vTw = 0.65 + 0.35 * sin(uTime * (0.6 + aPhase) + aPhase * 20.0);
+    vTw = 0.72 + 0.28 * sin(uTime * (0.35 + aPhase * 0.6) + aPhase * 20.0);
     vFogDepth = -mv.z;
     gl_PointSize = aSize * uPixelRatio * (140.0 / max(1.0, -mv.z)) * vTw;
     gl_Position = projectionMatrix * mv;
@@ -180,6 +180,35 @@ const RIM_FRAG = /* glsl */ `
   }
 `;
 
+// tapered filament ribbon — a line that thins and expands, not a wire
+const FIL_VERT = /* glsl */ `
+  varying vec2 vUv;
+  varying float vFogDepth;
+  void main() {
+    vUv = uv;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vFogDepth = -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const FIL_FRAG = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uIntensity;
+  uniform float uPresence;
+  uniform float uFogDensity;
+  varying vec2 vUv;
+  varying float vFogDepth;
+  void main() {
+    float across = abs(vUv.y - 0.5) * 2.0;
+    float edge = pow(max(0.0, 1.0 - across), 1.7);
+    float along = pow(max(0.001, sin(3.14159 * vUv.x)), 0.55);
+    float fogF = exp(-uFogDensity * uFogDensity * vFogDepth * vFogDepth * 1.442695);
+    float a = edge * along * uIntensity * uPresence * fogF;
+    gl_FragColor = vec4(uColor * a, a);
+  }
+`;
+
 /* ---------- helpers ---------- */
 function strHash(s) {
   let h = 2166136261;
@@ -197,7 +226,7 @@ function shardGeometry(radius) {
   for (let i = 0; i < pos.count; i++) {
     v.fromBufferAttribute(pos, i);
     const h = strHash(v.x.toFixed(3) + ',' + v.y.toFixed(3) + ',' + v.z.toFixed(3));
-    v.multiplyScalar(1 + (h - 0.5) * 0.34);
+    v.multiplyScalar(1 + (h - 0.5) * 0.22); // gem-cut, not rubble
     pos.setXYZ(i, v.x, v.y, v.z);
   }
   g.computeVertexNormals();
@@ -252,6 +281,56 @@ function pointsCloud(count, positionFn, color, sizeRange, alpha, drift, fogDensi
   return new THREE.Points(geo, mat);
 }
 
+/* merged tapered ribbons for a whole set of edges — one draw call per network */
+function filamentsGeometry(edges, baseWidth) {
+  const positions = [], uvs = [], index = [];
+  const pt = new THREE.Vector3(), tan = new THREE.Vector3(), side = new THREE.Vector3();
+  const SEG = 12;
+  let vbase = 0;
+  for (const [a, b] of edges) {
+    const len = a.distanceTo(b);
+    const mid = a.clone().add(b).multiplyScalar(0.5)
+      .add(new THREE.Vector3().randomDirection().multiplyScalar(len * rand(0.08, 0.2)));
+    const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+    const up = new THREE.Vector3().randomDirection();
+    const w0 = baseWidth * rand(0.55, 1.35);
+    for (let i = 0; i <= SEG; i++) {
+      const u = i / SEG;
+      curve.getPoint(u, pt);
+      curve.getTangent(u, tan);
+      side.crossVectors(tan, up).normalize();
+      const w = w0 * (0.1 + 0.9 * Math.pow(Math.sin(Math.PI * u), 0.75));
+      positions.push(pt.x + side.x * w, pt.y + side.y * w, pt.z + side.z * w,
+                     pt.x - side.x * w, pt.y - side.y * w, pt.z - side.z * w);
+      uvs.push(u, 1, u, 0);
+      if (i < SEG) { const q = vbase + i * 2; index.push(q, q + 1, q + 2, q + 1, q + 3, q + 2); }
+    }
+    vbase += (SEG + 1) * 2;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(index);
+  return geo;
+}
+
+function filamentMaterial(color, intensity, fogDensity = 0.0115) {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(color) },
+      uIntensity: { value: intensity },
+      uPresence: { value: 1 },
+      uFogDensity: { value: fogDensity },
+    },
+    vertexShader: FIL_VERT,
+    fragmentShader: FIL_FRAG,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+  });
+}
+
 function buildPanel(stop, room, globalIndex) {
   const sec = document.createElement('section');
   const variant = stop.variant || 'panel';
@@ -304,7 +383,7 @@ async function boot() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(ROOM_DEFAULTS.fog, 0.010);
+  scene.fog = new THREE.FogExp2(ROOM_DEFAULTS.fog, 0.0115); // deeper dark, slower reveals
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envScene = new RoomEnvironment();
@@ -357,7 +436,7 @@ async function boot() {
   const stars = pointsCloud(
     CONFIG.starCount,
     () => new THREE.Vector3().randomDirection().multiplyScalar(rand(90, 240)),
-    0xdfe6ff, [0.8, 2.2], 0.9, 0.0, 0.0
+    0xdfe6ff, [0.6, 1.6], 0.75, 0.0, 0.0
   );
   sky.add(stars);
 
@@ -419,16 +498,32 @@ async function boot() {
   function registerGroup(group, baseY, rotSpeed, bobSpeed) {
     scene.add(group);
     W.groups.push(group);
-    group.traverse((o) => { if (o.geometry || o.material) track(o); });
+    // collect every glow layer so presence (fade in/out of existence) can drive it
+    const glow = [];
+    group.traverse((o) => {
+      if (o.geometry || o.material) track(o);
+      const m = o.material;
+      if (!m) return;
+      if (m.uniforms && m.uniforms.uPresence) glow.push({ kind: 'fil', mat: m });
+      else if (m.uniforms && m.uniforms.uIntensity) glow.push({ kind: 'rim', mat: m, base: m.uniforms.uIntensity.value });
+      else if (m.uniforms && m.uniforms.uAlpha) glow.push({ kind: 'points', mat: m, base: m.uniforms.uAlpha.value });
+      else if (m.isMeshBasicMaterial && m.transparent) glow.push({ kind: 'basic', mat: m, base: m.opacity });
+    });
+    const breathe = group.userData.breathe !== undefined ? group.userData.breathe : true;
     W.animated.push({
-      group, baseY,
-      rotSpeed: rotSpeed != null ? rotSpeed : rand(0.05, 0.17),
-      bobSpeed: bobSpeed != null ? bobSpeed : rand(0.2, 0.5),
+      group, baseY, glow, breathe,
+      breatheMin: group.userData.breatheMin || 0,
+      breatheSpeed: rand(0.16, 0.4),
+      breathePhase: Math.random() * Math.PI * 2,
+      rotSpeed: rotSpeed != null ? rotSpeed : rand(0.03, 0.09),
+      bobSpeed: bobSpeed != null ? bobSpeed : rand(0.15, 0.35),
       bobPhase: Math.random() * Math.PI * 2,
     });
   }
 
   function place(group, room, i, spec) {
+    // anchored/hero pieces stay lit; ambient ones fade in and out of the dark
+    group.userData.breathe = spec.breathe !== undefined ? !!spec.breathe : !spec.anchor;
     if (spec.anchor) {
       const stopIdx = room.firstStop + 1 + (i % Math.max(1, room.stops.length - 1));
       const p = W.curve.getPointAt(stopT(Math.min(stopIdx, W.totalStops - 1)));
@@ -466,9 +561,9 @@ async function boot() {
           group.add(rim);
 
         } else if (spec.kind === 'ring') {
-          const geo = new THREE.TorusGeometry(s, s * 0.008, 8, 128);
+          const geo = new THREE.TorusGeometry(s, s * 0.005, 8, 128);
           group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-            color: col, transparent: true, opacity: spec.opacity != null ? spec.opacity : 0.3,
+            color: col, transparent: true, opacity: spec.opacity != null ? spec.opacity : 0.22,
             blending: THREE.AdditiveBlending, depthWrite: false,
           })));
 
@@ -482,29 +577,31 @@ async function boot() {
           group.add(rim);
 
         } else if (spec.kind === 'network') {
-          // mycelium: nodes joined to their nearest neighbors by glowing filaments
-          const nodeCount = Math.min(spec.nodes || 26, 40);
+          // mycelium: nodes joined by TAPERED filaments that thin and expand —
+          // organic threads, not wireframe
+          const nodeCount = Math.min(spec.nodes || 22, 36);
           const pts = [];
           for (let n = 0; n < nodeCount; n++) {
             pts.push(new THREE.Vector3().randomDirection().multiplyScalar(Math.cbrt(Math.random()) * s));
           }
-          const segs = [];
+          const edges = [];
           for (let a = 0; a < pts.length; a++) {
             const near = pts
               .map((p, idx) => ({ idx, dist: p.distanceTo(pts[a]) }))
               .filter((x) => x.idx !== a)
               .sort((x, y) => x.dist - y.dist);
             for (let k = 0; k < 2 && k < near.length; k++) {
-              segs.push(pts[a], pts[near[k].idx]);
+              if (near[k].idx > a) edges.push([pts[a], pts[near[k].idx]]);
+              else edges.push([pts[near[k].idx], pts[a]]);
             }
           }
-          const lineGeo = new THREE.BufferGeometry().setFromPoints(segs);
-          group.add(new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
-            color: col, transparent: true, opacity: spec.opacity != null ? spec.opacity : 0.32,
-            blending: THREE.AdditiveBlending, depthWrite: false,
-          })));
+          const fil = new THREE.Mesh(
+            filamentsGeometry(edges, s * 0.02),
+            filamentMaterial(col, intensity)
+          );
+          group.add(fil);
           let ni = 0;
-          group.add(pointsCloud(pts.length, () => pts[ni++], col, [1.2, 2.4], 0.9, 0.12));
+          group.add(pointsCloud(pts.length, () => pts[ni++], col, [0.8, 1.5], 0.55, 0.1));
 
         } else if (spec.kind === 'swarm') {
           group.add(pointsCloud(
@@ -532,7 +629,9 @@ async function boot() {
           const t = stopT(rand(room.firstStop, room.lastStop));
           const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
           group.position.set(p.x + rand(-7, 7), p.y + rand(9, 14) * (Math.random() > 0.5 ? 1 : -1), p.z - 4);
-          registerGroup(group, group.position.y, 0.1, 0.6);
+          group.userData.breathe = true;
+          group.userData.breatheMin = 0.5; // eggs dim but never vanish — findable
+          registerGroup(group, group.position.y, 0.06, 0.5);
           continue;
 
         } else if (spec.kind === 'portal') {
@@ -558,7 +657,9 @@ async function boot() {
           } else {
             group.position.copy(besidePath(room, 9, 16, i));
           }
-          registerGroup(group, group.position.y, 0.22, 0.35);
+          group.userData.breathe = true;
+          group.userData.breatheMin = 0.7; // portals pulse, never hide
+          registerGroup(group, group.position.y, 0.12, 0.3);
           continue;
         } else {
           continue;
@@ -601,9 +702,9 @@ async function boot() {
     W.panels = W.allStops.map((s, i) => buildPanel(s.stop, s.room, i));
 
     W.dust = pointsCloud(
-      Math.max(200, CONFIG.dustPerStop * W.totalStops),
+      Math.max(180, CONFIG.dustPerStop * W.totalStops),
       () => new THREE.Vector3(rand(-52, 52), rand(-24, 24), 30 - Math.random() * (W.pathLength + 110)),
-      W.rooms[0].dust, [0.5, 1.3], 0.5, 1.6
+      W.rooms[0].dust, [0.4, 1.0], 0.35, 1.6
     );
     scene.add(W.dust);
     track(W.dust);
@@ -783,7 +884,9 @@ async function boot() {
     if (!W.curve) return;
     const t = clock.getElapsedTime() * (reduced ? 0.15 : 1);
 
-    progress = reduced ? targetProgress : lerp(progress, targetProgress, CONFIG.camLerp);
+    // adaptive glide: dreamy up close, quicker over long jumps so no one waits half a minute
+    const gap = Math.abs(targetProgress - progress);
+    progress = reduced ? targetProgress : lerp(progress, targetProgress, Math.min(0.16, CONFIG.camLerp + gap * 0.35));
     mouseX = lerp(mouseX, mouseTX, 0.045);
     mouseY = lerp(mouseY, mouseTY, 0.045);
 
@@ -817,11 +920,23 @@ async function boot() {
     stars.material.uniforms.uTime.value = t;
     if (W.dust) W.dust.material.uniforms.uTime.value = t;
     for (const s of W.animated) {
-      s.group.rotation.y += s.rotSpeed * 0.004;
-      s.group.rotation.x += s.rotSpeed * 0.002;
-      s.group.position.y = s.baseY + Math.sin(t * s.bobSpeed + s.bobPhase) * 0.5;
-      const first = s.group.children[0];
-      if (first && first.isPoints) first.material.uniforms.uTime.value = t;
+      s.group.rotation.y += s.rotSpeed * 0.002;
+      s.group.rotation.x += s.rotSpeed * 0.001;
+      s.group.position.y = s.baseY + Math.sin(t * s.bobSpeed + s.bobPhase) * 0.35;
+      // presence: things surface out of the dark, hold, and sink back —
+      // "was that something I saw"
+      let presence = 1;
+      if (s.breathe && !reduced) {
+        const raw = 0.5 + 0.5 * Math.sin(t * s.breatheSpeed + s.breathePhase);
+        const shaped = raw * raw * (3 - 2 * raw);
+        presence = s.breatheMin + (1 - s.breatheMin) * shaped;
+      }
+      for (const g of s.glow) {
+        if (g.kind === 'rim') g.mat.uniforms.uIntensity.value = g.base * (0.06 + 0.94 * presence);
+        else if (g.kind === 'fil') g.mat.uniforms.uPresence.value = presence;
+        else if (g.kind === 'points') { g.mat.uniforms.uAlpha.value = g.base * presence; g.mat.uniforms.uTime.value = t; }
+        else if (g.kind === 'basic') g.mat.opacity = g.base * presence;
+      }
     }
     if (W.planetGroup) W.planetGroup.rotation.y += 0.0003;
 
