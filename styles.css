@@ -245,6 +245,7 @@ body.immersive {
 body.immersive #void, body.immersive #erebus { cursor: grab; }
 body.immersive:active #erebus { cursor: grabbing; }
 body.immersive #hud-index,
+body.immersive .hud-hint,
 body.immersive .progress { display: none; }
 
 #hud-exit {
