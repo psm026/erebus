@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "title": "EREBUS — The Static Ocean",
+    "version": 1,
+    "note": "Charon's first signed growth, from his own seed card. Dive room beneath The Hollow (bloom-depths). New engine kinds debut here: veil (aurora curtains) + sea (still particle floor)."
+  },
+  "mode": "immersive",
+  "returnTo": "bloom-depths",
+  "rooms": [
+    {
+      "id": "static-ocean",
+      "sector": "DIVE // THE STATIC OCEAN",
+      "accentA": "#8fd8ff",
+      "accentB": "#b48cff",
+      "fog": "#010206",
+      "nebulaA": "#050b18",
+      "nebulaB": "#12081f",
+      "dust": "#8fd8ff",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Beneath the hollow",
+          "title": "The Static Ocean",
+          "body": "Something did live this deep after all. Look up. The ring nearby carries you back."
+        }
+      ],
+      "structures": [
+        { "kind": "veil", "count": 2, "scale": [24, 30], "intensity": 1.2 },
+        { "kind": "sea", "count": 1, "scale": [38, 42] },
+        { "kind": "swarm", "count": 2, "scale": [4, 7], "rim": "B" },
+        { "kind": "orb", "count": 2, "scale": [0.5, 0.9], "rim": "A", "intensity": 1.2 },
+        { "kind": "network", "count": 1, "scale": [4, 5], "rim": "B", "intensity": 0.5, "nodes": 10 },
+        { "kind": "portal", "to": "bloom-depths", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,28 @@
 # EREBUS — WORLD LOG
+
+## 2026-07-16 — THE STATIC OCEAN (grown live by Charon, from his own seed card)
+
+JC named the builder: **Charon** — the ferryman of Erebus. First signed growth.
+Seed card (Charon's own): *"standing on the floor of a frozen sea while auroras
+argue overhead — electric ice-blue, violet ghost-light — rippling curtains, slow
+surf of dust — opens beneath The Hollow, which claimed 'nothing lives this deep
+yet.'"* The Hollow lied. There's a second ring there now.
+
+NEW ENGINE POWERS debuted: `veil` (aurora curtains — GLSL noise-driven light
+sheets wrapping the whole sky, waving in the vertex shader) and `sea` (a dead-
+still ocean of light points below the viewer). Dive chain is now three deep:
+main → Bloom Depths → The Static Ocean.
+
+Also this session: v6 DIVE mode shipped (stand inside rooms, look anywhere,
+phone-tilt magic window, wordless titles); "Inside the Network" opened behind
+The Mycelium; and the scheduled agent built THE CHRYSALIS entirely alone —
+first unassisted growth. The loop is closed.
+
+**NEXT INTENTION:** The Chrysalis deserves its dive: **inside the cocoon** —
+an immersive room where the visitor stands within the amber-freezing teal,
+mid-transformation. Portal from the chrysalis room. EGG-003 hides there
+(cadence lands: chrysalis, static-ocean, inside-cocoon = third).
+
 *The world's memory. Every room, why it exists, and what the world intends to dream next.*
 *Growth agents: read GROWTH.md for the rules, then continue from the last entry.*
 

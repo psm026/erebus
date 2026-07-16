@@ -209,6 +209,53 @@ const FIL_FRAG = /* glsl */ `
   }
 `;
 
+// aurora veil: a curtain of flowing light wrapping the sky
+const VEIL_VERT = /* glsl */ `
+  uniform float uTime;
+  varying vec2 vUv;
+  varying float vFogDepth;
+  void main() {
+    vUv = uv;
+    vec3 p = position;
+    p += normal * (sin(uv.x * 6.2831 + uTime * 0.28) * 1.4 + sin(uv.x * 15.0 - uTime * 0.2) * 0.6) * uv.y;
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    vFogDepth = -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const VEIL_FRAG = /* glsl */ `
+  uniform vec3 uColA;
+  uniform vec3 uColB;
+  uniform float uIntensity;
+  uniform float uPresence;
+  uniform float uFogDensity;
+  uniform float uTime;
+  varying vec2 vUv;
+  varying float vFogDepth;
+  float hash2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float noise2(vec2 x) {
+    vec2 i = floor(x), f = fract(x);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash2(i), hash2(i + vec2(1, 0)), f.x),
+               mix(hash2(i + vec2(0, 1)), hash2(i + vec2(1, 1)), f.x), f.y);
+  }
+  float fbm2(vec2 p) {
+    float v = 0.0, a = 0.5;
+    for (int i = 0; i < 4; i++) { v += a * noise2(p); p *= 2.15; a *= 0.5; }
+    return v;
+  }
+  void main() {
+    float n = fbm2(vec2(vUv.x * 5.0 + uTime * 0.05, vUv.y * 1.6 - uTime * 0.03));
+    float band = pow(max(0.0, 1.0 - vUv.y), 1.35);                 // bright hem fading upward
+    float rays = 0.5 + 0.5 * sin(vUv.x * 44.0 + n * 7.0);          // curtain striations
+    vec3 col = mix(uColA, uColB, n);
+    float fogF = exp(-uFogDensity * uFogDensity * vFogDepth * vFogDepth * 1.442695);
+    float a = band * rays * smoothstep(0.25, 0.8, n) * uIntensity * uPresence * fogF;
+    gl_FragColor = vec4(col * a, a);
+  }
+`;
+
 /* ---------- helpers ---------- */
 function strHash(s) {
   let h = 2166136261;
@@ -505,7 +552,8 @@ async function boot() {
       if (o.geometry || o.material) track(o);
       const m = o.material;
       if (!m) return;
-      if (m.uniforms && m.uniforms.uPresence) glow.push({ kind: 'fil', mat: m });
+      if (m.uniforms && m.uniforms.uColA && m.uniforms.uPresence) glow.push({ kind: 'veil', mat: m });
+      else if (m.uniforms && m.uniforms.uPresence) glow.push({ kind: 'fil', mat: m });
       else if (m.uniforms && m.uniforms.uIntensity) glow.push({ kind: 'rim', mat: m, base: m.uniforms.uIntensity.value });
       else if (m.uniforms && m.uniforms.uAlpha) glow.push({ kind: 'points', mat: m, base: m.uniforms.uAlpha.value });
       else if (m.isMeshBasicMaterial && m.transparent) glow.push({ kind: 'basic', mat: m, base: m.opacity });
@@ -620,6 +668,48 @@ async function boot() {
           group.add(fil);
           let ni = 0;
           group.add(pointsCloud(pts.length, () => pts[ni++], col, [0.8, 1.5], 0.55, 0.1));
+
+        } else if (spec.kind === 'veil') {
+          // aurora curtain wrapping the viewer — sky-scale, dive rooms especially
+          const geo = new THREE.CylinderGeometry(s, s * 0.96, s * rand(0.34, 0.5), 96, 10, true);
+          const mat = new THREE.ShaderMaterial({
+            uniforms: {
+              uColA: { value: new THREE.Color(accent(room, 'A')) },
+              uColB: { value: new THREE.Color(accent(room, 'B')) },
+              uIntensity: { value: intensity },
+              uPresence: { value: 1 },
+              uFogDensity: { value: 0.0115 },
+              uTime: { value: 0 },
+            },
+            vertexShader: VEIL_VERT,
+            fragmentShader: VEIL_FRAG,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+          });
+          group.add(new THREE.Mesh(geo, mat));
+          group.position.set(0, rand(7, 13) + i * 4, 0);
+          group.rotation.y = Math.random() * Math.PI * 2;
+          group.userData.breathe = spec.breathe !== undefined ? !!spec.breathe : true;
+          group.userData.breatheMin = 0.45; // auroras dim, never die
+          registerGroup(group, group.position.y, 0.05, 0.12);
+          continue;
+
+        } else if (spec.kind === 'sea') {
+          // a dead-still ocean of light below you
+          group.add(pointsCloud(
+            isMobile ? 380 : 720,
+            () => {
+              const r = Math.sqrt(Math.random()) * s;
+              const a = Math.random() * Math.PI * 2;
+              return new THREE.Vector3(Math.cos(a) * r, -rand(6.5, 9.5), Math.sin(a) * r);
+            },
+            col, [0.4, 1.0], 0.6, 0.25
+          ));
+          group.userData.breathe = false;
+          registerGroup(group, 0, 0.005, 0.05);
+          continue;
 
         } else if (spec.kind === 'swarm') {
           group.add(pointsCloud(
@@ -1055,6 +1145,7 @@ async function boot() {
       for (const g of s.glow) {
         if (g.kind === 'rim') g.mat.uniforms.uIntensity.value = g.base * (0.06 + 0.94 * presence);
         else if (g.kind === 'fil') g.mat.uniforms.uPresence.value = presence;
+        else if (g.kind === 'veil') { g.mat.uniforms.uPresence.value = presence; g.mat.uniforms.uTime.value = t; }
         else if (g.kind === 'points') { g.mat.uniforms.uAlpha.value = g.base * presence; g.mat.uniforms.uTime.value = t; }
         else if (g.kind === 'basic') g.mat.opacity = g.base * presence;
       }
