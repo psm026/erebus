@@ -90,6 +90,36 @@
       ]
     },
     {
+      "id": "chrysalis",
+      "sector": "EREBUS // CHRYSALIS",
+      "accentA": "#49d6a4",
+      "accentB": "#e8a55f",
+      "fog": "#050604",
+      "nebulaA": "#0a2318",
+      "nebulaB": "#241206",
+      "dust": "#6bd9a2",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Third chamber",
+          "title": "The Chrysalis",
+          "body": "Between the garden and the relic hall, something stopped mid-turn. Still green at the core. Already amber at the edge."
+        },
+        {
+          "num": "◐",
+          "title": "Half-grown, half-carved",
+          "tags": "Transitional / do not disturb",
+          "body": "This is where living ideas harden into objects. One shard hangs inside its orbit-cocoon, deciding what it will be. Come back later. It will not be this."
+        }
+      ],
+      "structures": [
+        { "kind": "shard", "count": 1, "scale": [3.4, 3.4], "rim": "A", "anchor": true, "intensity": 1.2 },
+        { "kind": "ring", "count": 1, "scale": [6, 6], "rim": "B", "opacity": 0.3, "intensity": 0.8 },
+        { "kind": "ring", "count": 1, "scale": [8.5, 8.5], "rim": "B", "opacity": 0.12, "intensity": 0.5 },
+        { "kind": "orb", "count": 3, "scale": [0.4, 0.8], "rim": "A", "intensity": 0.5 }
+      ]
+    },
+    {
       "id": "relics",
       "sector": "EREBUS // RELICS",
       "accentA": "#ff9d5c",
@@ -101,7 +131,7 @@
       "stops": [
         {
           "variant": "room-title",
-          "eyebrow": "Third chamber",
+          "eyebrow": "Fourth chamber",
           "title": "The Relics",
           "body": "Monuments to things not built yet. This hall becomes the marketplace — rooms you can buy inside, products floating where paintings would hang."
         },

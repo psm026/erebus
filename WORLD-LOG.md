@@ -76,3 +76,31 @@ becomes 6 of 9 max rooms). Borrow the Bloom's teal but freeze it mid-turn into t
 Relics' amber — the moment life becomes object. Structures: one hero shard caught
 inside a ring (orbit as cocoon), sparse. No egg (cadence resets; EGG-003 waits two
 more rooms).
+
+---
+
+## 2026-07-16 — CHRYSALIS (growth cycle #2 — scheduled protocol run)
+
+Seeds folder: empty. Feed: empty. Consumed the standing NEXT INTENTION as written.
+
+Built **The Chrysalis** — main world, third chamber, inserted between The Bloom and
+The Relics (main drift now 6 of 9 max rooms). One hero shard held inside a slow
+amber ring — orbit as cocoon — a second, fainter ring outside it, and three dim
+residue orbs the Bloom hasn't finished letting go of. Six objects total; nothing
+else earned its place. Palette holds both neighbors at once: bloom teal (#49d6a4)
+frozen mid-turn into relic amber (#e8a55f) over a near-black warm-green fog.
+Renumbered The Relics to "Fourth chamber" so the drift counts true — The Mycelium's
+"Fifth chamber" now lands exactly. No egg, per cadence; EGG-003 still waits.
+
+Why it follows: The Bloom grows things and The Relics remember them, but nothing in
+the world showed the in-between — the held breath where a living idea hardens into
+an artifact. The Spore Field scattered futures outward; The Chrysalis is what
+happens when one of them lands.
+
+**NEXT INTENTION:** Open the cocoon. Build **The Within** as a two-room sub-world
+behind a new portal in The Chrysalis (world-within.json): room one, the interior of
+the hardening — amber walls, the teal ghost still breathing; room two, the heart —
+the smallest, warmest, near-empty room in the world, where **EGG-003** hides
+(third-room cadence lands: Chrysalis, interior, heart). Return portal to main in
+the last room. Palette: the Chrysalis's amber deepened toward ember, teal reduced
+to a single held light.
