@@ -30,6 +30,24 @@
    `pending-rooms/` in this folder and note it in the log — the next run (or JC's
    next chat session) publishes it.
 
+## DIVE rooms (v6 engine) — enterable 360° spaces
+
+- A world file with `"mode": "immersive"` is a DIVE room: the visitor stands at the
+  center, drags to look in ANY direction (idle = slow drift; phones = tilt to look;
+  wheel = lean in). One room per dive world. `"returnTo"` names the world its
+  surface button exits to. ALWAYS include a return portal structure too.
+- Wordless by design: the single room-title stop appears for ~4s and dissolves.
+  Say it with structures, not sentences.
+- Composition law (from JC's references — themed-space storytelling):
+  * ONE focal "weenie": a single `"anchor": true` structure — the gravitational
+    centerpiece the eye keeps returning to.
+  * LAYERS: far silhouettes (macro), mid-shell density, a few near micro pieces
+    that feel almost touchable.
+  * REVEAL: the engine wakes the room over ~3.5s — never fight it; the arrival IS
+    the show. Guests are participants, not viewers.
+- Dive rooms are the "feel real and mystical, be taken in" spaces. Grow one when a
+  main-drift room's theme deserves to be stood inside (portal in the parent room).
+
 ## Sub-worlds & portals (v4 engine)
 
 - A structure `{ "kind": "portal", "to": "<world-id>", "scale": [2.6, 2.6], "rim": "B", "intensity": 1.5 }`

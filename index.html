@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=6" />
 
   <script type="importmap">
     {
@@ -24,7 +24,7 @@
       }
     }
   </script>
-  <script type="module" src="script.js?v=5"></script>
+  <script type="module" src="script.js?v=6"></script>
   <script>
     // rescue hatch: if the module/CDN never loads, don't strand visitors on the loader
     setTimeout(function () {
@@ -63,6 +63,9 @@
     <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
     <span class="hud-hint" id="hud-hint">Scroll to drift</span>
   </div>
+
+  <!-- The way back out of a dive room -->
+  <button id="hud-exit" type="button">◦ surface</button>
 
   <!-- Panels are built by script.js from world.json — the world is data -->
   <main id="content"></main>

@@ -454,6 +454,7 @@ async function boot() {
     curve: null, totalStops: 0, pathLength: 0,
     animated: [], clickables: [], dust: null, planetGroup: null,
     disposables: [], groups: [],
+    immersive: false, returnTo: 'main', wakeAt: 0,
   };
   const CAM_BASE_Z = 10;
   const seg = CONFIG.segment;
@@ -524,6 +525,22 @@ async function boot() {
   function place(group, room, i, spec) {
     // anchored/hero pieces stay lit; ambient ones fade in and out of the dark
     group.userData.breathe = spec.breathe !== undefined ? !!spec.breathe : !spec.anchor;
+    if (W.immersive) {
+      // dive rooms: everything surrounds YOU — spherical shells, layered
+      // macro (far silhouettes) / mid / micro (almost touchable)
+      if (spec.anchor) {
+        // the "weenie": one gravitational focal piece, ahead and slightly up
+        group.position.set(rand(-4, 4), rand(1, 5), -rand(24, 30));
+      } else {
+        const dir = new THREE.Vector3().randomDirection();
+        dir.y *= 0.65; // denser near the horizon band, still above/below you
+        const shell = [rand(9, 15), rand(16, 28), rand(30, 44)][i % 3];
+        group.position.copy(dir.normalize().multiplyScalar(shell));
+      }
+      group.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+      registerGroup(group, group.position.y);
+      return;
+    }
     if (spec.anchor) {
       const stopIdx = room.firstStop + 1 + (i % Math.max(1, room.stops.length - 1));
       const p = W.curve.getPointAt(stopT(Math.min(stopIdx, W.totalStops - 1)));
@@ -627,9 +644,14 @@ async function boot() {
           group.add(core); group.add(rim);
           core.userData = { type: 'egg', secret: spec.secret };
           W.clickables.push(core);
-          const t = stopT(rand(room.firstStop, room.lastStop));
-          const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
-          group.position.set(p.x + rand(-7, 7), p.y + rand(9, 14) * (Math.random() > 0.5 ? 1 : -1), p.z - 4);
+          if (W.immersive) {
+            const dir = new THREE.Vector3().randomDirection();
+            group.position.copy(dir.multiplyScalar(rand(14, 26)));
+          } else {
+            const t = stopT(rand(room.firstStop, room.lastStop));
+            const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
+            group.position.set(p.x + rand(-7, 7), p.y + rand(9, 14) * (Math.random() > 0.5 ? 1 : -1), p.z - 4);
+          }
           group.userData.breathe = true;
           group.userData.breatheMin = 0.5; // eggs dim but never vanish — findable
           registerGroup(group, group.position.y, 0.06, 0.5);
@@ -651,7 +673,10 @@ async function boot() {
           // the ring is clickable too — bigger target
           group.children[0].userData = core.userData;
           W.clickables.push(core, group.children[0]);
-          if (spec.anchor !== false) {
+          if (W.immersive) {
+            // exit gate floats behind your entry gaze — turn around to leave
+            group.position.set(rand(-3, 3), rand(-1, 3), rand(18, 24));
+          } else if (spec.anchor !== false) {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
             const p = W.curve.getPointAt(stopT(stopIdx));
             group.position.set(p.x - 9 - (i % 2) * 2, p.y + rand(-1, 2), p.z - 10);
@@ -675,6 +700,10 @@ async function boot() {
 
   function buildWorld(data, id) {
     W.id = id;
+    W.immersive = data.mode === 'immersive';
+    W.returnTo = data.returnTo || 'main';
+    W.wakeAt = clock ? clock.getElapsedTime() : 0;
+    document.body.classList.toggle('immersive', W.immersive);
     W.rooms = sanitizeRooms(data.rooms);
     if (!W.rooms.length) throw new Error('world "' + id + '" has no valid rooms');
 
@@ -688,25 +717,40 @@ async function boot() {
     W.totalStops = W.allStops.length;
     W.pathLength = (W.totalStops - 1) * seg;
 
-    const pts = [];
-    for (let i = 0; i < W.totalStops; i++) {
-      pts.push(new THREE.Vector3(
-        Math.sin(i * 1.7) * CONFIG.weaveX,
-        Math.cos(i * 1.3) * CONFIG.weaveY,
-        CAM_BASE_Z - i * seg
-      ));
+    if (!W.immersive) {
+      const pts = [];
+      for (let i = 0; i < W.totalStops; i++) {
+        pts.push(new THREE.Vector3(
+          Math.sin(i * 1.7) * CONFIG.weaveX,
+          Math.cos(i * 1.3) * CONFIG.weaveY,
+          CAM_BASE_Z - i * seg
+        ));
+      }
+      // a 1-stop world still needs a line to fly
+      if (pts.length === 1) pts.push(pts[0].clone().add(new THREE.Vector3(0, 0, -seg)));
+      W.curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.4);
+    } else {
+      W.curve = null; // dive rooms have no rail — you stand inside them
     }
-    // a 1-stop world still needs a line to fly
-    if (pts.length === 1) pts.push(pts[0].clone().add(new THREE.Vector3(0, 0, -seg)));
-    W.curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.4);
 
-    W.panels = W.allStops.map((s, i) => buildPanel(s.stop, s.room, i));
-
-    W.dust = pointsCloud(
-      Math.max(180, CONFIG.dustPerStop * W.totalStops),
-      () => new THREE.Vector3(rand(-52, 52), rand(-24, 24), 30 - Math.random() * (W.pathLength + 110)),
-      W.rooms[0].dust, [0.4, 1.0], 0.35, 1.6
-    );
+    if (W.immersive) {
+      // one ephemeral title — appears, then dissolves; the room speaks visually
+      W.panels = [buildPanel(W.rooms[0].stops[0], W.rooms[0], 0)];
+      W.panels[0].classList.add('is-active', 'ephemeral');
+      setTimeout(() => W.panels[0] && W.panels[0].classList.add('gone'), 4200);
+      W.dust = pointsCloud(
+        420,
+        () => new THREE.Vector3().randomDirection().multiplyScalar(Math.cbrt(Math.random()) * 42),
+        W.rooms[0].dust, [0.4, 1.0], 0.35, 1.2
+      );
+    } else {
+      W.panels = W.allStops.map((s, i) => buildPanel(s.stop, s.room, i));
+      W.dust = pointsCloud(
+        Math.max(180, CONFIG.dustPerStop * W.totalStops),
+        () => new THREE.Vector3(rand(-52, 52), rand(-24, 24), 30 - Math.random() * (W.pathLength + 110)),
+        W.rooms[0].dust, [0.4, 1.0], 0.35, 1.6
+      );
+    }
     scene.add(W.dust);
     track(W.dust);
 
@@ -728,7 +772,8 @@ async function boot() {
       W.planetGroup.traverse((o) => { if (o.geometry || o.material) track(o); });
     }
 
-    document.getElementById('scroll-space').style.height = `${W.totalStops * 120}vh`;
+    document.getElementById('scroll-space').style.height = W.immersive ? '100vh' : `${W.totalStops * 120}vh`;
+    hudSector.textContent = W.rooms[0].sector || '';
 
     // palette snap targets to the first room of the new world
     const r0 = W.rooms[0];
@@ -752,10 +797,11 @@ async function boot() {
       await new Promise((res) => setTimeout(res, 620)); // let the fade land
       disposeWorld();
       buildWorld(data, id);
+      resetLook();
       window.scrollTo(0, 0);
       progress = 0; targetProgress = 0;
       onScroll();
-      setActiveStop(0);
+      if (!W.immersive) setActiveStop(0);
       if (pushHash) {
         history.pushState({ w: id }, '', id === 'main' ? location.pathname : '#w=' + id);
       }
@@ -807,18 +853,68 @@ async function boot() {
 
   /* --- pointer --- */
   let mouseTX = 0, mouseTY = 0, mouseX = 0, mouseY = 0;
+
+  /* dive-room look state: drag turns your head anywhere — a magic window */
+  let yaw = 0, pitch = 0, yawVel = 0, pitchVel = 0;
+  let dragging = false, lastX = 0, lastY = 0, lastMoveAt = 0;
+  let tiltYaw = 0, tiltPitch = 0, tiltArmed = false;
+  let targetFov = 58;
+
   window.addEventListener('pointermove', (e) => {
+    if (W.immersive) {
+      if (!dragging) return;
+      const dx = e.clientX - lastX, dy = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      const kx = 2.4 / window.innerWidth, ky = 1.7 / window.innerHeight;
+      yaw -= dx * kx; pitch -= dy * ky;
+      pitch = Math.max(-1.45, Math.min(1.45, pitch));
+      yawVel = -dx * kx; pitchVel = -dy * ky;
+      lastMoveAt = performance.now();
+      return;
+    }
     if (e.pointerType === 'touch') return;
     mouseTX = (e.clientX / window.innerWidth - 0.5) * 2;
     mouseTY = (e.clientY / window.innerHeight - 0.5) * 2;
   }, { passive: true });
 
+  window.addEventListener('pointerup', () => { dragging = false; });
+  window.addEventListener('pointercancel', () => { dragging = false; });
+
+  window.addEventListener('wheel', (e) => {
+    if (!W.immersive) return;
+    targetFov = Math.max(38, Math.min(70, targetFov + e.deltaY * 0.02)); // lean in / pull back
+  }, { passive: true });
+
+  // magic-window tilt on phones (iOS asks permission on first touch)
+  function armTilt() {
+    if (tiltArmed) return;
+    tiltArmed = true;
+    const attach = () => window.addEventListener('deviceorientation', (e) => {
+      if (!W.immersive || e.beta == null) return;
+      tiltPitch = ((e.beta - 55) / 90) * 0.7;
+      tiltYaw = (-e.gamma / 90) * 0.7;
+    }, { passive: true });
+    try {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then((r) => { if (r === 'granted') attach(); }).catch(() => {});
+      } else {
+        attach();
+      }
+    } catch (err) { /* the dark forgives */ }
+  }
+
+  function resetLook() { yaw = 0; pitch = 0; yawVel = 0; pitchVel = 0; tiltYaw = 0; tiltPitch = 0; targetFov = 58; }
+
   const raycaster = new THREE.Raycaster();
   const clickNDC = new THREE.Vector2();
   window.addEventListener('pointerdown', (e) => {
+    if (W.immersive && !(e.target.closest && e.target.closest('.hud, #hud-exit, #egg-veil'))) {
+      dragging = true; lastX = e.clientX; lastY = e.clientY; lastMoveAt = performance.now();
+      armTilt();
+    }
     if (swapping || !W.clickables.length) return;
     if (document.body.classList.contains('egg-open')) return;
-    if (e.target.closest && e.target.closest('.panel, .hud, .hud-bottom, #egg-veil')) return;
+    if (e.target.closest && e.target.closest('.panel, .hud, .hud-bottom, #egg-veil, #hud-exit')) return;
     clickNDC.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(clickNDC, camera);
     const hits = raycaster.intersectObjects(W.clickables, false);
@@ -837,6 +933,10 @@ async function boot() {
   eggVeil.querySelector('.egg-close').addEventListener('click', () => {
     document.body.classList.remove('egg-open');
   });
+
+  /* surface: the always-available way back out of a dive */
+  const exitBtn = document.getElementById('hud-exit');
+  if (exitBtn) exitBtn.addEventListener('click', () => swapWorld(W.returnTo || 'main', true));
 
   /* --- HUD --- */
   function setActiveStop(idx) {
@@ -882,29 +982,46 @@ async function boot() {
   function tick() {
     if (!running) return;
     requestAnimationFrame(tick);
-    if (!W.curve) return;
-    const t = clock.getElapsedTime() * (reduced ? 0.15 : 1);
+    if (!W.curve && !W.immersive) return;
+    const tAbs = clock.getElapsedTime();
+    const t = tAbs * (reduced ? 0.15 : 1);
 
-    // adaptive glide: dreamy up close, quicker over long jumps so no one waits half a minute
-    const gap = Math.abs(targetProgress - progress);
-    progress = reduced ? targetProgress : lerp(progress, targetProgress, Math.min(0.16, CONFIG.camLerp + gap * 0.35));
-    mouseX = lerp(mouseX, mouseTX, 0.045);
-    mouseY = lerp(mouseY, mouseTY, 0.045);
+    if (W.immersive) {
+      /* you stand inside the room; your head is the camera */
+      if (!dragging) {
+        yaw += yawVel; pitch = Math.max(-1.45, Math.min(1.45, pitch + pitchVel));
+        yawVel *= 0.94; pitchVel *= 0.94;
+        if (!reduced && performance.now() - lastMoveAt > 2200) yaw += 0.00045; // idle drift — never frozen
+      }
+      camera.position.set(0, 0, 0);
+      camera.rotation.set(pitch + tiltPitch, yaw + tiltYaw, 0);
+      if (Math.abs(camera.fov - targetFov) > 0.1) {
+        camera.fov = lerp(camera.fov, targetFov, 0.08);
+        camera.updateProjectionMatrix();
+      }
+      camPos.set(0, 0, 0);
+    } else {
+      // adaptive glide: dreamy up close, quicker over long jumps so no one waits half a minute
+      const gap = Math.abs(targetProgress - progress);
+      progress = reduced ? targetProgress : lerp(progress, targetProgress, Math.min(0.16, CONFIG.camLerp + gap * 0.35));
+      mouseX = lerp(mouseX, mouseTX, 0.045);
+      mouseY = lerp(mouseY, mouseTY, 0.045);
 
-    const pT = Math.min(0.9995, Math.max(0, progress));
-    W.curve.getPointAt(pT, camPos);
-    W.curve.getPointAt(Math.min(1, pT + 0.018), lookPos);
-    W.curve.getTangentAt(pT, tangent);
+      const pT = Math.min(0.9995, Math.max(0, progress));
+      W.curve.getPointAt(pT, camPos);
+      W.curve.getPointAt(Math.min(1, pT + 0.018), lookPos);
+      W.curve.getTangentAt(pT, tangent);
 
-    camera.position.copy(camPos);
-    camera.lookAt(lookPos);
-    camera.rotateY(-mouseX * CONFIG.lookYaw);
-    camera.rotateX(-mouseY * CONFIG.lookPitch);
-    camera.rotateZ(-tangent.x * CONFIG.bank);
+      camera.position.copy(camPos);
+      camera.lookAt(lookPos);
+      camera.rotateY(-mouseX * CONFIG.lookYaw);
+      camera.rotateX(-mouseY * CONFIG.lookPitch);
+      camera.rotateZ(-tangent.x * CONFIG.bank);
+    }
 
     sky.position.copy(camera.position);
 
-    const room = roomAtZ(camPos.z);
+    const room = W.immersive ? W.rooms[0] : roomAtZ(camPos.z);
     if (room) {
       fogTarget.set(room.fog); nebATarget.set(room.nebulaA); nebBTarget.set(room.nebulaB);
       dustTarget.set(room.dust); lightATarget.set(room.accentA); lightBTarget.set(room.accentB);
@@ -932,6 +1049,9 @@ async function boot() {
         const shaped = raw * raw * (3 - 2 * raw);
         presence = s.breatheMin + (1 - s.breatheMin) * shaped;
       }
+      // dive rooms wake slowly: the reveal is the arrival
+      const wakeRaw = Math.min(1, Math.max(0, (tAbs - W.wakeAt) / 3.5));
+      presence *= wakeRaw * wakeRaw * (3 - 2 * wakeRaw);
       for (const g of s.glow) {
         if (g.kind === 'rim') g.mat.uniforms.uIntensity.value = g.base * (0.06 + 0.94 * presence);
         else if (g.kind === 'fil') g.mat.uniforms.uPresence.value = presence;
@@ -941,8 +1061,10 @@ async function boot() {
     }
     if (W.planetGroup) W.planetGroup.rotation.y += 0.0003;
 
-    setActiveStop(Math.round(progress * (W.totalStops - 1)));
-    progressFill.style.width = `${(progress * 100).toFixed(2)}%`;
+    if (!W.immersive) {
+      setActiveStop(Math.round(progress * (W.totalStops - 1)));
+      progressFill.style.width = `${(progress * 100).toFixed(2)}%`;
+    }
 
     if (composer) composer.render();
     else renderer.render(scene, camera);
@@ -978,9 +1100,12 @@ async function boot() {
     else throw err;
   }
   buildWorld(data, startId);
-  camera.position.copy(W.curve.getPointAt(0));
+  resetLook();
+  if (W.curve) {
+    camera.position.copy(W.curve.getPointAt(0));
+    setActiveStop(0);
+  }
   onScroll();
-  setActiveStop(0);
   tick();
 }
 
