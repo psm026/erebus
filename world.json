@@ -147,6 +147,7 @@
         { "kind": "network", "count": 3, "scale": [8, 14], "rim": "A", "intensity": 1.1, "nodes": 24 },
         { "kind": "network", "count": 2, "scale": [4, 7], "rim": "B", "intensity": 0.7, "nodes": 14 },
         { "kind": "orb", "count": 4, "scale": [0.5, 1.0], "rim": "B", "intensity": 1.4 },
+        { "kind": "portal", "to": "spore-field", "scale": [2.6, 2.6], "rim": "A", "intensity": 1.4 },
         { "kind": "swarm", "count": 2, "scale": [6, 9], "rim": "A" },
         { "kind": "ring", "count": 1, "scale": [9, 12], "rim": "B", "opacity": 0.15 }
       ]

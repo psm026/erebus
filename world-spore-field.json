@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "EREBUS — The Spore Field",
+    "version": 1,
+    "note": "Grown by the growth protocol from WORLD-LOG intention, 2026-07-15. Entered through the portal in The Mycelium. Contains EGG-002 (The Hush)."
+  },
+  "rooms": [
+    {
+      "id": "spore-field",
+      "sector": "SPORES // FIELD",
+      "accentA": "#e8d9a8",
+      "accentB": "#c9a2ff",
+      "fog": "#050403",
+      "nebulaA": "#2b2210",
+      "nebulaB": "#1a0d3e",
+      "dust": "#e8d9a8",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Behind the mycelium",
+          "title": "The Spore Field",
+          "body": "What the network releases. Every drifting light is a room that doesn't exist yet — the world's unborn ideas, holding until something feeds them."
+        },
+        {
+          "num": "✧",
+          "title": "Unwritten rooms",
+          "tags": "Seeds / futures / drift",
+          "body": "Some will land and become chambers. Some will dissolve unseen. Feed the world and you decide which."
+        }
+      ],
+      "structures": [
+        { "kind": "swarm", "count": 3, "scale": [5, 9], "rim": "A" },
+        { "kind": "orb", "count": 4, "scale": [0.4, 0.9], "rim": "A", "intensity": 1.4 },
+        { "kind": "network", "count": 1, "scale": [5, 7], "rim": "B", "intensity": 0.6, "nodes": 12 },
+        { "kind": "ring", "count": 1, "scale": [7, 9], "rim": "B", "opacity": 0.12 }
+      ]
+    },
+    {
+      "id": "the-hush",
+      "sector": "SPORES // HUSH",
+      "accentA": "#d9b96a",
+      "accentB": "#e8d9a8",
+      "fog": "#040302",
+      "nebulaA": "#241a08",
+      "nebulaB": "#100a1e",
+      "dust": "#d9b96a",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Where spores settle",
+          "title": "The Hush",
+          "body": "The quietest place in EREBUS so far. Listen with your eyes — something here was left for the patient. The burning ring returns you to the surface."
+        }
+      ],
+      "structures": [
+        { "kind": "monolith", "count": 2, "scale": [5, 8], "rim": "A", "intensity": 0.4 },
+        { "kind": "orb", "count": 2, "scale": [0.8, 1.4], "rim": "B", "intensity": 1.1 },
+        {
+          "kind": "egg",
+          "scale": [0.3, 0.3],
+          "rim": "A",
+          "intensity": 2.0,
+          "secret": {
+            "eyebrow": "EGG-002 // FOUND",
+            "title": "Patience pays in the dark.",
+            "body": "Second of its kind. The Spore Field grew itself — no human built this place. You found the proof. Keep wandering; the world keeps burying."
+          }
+        },
+        { "kind": "portal", "to": "main", "scale": [2.6, 2.6], "rim": "A", "intensity": 1.4 }
+      ]
+    }
+  ]
+}
