@@ -757,14 +757,15 @@ async function boot() {
           W.clickables.push(core);
           if (W.immersive) {
             const dir = new THREE.Vector3().randomDirection();
-            group.position.copy(dir.multiplyScalar(rand(14, 26)));
+            group.position.copy(dir.multiplyScalar(rand(12, 20)));
           } else {
             const t = stopT(rand(room.firstStop, room.lastStop));
             const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
-            group.position.set(p.x + rand(-7, 7), p.y + rand(9, 14) * (Math.random() > 0.5 ? 1 : -1), p.z - 4);
+            // within reach of the look-around: off the path, never out of sight
+            group.position.set(p.x + rand(-6, 6), p.y + rand(4.5, 7.5) * (Math.random() > 0.5 ? 1 : -1), p.z - 6);
           }
           group.userData.breathe = true;
-          group.userData.breatheMin = 0.5; // eggs dim but never vanish — findable
+          group.userData.breatheMin = 0.7; // eggs dim but stay findable
           registerGroup(group, group.position.y, 0.06, 0.5);
           continue;
 
@@ -1021,6 +1022,24 @@ async function boot() {
 
   const raycaster = new THREE.Raycaster();
   const clickNDC = new THREE.Vector2();
+
+  /* hover affordance: clickables wake and the cursor tells the truth */
+  let hoveredGroup = null;
+  let lastHoverCheck = 0;
+  window.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'touch' || swapping || !W.clickables.length) return;
+    const now = performance.now();
+    if (now - lastHoverCheck < 120) return;
+    lastHoverCheck = now;
+    clickNDC.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    raycaster.setFromCamera(clickNDC, camera);
+    const hits = raycaster.intersectObjects(W.clickables, false);
+    const g = hits.length ? hits[0].object.parent : null;
+    if (g !== hoveredGroup) {
+      hoveredGroup = g;
+      document.documentElement.style.cursor = g ? 'pointer' : '';
+    }
+  }, { passive: true });
   window.addEventListener('pointerdown', (e) => {
     if (W.immersive && !(e.target.closest && e.target.closest('.hud, #hud-exit, #egg-veil'))) {
       dragging = true; lastX = e.clientX; lastY = e.clientY; lastMoveAt = performance.now();
@@ -1163,6 +1182,7 @@ async function boot() {
         const shaped = raw * raw * (3 - 2 * raw);
         presence = s.breatheMin + (1 - s.breatheMin) * shaped;
       }
+      if (s.group === hoveredGroup) presence = Math.max(presence, 0.95); // hover wakes it fully
       // dive rooms wake slowly: the reveal is the arrival
       const wakeRaw = Math.min(1, Math.max(0, (tAbs - W.wakeAt) / 3.5));
       presence *= wakeRaw * wakeRaw * (3 - 2 * wakeRaw);
