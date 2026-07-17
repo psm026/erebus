@@ -10,6 +10,8 @@
     {
       "id": "static-ocean",
       "sector": "DIVE // THE STATIC OCEAN",
+      "sky": "./asset-ocean-sky.webp",
+      "skyOpacity": 0.55,
       "accentA": "#8fd8ff",
       "accentB": "#b48cff",
       "fog": "#010206",
