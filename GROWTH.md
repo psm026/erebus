@@ -48,6 +48,18 @@
 - Dive rooms are the "feel real and mystical, be taken in" spaces. Grow one when a
   main-drift room's theme deserves to be stood inside (portal in the parent room).
 
+## AI-generated matter (v7 engine)
+
+- Any room may carry `"sky": "./asset-<name>.webp"` (+ optional `"skyOpacity"`, default
+  0.85): a 2:1 EQUIRECTANGULAR image wrapped around the entire sky — the main road for
+  AI-generated environments (Firefly / FLUX / skybox generators). Most powerful in dive
+  rooms. Keep skies DARK and mystical; the nebula shader still breathes underneath.
+- AI images also enter as floating matter: `{ "kind": "image", "src": "./asset-x.webp" }`.
+- Asset rules: webp, ≤2048px wide for skies (≤1200px for floating images), ≤600KB,
+  flat filenames `asset-<name>.webp`, committed alongside the world files.
+- Video (Higgsfield / Veo / Kling loops) is for HERO moments only — max one short muted
+  loop per room, and only when JC supplies/approves it. Never autonomous video spends.
+
 ## Sub-worlds & portals (v4 engine)
 
 - A structure `{ "kind": "portal", "to": "<world-id>", "scale": [2.6, 2.6], "rim": "B", "intensity": 1.5 }`

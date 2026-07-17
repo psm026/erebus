@@ -480,6 +480,27 @@ async function boot() {
     depthWrite: false,
   });
   sky.add(new THREE.Mesh(new THREE.SphereGeometry(260, 32, 32), nebulaMat));
+
+  // photographic/AI sky: a second sphere that carries an equirectangular image
+  // (rooms opt in with "sky": "./asset-name.webp" — 2:1 equirect, AI-generated or shot)
+  const skyPhotoMat = new THREE.MeshBasicMaterial({
+    transparent: true, opacity: 0, depthWrite: false, side: THREE.BackSide,
+  });
+  const skyPhoto = new THREE.Mesh(new THREE.SphereGeometry(255, 48, 32), skyPhotoMat);
+  skyPhoto.rotation.y = Math.PI; // seam behind the entry gaze
+  sky.add(skyPhoto);
+  function setSkyPhoto(url, opacity) {
+    if (skyPhotoMat.map) { skyPhotoMat.map.dispose(); skyPhotoMat.map = null; }
+    skyPhotoMat.opacity = 0;
+    if (!url) { skyPhotoMat.needsUpdate = true; return; }
+    texLoaderGlobal.load(url, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      skyPhotoMat.map = tex;
+      skyPhotoMat.opacity = opacity != null ? opacity : 0.85;
+      skyPhotoMat.needsUpdate = true;
+    });
+  }
+  const texLoaderGlobal = new THREE.TextureLoader();
   const stars = pointsCloud(
     CONFIG.starCount,
     () => new THREE.Vector3().randomDirection().multiplyScalar(rand(90, 240)),
@@ -864,6 +885,9 @@ async function boot() {
 
     document.getElementById('scroll-space').style.height = W.immersive ? '100vh' : `${W.totalStops * 120}vh`;
     hudSector.textContent = W.rooms[0].sector || '';
+
+    // photographic/AI sky if the room asks for one
+    setSkyPhoto(W.rooms[0].sky || null, W.rooms[0].skyOpacity);
 
     // palette snap targets to the first room of the new world
     const r0 = W.rooms[0];
