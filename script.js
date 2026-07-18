@@ -88,6 +88,7 @@ const NEBULA_FRAG = /* glsl */ `
   uniform float uTime;
   uniform vec3 uColA;
   uniform vec3 uColB;
+  uniform float uLift;
   varying vec3 vDir;
   float hash(vec3 p) {
     p = fract(p * 0.3183099 + 0.1);
@@ -118,7 +119,7 @@ const NEBULA_FRAG = /* glsl */ `
     vec3 col = vec3(0.008, 0.008, 0.020);
     col += uColA * smoothstep(0.52, 0.95, n);
     col += uColB * smoothstep(0.58, 0.97, n2);
-    gl_FragColor = vec4(col, 1.0);
+    gl_FragColor = vec4(col * uLift, 1.0);
   }
 `;
 
@@ -425,9 +426,12 @@ function sanitizeRooms(raw) {
 async function boot() {
   /* --- persistent core (survives world swaps) --- */
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, PR_CAP));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : PR_CAP));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+  // portrait screens get a wider window into the dark and a tighter flight path
+  const isPortrait = () => window.innerHeight > window.innerWidth * 1.05;
 
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(ROOM_DEFAULTS.fog, 0.0115); // deeper dark, slower reveals
@@ -438,7 +442,7 @@ async function boot() {
   scene.environmentIntensity = 0.25;
   pmrem.dispose();
 
-  const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 600);
+  const camera = new THREE.PerspectiveCamera(isPortrait() ? 68 : 58, window.innerWidth / window.innerHeight, 0.1, 600);
   camera.rotation.order = 'YXZ';
   scene.add(camera);
 
@@ -453,18 +457,16 @@ async function boot() {
   lightB.position.set(7, -4, -10);
   camera.add(lightB);
 
-  let composer = null;
-  if (!isMobile) {
-    composer = new EffectComposer(renderer);
-    composer.setPixelRatio(Math.min(window.devicePixelRatio, PR_CAP));
-    composer.setSize(window.innerWidth, window.innerHeight);
-    composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
-      CONFIG.bloom.strength, CONFIG.bloom.radius, CONFIG.bloom.threshold
-    ));
-    composer.addPass(new OutputPass());
-  }
+  /* bloom is the soul — phones get it too, at lean resolution */
+  const composer = new EffectComposer(renderer);
+  composer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.25 : PR_CAP));
+  composer.setSize(window.innerWidth, window.innerHeight);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(
+    isMobile ? new THREE.Vector2(384, 384) : new THREE.Vector2(window.innerWidth, window.innerHeight),
+    isMobile ? 0.5 : CONFIG.bloom.strength, CONFIG.bloom.radius, CONFIG.bloom.threshold
+  ));
+  composer.addPass(new OutputPass());
 
   const sky = new THREE.Group();
   scene.add(sky);
@@ -473,6 +475,8 @@ async function boot() {
       uTime: { value: 0 },
       uColA: { value: new THREE.Color(ROOM_DEFAULTS.nebulaA) },
       uColB: { value: new THREE.Color(ROOM_DEFAULTS.nebulaB) },
+      // small screens crush near-black — lift the sky so the dark stays visible
+      uLift: { value: isMobile ? 1.4 : 1.0 },
     },
     vertexShader: NEBULA_VERT,
     fragmentShader: NEBULA_FRAG,
@@ -613,10 +617,15 @@ async function boot() {
     if (spec.anchor) {
       const stopIdx = room.firstStop + 1 + (i % Math.max(1, room.stops.length - 1));
       const p = W.curve.getPointAt(stopT(Math.min(stopIdx, W.totalStops - 1)));
-      // 11+ units off-path: the camera weaves ±sway, never fly THROUGH a hero piece
-      group.position.set(p.x + 11 + (i % 3) * 2, p.y + rand(-1.5, 2.5), p.z - 12);
+      if (isPortrait()) {
+        // phones: hero pieces live in the upper half, above the text
+        group.position.set(p.x + rand(-2.5, 3.5), p.y + rand(3, 5.5), p.z - 13);
+      } else {
+        // 11+ units off-path: the camera weaves ±sway, never fly THROUGH a hero piece
+        group.position.set(p.x + 11 + (i % 3) * 2, p.y + rand(-1.5, 2.5), p.z - 12);
+      }
     } else {
-      group.position.copy(besidePath(room, 11, 30, i));
+      group.position.copy(isPortrait() ? besidePath(room, 6, 15, i) : besidePath(room, 11, 30, i));
     }
     group.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
     registerGroup(group, group.position.y);
@@ -830,10 +839,11 @@ async function boot() {
     W.pathLength = (W.totalStops - 1) * seg;
 
     if (!W.immersive) {
+      const wx = CONFIG.weaveX * (isPortrait() ? 0.45 : 1); // narrow screens: tighter weave, nothing off-frame
       const pts = [];
       for (let i = 0; i < W.totalStops; i++) {
         pts.push(new THREE.Vector3(
-          Math.sin(i * 1.7) * CONFIG.weaveX,
+          Math.sin(i * 1.7) * wx,
           Math.cos(i * 1.3) * CONFIG.weaveY,
           CAM_BASE_Z - i * seg
         ));
@@ -860,7 +870,7 @@ async function boot() {
       W.dust = pointsCloud(
         Math.max(180, CONFIG.dustPerStop * W.totalStops),
         () => new THREE.Vector3(rand(-52, 52), rand(-24, 24), 30 - Math.random() * (W.pathLength + 110)),
-        W.rooms[0].dust, [0.4, 1.0], 0.35, 1.6
+        W.rooms[0].dust, [0.4, 1.0], isMobile ? 0.48 : 0.35, 1.6
       );
     }
     scene.add(W.dust);
@@ -1208,9 +1218,18 @@ async function boot() {
 
   /* --- resize --- */
   let lastW = window.innerWidth, lastH = window.innerHeight;
+  let wasPortrait = isPortrait();
   window.addEventListener('resize', () => {
     if (window.innerWidth === lastW && Math.abs(window.innerHeight - lastH) < 140) return;
     lastW = window.innerWidth; lastH = window.innerHeight;
+    if (isPortrait() !== wasPortrait) {
+      // orientation flip: recompose the world for the new frame
+      wasPortrait = isPortrait();
+      camera.fov = wasPortrait ? 68 : 58;
+      const id = W.id || 'main';
+      W.id = null; // force rebuild
+      swapWorld(id, false);
+    }
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
