@@ -13,7 +13,6 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 /* ---------------- config ---------------- */
 
@@ -79,7 +78,7 @@ function boot() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, PR_CAP));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 1.0;
 
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(new THREE.Color(CHAMBERS[0].nebA), 0.012);
@@ -89,15 +88,46 @@ function boot() {
   camera.position.set(0, 4, 17);
   scene.add(camera);
 
-  // environment for physical materials
+  // environment for physical materials — built from OUR dark, not a white studio.
+  // The glass reflects the nebula: violet dusk above, void below, three dim
+  // colored panes for specular life. No pure white anywhere.
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.2).texture;
+  {
+    const envScene = new THREE.Scene();
+    const grad = new THREE.Mesh(
+      new THREE.SphereGeometry(40, 24, 24),
+      new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        fragmentShader: `varying vec3 vP;
+          void main(){
+            vec3 lo = vec3(0.004, 0.003, 0.012);
+            vec3 hi = vec3(0.10, 0.06, 0.24);
+            gl_FragColor = vec4(mix(lo, hi, smoothstep(-0.6, 0.9, vP.y)), 1.0);
+          }`,
+      })
+    );
+    envScene.add(grad);
+    const pane = (color, intensity, x, y, z, w, h) => {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, h),
+        new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(intensity) })
+      );
+      m.position.set(x, y, z);
+      m.lookAt(0, 0, 0);
+      envScene.add(m);
+    };
+    pane('#8f6bff', 2.6, -10, 9, -5, 7, 16);   // violet rake from above-left
+    pane('#37e6d4', 1.7, 12, 2, 6, 4, 12);     // teal edge
+    pane('#ff8a4d', 0.9, 3, -11, 8, 9, 4);     // faint ember floor bounce
+    scene.environment = pmrem.fromScene(envScene, 0.06).texture;
+  }
 
-  // lights ride with the camera, tinted per chamber
-  const keyLight = new THREE.PointLight(0xffffff, 40, 90, 1.9);
+  // lights ride with the camera, tinted per chamber — dim, sculptural
+  const keyLight = new THREE.PointLight(0xffffff, 15, 90, 1.9);
   keyLight.position.set(6, 3, 4);
   camera.add(keyLight);
-  const fillLight = new THREE.PointLight(0xffffff, 22, 70, 2.0);
+  const fillLight = new THREE.PointLight(0xffffff, 8, 70, 2.0);
   fillLight.position.set(-7, -4, 2);
   camera.add(fillLight);
 
@@ -228,8 +258,8 @@ function boot() {
         iridescenceThicknessRange: [120, 480],
         clearcoat: 1.0,
         clearcoatRoughness: 0.12,
-        envMapIntensity: 1.5,
-        specularIntensity: 1.0,
+        envMapIntensity: 1.0,
+        specularIntensity: 0.7,
       });
     } else {
       // transmission is brutal on phone GPUs — iridescent obsidian instead
@@ -241,7 +271,7 @@ function boot() {
         iridescenceIOR: 1.3,
         clearcoat: 1.0,
         clearcoatRoughness: 0.2,
-        envMapIntensity: 1.7,
+        envMapIntensity: 1.2,
       });
     }
     const hero = new THREE.Mesh(heroGeo, heroMat);
@@ -256,7 +286,7 @@ function boot() {
     group.add(core);
     S.cores.push(core);
 
-    const heroLight = new THREE.PointLight(A, 60, 40, 1.8);
+    const heroLight = new THREE.PointLight(A, 26, 40, 1.8);
     group.add(heroLight);
 
     /* -- pillar 3: the reactive belt -- */
@@ -266,7 +296,7 @@ function boot() {
       metalness: 0.85,
       iridescence: 0.9,
       iridescenceIOR: 1.35,
-      envMapIntensity: 1.4,
+      envMapIntensity: 0.85,
       emissive: A,
       emissiveIntensity: 0.06,
     });
