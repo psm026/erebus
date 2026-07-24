@@ -74,7 +74,7 @@ const GLSL_NOISE = /* glsl */`
 
 function boot() {
   const canvas = document.getElementById('kata');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, alpha: false });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
   renderer.setPixelRatio(Math.min(devicePixelRatio, PR_CAP));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -142,6 +142,8 @@ function boot() {
     pulseAt: -99,        // time of last click shockwave
     pulseFrom: new THREE.Vector3(),
     heroes: [],
+    heroMats: [],
+    chamberGroups: [],
     belts: [],
     blades: [],
     slabs: [],
@@ -237,6 +239,7 @@ function boot() {
     const group = new THREE.Group();
     group.position.set(0, y, 0);
     scene.add(group);
+    S.chamberGroups.push(group);
 
     const A = new THREE.Color(ch.accA), B = new THREE.Color(ch.accB);
 
@@ -274,9 +277,23 @@ function boot() {
         envMapIntensity: 1.2,
       });
     }
-    const hero = new THREE.Mesh(heroGeo, heroMat);
+    // cheap twin: iridescent obsidian, used whenever this chamber isn't the
+    // one you're inside — true glass renders the whole scene again, so only
+    // ONE crystal is ever allowed to be glass at a time.
+    const cheapMat = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(ch.glass),
+      roughness: 0.14,
+      metalness: 0.55,
+      iridescence: 1.0,
+      iridescenceIOR: 1.3,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.2,
+      envMapIntensity: 1.2,
+    });
+    const hero = new THREE.Mesh(heroGeo, isMobile ? heroMat : cheapMat);
     group.add(hero);
     S.heroes.push(hero);
+    S.heroMats.push({ glass: heroMat, cheap: cheapMat });
 
     // molten core inside the glass
     const core = new THREE.Mesh(
@@ -497,7 +514,7 @@ function boot() {
   composer.setSize(innerWidth, innerHeight);
   composer.addPass(new RenderPass(scene, camera));
   composer.addPass(new UnrealBloomPass(
-    isMobile ? new THREE.Vector2(384, 384) : new THREE.Vector2(innerWidth, innerHeight),
+    isMobile ? new THREE.Vector2(384, 384) : new THREE.Vector2(innerWidth >> 1, innerHeight >> 1),
     CFG.bloomStrength, CFG.bloomRadius, CFG.bloomThreshold
   ));
   composer.addPass(new OutputPass());
@@ -610,6 +627,18 @@ function boot() {
     const pulseAge = t - S.pulseAt;
     const pulseGlow = Math.exp(-pulseAge * 1.4) * (pulseAge > 0 ? 1 : 0);
 
+    // chamber culling — only the chamber you're in (and its neighbor mid-fall)
+    // exists. Only the nearest crystal is real glass; the rest are obsidian.
+    S.chamberGroups.forEach((g, i) => {
+      const near = Math.abs(S.depth - i);
+      g.visible = near < 1.25;
+      if (!isMobile) {
+        const hero = S.heroes[i], m = S.heroMats[i];
+        const want = near < 0.6 ? m.glass : m.cheap;
+        if (hero.material !== want) hero.material = want;
+      }
+    });
+
     // heroes breathe + tilt away from the cursor
     S.heroes.forEach((hero, i) => {
       hero.rotation.y = t * 0.06 + i;
@@ -627,6 +656,7 @@ function boot() {
 
     // belts: orbit + cursor repulsion (matter avoids your hand)
     S.belts.forEach(({ mesh, data, mat, group }) => {
+      if (!group.visible) return;
       const gy = group.position.y;
       for (let k = 0; k < data.length; k++) {
         const d = data[k];
