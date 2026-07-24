@@ -120,7 +120,7 @@ function boot() {
     pane('#8f6bff', 2.6, -10, 9, -5, 7, 16);   // violet rake from above-left
     pane('#37e6d4', 1.7, 12, 2, 6, 4, 12);     // teal edge
     pane('#ff8a4d', 0.9, 3, -11, 8, 9, 4);     // faint ember floor bounce
-    scene.environment = pmrem.fromScene(envScene, 0.06).texture;
+    scene.environment = pmrem.fromScene(envScene, 0.04).texture;
   }
 
   // lights ride with the camera, tinted per chamber — dim, sculptural
@@ -704,6 +704,11 @@ function boot() {
 
   tick();
   window.__kataBooted = true;
+  // debug/console hook (harmless in production; lets tools steer the descent)
+  window.__kata = {
+    jump(d) { S.targetDepth = S.depth = THREE.MathUtils.clamp(d, 0, MAX_DEPTH); },
+    depth: () => S.depth,
+  };
 
   /* entry choreography */
   setTimeout(() => document.getElementById('veil').classList.add('gone'), 2900);
