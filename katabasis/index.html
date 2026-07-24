@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>PSM — KATABASIS</title>
+  <meta name="description" content="KATABASIS — a descent. PSM's dark, beautiful fantasies, deeper. There is no floor." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#020207" />
+  <meta property="og:title" content="PSM — KATABASIS" />
+  <meta property="og:description" content="A descent. There is no floor." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=1" />
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="script.js?v=1"></script>
+  <script>
+    setTimeout(function () {
+      if (!window.__kataBooted) document.body.classList.add('no-webgl');
+    }, 7000);
+  </script>
+</head>
+<body>
+  <canvas id="kata" aria-hidden="true"></canvas>
+
+  <!-- entry veil -->
+  <div id="veil" aria-hidden="true">
+    <p class="veil-eyebrow">PSM presents</p>
+    <h1 class="veil-title">KATABASIS</h1>
+    <p class="veil-sub">a descent · there is no floor</p>
+  </div>
+
+  <!-- persistent whisper HUD -->
+  <header class="hud">
+    <a class="mark" href="#" aria-label="PSM">PSM</a>
+    <span class="depth" id="depth">000</span>
+  </header>
+
+  <p class="hint" id="hint">scroll to descend · touch the dark</p>
+
+  <div class="fallback" role="note">
+    <h1>KATABASIS</h1>
+    <p>This descent needs WebGL. Open in a modern browser.</p>
+  </div>
+
+  <noscript>
+    <div class="fallback"><h1>KATABASIS</h1><p>Enable JavaScript to descend.</p></div>
+  </noscript>
+</body>
+</html>
