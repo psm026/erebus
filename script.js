@@ -539,6 +539,10 @@ async function boot() {
   function track(obj) { W.disposables.push(obj); return obj; }
 
   function disposeWorld() {
+    for (const v of (W.videos || [])) {
+      try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {}
+    }
+    W.videos = [];
     for (const g of W.groups) scene.remove(g);
     if (W.dust) scene.remove(W.dust);
     if (W.planetGroup) scene.remove(W.planetGroup);
@@ -755,6 +759,45 @@ async function boot() {
           group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
             map: tex, transparent: true, opacity: 0.92, side: THREE.DoubleSide,
           })));
+
+        } else if (spec.kind === 'video' && spec.src) {
+          // a living painting: AI film matter floating in the dark, muted loop
+          const vid = document.createElement('video');
+          vid.src = spec.src;
+          vid.muted = true;
+          vid.loop = true;
+          vid.playsInline = true;
+          vid.setAttribute('playsinline', '');
+          vid.preload = isMobile ? 'metadata' : 'auto';
+          vid.play().catch(() => {
+            addEventListener('pointerdown', () => vid.play().catch(() => {}), { once: true });
+          });
+          (W.videos || (W.videos = [])).push(vid);
+          const tex = new THREE.VideoTexture(vid);
+          tex.colorSpace = THREE.SRGBColorSpace;
+          const geo = new THREE.PlaneGeometry(s, s * (spec.ratio || 0.5625));
+          group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+            map: tex, transparent: true, opacity: 0.94, side: THREE.DoubleSide, toneMapped: false,
+          })));
+          // living paintings hang upright and face the drift — no random tumble
+          if (W.immersive) {
+            const ang = rand(0, Math.PI * 2);
+            const rr = rand(14, 20);
+            group.position.set(Math.cos(ang) * rr, rand(0, 4), Math.sin(ang) * rr);
+            group.lookAt(0, group.position.y, 0);
+          } else if (spec.anchor) {
+            const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
+            const p = W.curve.getPointAt(stopT(stopIdx));
+            if (isPortrait()) group.position.set(p.x + rand(-2, 2), p.y + rand(3.5, 5.5), p.z - 14);
+            else group.position.set(p.x - 12 - (i % 2) * 2, p.y + rand(0, 2), p.z - 12);
+            group.lookAt(p.x, p.y, p.z + 12);
+          } else {
+            group.position.copy(isPortrait() ? besidePath(room, 7, 14, i) : besidePath(room, 12, 24, i));
+            group.lookAt(group.position.x * 0.2, group.position.y, group.position.z + 20);
+          }
+          group.userData.breathe = spec.breathe !== undefined ? !!spec.breathe : false;
+          registerGroup(group, group.position.y, 0, 0.15);
+          continue;
 
         } else if (spec.kind === 'egg') {
           const geo = new THREE.SphereGeometry(scale[0], 16, 16);

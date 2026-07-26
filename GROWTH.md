@@ -25,7 +25,7 @@
 5. **Publish.** Commit `world.json` + `WORLD-LOG.md` to github.com/psm026/erebus
    via the browser (GitHub upload page replaces files by name:
    https://github.com/psm026/erebus/upload/main — commit message
-   `GROWTH: <room-id>`). Vercel auto-deploys. Verify https://erebus-emra1.vercel.app
+   `GROWTH: <room-id>`). Vercel auto-deploys. Verify https://erebus-two.vercel.app
    loads afterward. If the browser is unavailable, save the room to
    `pending-rooms/` in this folder and note it in the log — the next run (or JC's
    next chat session) publishes it.
@@ -55,6 +55,10 @@
   AI-generated environments (Firefly / FLUX / skybox generators). Most powerful in dive
   rooms. Keep skies DARK and mystical; the nebula shader still breathes underneath.
 - AI images also enter as floating matter: `{ "kind": "image", "src": "./asset-x.webp" }`.
+- LIVING PAINTINGS (v8): `{ "kind": "video", "src": "./asset-video-<name>.mp4", "scale": [9, 12], "anchor": true }`
+  — a muted looping film pane that hangs upright facing the drift. Max ONE per room.
+  Files must be ≤720p, silent (-an), ≤6MB, named `asset-video-<name>.mp4`. Agents may
+  PLACE existing video assets but NEVER generate new ones (video costs money — JC only).
 - Asset rules: webp, ≤2048px wide for skies (≤1200px for floating images), ≤600KB,
   flat filenames `asset-<name>.webp`, committed alongside the world files.
 - Video (Higgsfield / Veo / Kling loops) is for HERO moments only — max one short muted
