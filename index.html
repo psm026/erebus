@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 
   <script type="importmap">
     {
@@ -34,6 +34,47 @@
 </head>
 <body>
   <a class="skip" href="#content">Skip to content</a>
+
+  <!-- The first link: entry film. Plays once per session, then the world. -->
+  <div id="entry" hidden>
+    <video id="entryFilm" src="first-link-web.mp4" playsinline preload="auto" muted></video>
+    <div class="entry-ui">
+      <button id="entrySound" type="button">◦ sound</button>
+      <button id="entrySkip" type="button">enter →</button>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var entry = document.getElementById('entry');
+      var film = document.getElementById('entryFilm');
+      var seen = false;
+      try { seen = !!sessionStorage.getItem('erebus.entered'); } catch (e) {}
+      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (seen || location.hash || reduced) { entry.remove(); return; }
+      entry.hidden = false;
+      document.body.classList.add('entry-active');
+      function leave() {
+        if (!entry.parentNode) return;
+        try { sessionStorage.setItem('erebus.entered', '1'); } catch (e) {}
+        entry.classList.add('gone');
+        document.body.classList.remove('entry-active');
+        setTimeout(function () { entry.remove(); }, 1600);
+      }
+      film.addEventListener('ended', leave);
+      film.addEventListener('error', leave);
+      document.getElementById('entrySkip').addEventListener('click', leave);
+      var snd = document.getElementById('entrySound');
+      snd.addEventListener('click', function () {
+        film.muted = !film.muted;
+        snd.textContent = film.muted ? '◦ sound' : '● sound';
+      });
+      var started = false;
+      film.addEventListener('playing', function () { started = true; });
+      setTimeout(function () { if (!started) leave(); }, 8000);
+      var p = film.play();
+      if (p && p.catch) p.catch(function () { leave(); });
+    })();
+  </script>
 
   <!-- The world -->
   <canvas id="erebus" aria-hidden="true"></canvas>
