@@ -37,7 +37,7 @@
 
   <!-- The first link: entry film. Plays once per session, then the world. -->
   <div id="entry" hidden>
-    <video id="entryFilm" src="first-link-web.mp4" playsinline preload="auto" muted></video>
+    <video id="entryFilm" playsinline preload="auto" muted></video>
     <div class="entry-ui">
       <button id="entrySound" type="button">◦ sound</button>
       <button id="entrySkip" type="button">enter →</button>
@@ -47,6 +47,13 @@
     (function () {
       var entry = document.getElementById('entry');
       var film = document.getElementById('entryFilm');
+      // 4K from the CDN for big sharp screens; 1080 from the repo for everyone else
+      var HD = 'first-link-web.mp4';
+      var UHD = 'https://b2ojikys9vmljtf7.public.blob.vercel-storage.com/FIRST-LINK-web-4K.mp4';
+      var wants4k = !matchMedia('(pointer: coarse)').matches
+        && (screen.width * (window.devicePixelRatio || 1)) >= 2200
+        && !(navigator.connection && navigator.connection.saveData);
+      film.src = wants4k ? UHD : HD;
       var seen = false;
       try { seen = !!sessionStorage.getItem('erebus.entered'); } catch (e) {}
       var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -61,7 +68,14 @@
         setTimeout(function () { entry.remove(); }, 1600);
       }
       film.addEventListener('ended', leave);
-      film.addEventListener('error', leave);
+      film.addEventListener('error', function () {
+        // if the 4K stream fails for any reason, fall back to 1080 before giving up
+        if (film.src === UHD) {
+          film.src = HD;
+          var pr = film.play();
+          if (pr && pr.catch) pr.catch(function () { leave(); });
+        } else leave();
+      });
       document.getElementById('entrySkip').addEventListener('click', leave);
       var snd = document.getElementById('entrySound');
       snd.addEventListener('click', function () {
