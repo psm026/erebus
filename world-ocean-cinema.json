@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "EREBUS — Film Chamber: The Inverted Ocean",
+    "version": 1,
+    "note": "A cinema you stand inside. Entered through a burning ring in The Hollow (bloom-depths). Click the screen to unmute."
+  },
+  "mode": "immersive",
+  "returnTo": "bloom-depths",
+  "rooms": [
+    {
+      "id": "ocean-cinema",
+      "sector": "CINEMA // THE INVERTED OCEAN",
+      "accentA": "#7de8ff",
+      "accentB": "#b48cff",
+      "fog": "#010407",
+      "nebulaA": "#041426",
+      "nebulaB": "#10081f",
+      "dust": "#7de8ff",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Film chamber",
+          "title": "The Inverted Ocean",
+          "body": "The rain falls up. Touch the screen and it will speak. The ring behind you leads back to the hollow."
+        }
+      ],
+      "structures": [
+        { "kind": "screen", "src": "./asset-video-ocean.mp4?v=2", "scale": [26, 26] },
+        { "kind": "sea", "count": 1, "scale": [38, 42] },
+        { "kind": "veil", "count": 1, "scale": [22, 26], "intensity": 0.9 },
+        { "kind": "portal", "to": "bloom-depths", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+      ]
+    }
+  ]
+}

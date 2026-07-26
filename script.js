@@ -799,6 +799,44 @@ async function boot() {
           registerGroup(group, group.position.y, 0, 0.15);
           continue;
 
+        } else if (spec.kind === 'screen' && spec.src) {
+          // CINEMA: a colossal curved screen you stand before — the film IS the
+          // room. Click the screen to give it a voice; click again to hush it.
+          const vid = document.createElement('video');
+          vid.src = spec.src;
+          vid.muted = true;
+          vid.loop = spec.loop !== false;
+          vid.playsInline = true;
+          vid.setAttribute('playsinline', '');
+          vid.crossOrigin = 'anonymous';
+          vid.preload = 'auto';
+          vid.play().catch(() => {
+            addEventListener('pointerdown', () => vid.play().catch(() => {}), { once: true });
+          });
+          (W.videos || (W.videos = [])).push(vid);
+          const tex = new THREE.VideoTexture(vid);
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.wrapS = THREE.RepeatWrapping;
+          tex.repeat.x = -1; // seen from inside the curve — unmirror
+          const R = s;
+          const arc = spec.arc || 1.15;
+          const h = R * arc * 0.5625; // hold 16:9 across the curve
+          const geo = new THREE.CylinderGeometry(R, R, h, 64, 1, true, Math.PI - arc / 2, arc);
+          const screen = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+            map: tex, side: THREE.BackSide, toneMapped: false,
+          }));
+          screen.userData = { type: 'screen', vid };
+          W.clickables.push(screen);
+          group.add(screen);
+          if (W.immersive) {
+            group.position.set(0, spec.y != null ? spec.y : 2.5, 0);
+          } else {
+            group.position.copy(besidePath(room, 16, 24, i));
+          }
+          group.userData.breathe = false;
+          registerGroup(group, group.position.y, 0, 0);
+          continue;
+
         } else if (spec.kind === 'egg') {
           const geo = new THREE.SphereGeometry(scale[0], 16, 16);
           const core = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col }));
@@ -1114,6 +1152,12 @@ async function boot() {
       document.body.classList.add('egg-open');
     } else if (data.type === 'portal') {
       swapWorld(data.to === '__back' ? 'main' : data.to, true);
+    } else if (data.type === 'screen') {
+      const v = data.vid;
+      if (v) {
+        v.muted = !v.muted;
+        if (v.paused) v.play().catch(() => {});
+      }
     }
   });
   eggVeil.querySelector('.egg-close').addEventListener('click', () => {

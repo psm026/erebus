@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "EREBUS — Film Chamber: The Fractured Monolith",
+    "version": 1,
+    "note": "A cinema you stand inside. Entered through a burning ring in The Relics. Click the screen to unmute."
+  },
+  "mode": "immersive",
+  "returnTo": "main",
+  "rooms": [
+    {
+      "id": "monolith-cinema",
+      "sector": "CINEMA // THE FRACTURED MONOLITH",
+      "accentA": "#ff9d5c",
+      "accentB": "#ffd27d",
+      "fog": "#070403",
+      "nebulaA": "#200d05",
+      "nebulaB": "#170812",
+      "dust": "#ff9d5c",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Film chamber",
+          "title": "The Fractured Monolith",
+          "body": "It opens whether you watch or not. Touch the screen and it will speak. The ring behind you leads home."
+        }
+      ],
+      "structures": [
+        { "kind": "screen", "src": "./asset-video-monolith.mp4?v=2", "scale": [26, 26] },
+        { "kind": "monolith", "count": 3, "scale": [6, 10], "rim": "A", "intensity": 0.4 },
+        { "kind": "swarm", "count": 2, "scale": [5, 8], "rim": "B" },
+        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+      ]
+    }
+  ]
+}

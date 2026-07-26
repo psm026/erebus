@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "title": "EREBUS — Film Chamber: The Living Galaxy",
+    "version": 1,
+    "note": "A cinema you stand inside. Entered through a burning ring in The Mycelium. Click the screen to unmute."
+  },
+  "mode": "immersive",
+  "returnTo": "main",
+  "rooms": [
+    {
+      "id": "galaxy-cinema",
+      "sector": "CINEMA // THE LIVING GALAXY",
+      "accentA": "#c9a2ff",
+      "accentB": "#7df2c8",
+      "fog": "#04030a",
+      "nebulaA": "#0d0722",
+      "nebulaB": "#071710",
+      "dust": "#c9a2ff",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Film chamber",
+          "title": "The Living Galaxy",
+          "body": "Stand still. Touch the screen and it will speak. The ring behind you leads home."
+        }
+      ],
+      "structures": [
+        { "kind": "screen", "src": "./asset-video-galaxy.mp4?v=2", "scale": [26, 26] },
+        { "kind": "sea", "count": 1, "scale": [38, 42] },
+        { "kind": "swarm", "count": 2, "scale": [5, 8], "rim": "B" },
+        { "kind": "orb", "count": 2, "scale": [0.4, 0.8], "rim": "A", "intensity": 1.1 },
+        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+      ]
+    }
+  ]
+}
