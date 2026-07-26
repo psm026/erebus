@@ -789,7 +789,7 @@ async function boot() {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
             const p = W.curve.getPointAt(stopT(stopIdx));
             if (isPortrait()) group.position.set(p.x + rand(-2, 2), p.y + rand(3.5, 5.5), p.z - 14);
-            else group.position.set(p.x - 12 - (i % 2) * 2, p.y + rand(0, 2), p.z - 12);
+            else group.position.set(p.x + 13 + (i % 2) * 2, p.y + rand(0, 2), p.z - 14);
             group.lookAt(p.x, p.y, p.z + 12);
           } else {
             group.position.copy(isPortrait() ? besidePath(room, 7, 14, i) : besidePath(room, 12, 24, i));
