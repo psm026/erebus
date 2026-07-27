@@ -18,19 +18,38 @@
         {
           "variant": "intro",
           "eyebrow": "Somewhere in the dark",
-          "title": "PSM — dark, beautiful fantasies.",
-          "body": "A world that grows while you're away. Will you take the dive?"
+          "title": "It's Beautiful here..",
+          "body": "Spaces & places that grows while you're away."
         },
         {
           "num": "◦",
-          "title": "The void keeps rooms",
-          "tags": "Portal / digital void",
-          "body": "This is a portal, not a page. Strange rooms grow in the dark past this point — some burn, some hide, some watch back."
+          "title": "Soon this will all make sense.",
+          "tags": "you trippin'",
+          "body": "Strange rooms grow in the dark past this point — some burn, some hide, some watch back. Smile for the darkness.",
+          "eyebrow": "watch your step"
         }
       ],
       "structures": [
-        { "kind": "shard", "count": 3, "scale": [2.4, 3.2], "rim": "A", "anchor": true },
-        { "kind": "shard", "count": 6, "scale": [0.5, 1.4], "rim": "A", "intensity": 0.35 }
+        {
+          "kind": "shard",
+          "count": 3,
+          "scale": [
+            2.4,
+            3.2
+          ],
+          "rim": "A",
+          "anchor": true
+        },
+        {
+          "kind": "shard",
+          "count": 6,
+          "scale": [
+            0.5,
+            1.4
+          ],
+          "rim": "A",
+          "intensity": 0.35
+        }
       ]
     },
     {
@@ -45,25 +64,64 @@
       "stops": [
         {
           "variant": "room-title",
-          "eyebrow": "Second chamber",
-          "title": "The Bloom",
-          "body": "A garden that grows without light. Ideas seed here before they become rooms — some of them glow, some of them wait."
+          "eyebrow": "V.1 Chamber",
+          "title": "The Bloom Bloom Room.",
+          "body": "A garden that grows without light. Ideas seed here before they become. — some of them glow, some of them wait till you're away."
         },
         {
           "num": "??",
-          "title": "Something is growing",
-          "tags": "Living room / evolves",
-          "body": "This chamber rearranges itself as the world learns. Look closely — not everything here is asleep. A burning ring to your left goes deeper."
+          "title": "Something is growing.",
+          "tags": "A burning ring to your left goes deeper.",
+          "body": "This chamber rearranges itself as the world learns. Look closely — not everything here is asleep. ",
+          "eyebrow": "V.2 Chamber"
         }
       ],
       "structures": [
-        { "kind": "orb", "count": 5, "scale": [0.8, 1.8], "rim": "A", "intensity": 1.15 },
-        { "kind": "swarm", "count": 2, "scale": [7, 10], "rim": "B" },
-        { "kind": "ring", "count": 2, "scale": [5, 9], "rim": "A", "opacity": 0.25 },
-        { "kind": "portal", "to": "bloom-depths", "scale": [2.6, 2.6], "rim": "B", "intensity": 1.5 },
+        {
+          "kind": "orb",
+          "count": 5,
+          "scale": [
+            0.8,
+            1.8
+          ],
+          "rim": "A",
+          "intensity": 1.15
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            7,
+            10
+          ],
+          "rim": "B"
+        },
+        {
+          "kind": "ring",
+          "count": 2,
+          "scale": [
+            5,
+            9
+          ],
+          "rim": "A",
+          "opacity": 0.25
+        },
+        {
+          "kind": "portal",
+          "to": "bloom-depths",
+          "scale": [
+            2.6,
+            2.6
+          ],
+          "rim": "B",
+          "intensity": 1.5
+        },
         {
           "kind": "egg",
-          "scale": [0.32, 0.32],
+          "scale": [
+            0.32,
+            0.32
+          ],
           "rim": "B",
           "intensity": 2.1,
           "secret": {
@@ -86,23 +144,73 @@
       "stops": [
         {
           "variant": "room-title",
-          "eyebrow": "Third chamber",
+          "eyebrow": "V.3 Chamber",
           "title": "The Chrysalis",
-          "body": "Between the garden and the relic hall, something stopped mid-turn. Still green at the core. Already amber at the edge."
+          "body": "Between the garden and the relic hall, something stopped mid-turn. ",
+          "tags": "Still green at the core. "
         },
         {
           "num": "◐",
-          "title": "Half-grown, half-carved",
+          "title": "Half-grown, half-carved.",
           "tags": "Transitional / do not disturb",
-          "body": "This is where living ideas harden into objects. One shard hangs inside its orbit-cocoon, deciding what it will be. The ring burning beside it opens inward. Come back later. It will not be this."
+          "body": "This is where living ideas harden into objects. The ring burning beside it opens inward. Come back later. ",
+          "eyebrow": "It will not be this."
         }
       ],
       "structures": [
-        { "kind": "shard", "count": 1, "scale": [3.4, 3.4], "rim": "A", "anchor": true, "intensity": 1.2 },
-        { "kind": "ring", "count": 1, "scale": [6, 6], "rim": "B", "opacity": 0.3, "intensity": 0.8 },
-        { "kind": "ring", "count": 1, "scale": [8.5, 8.5], "rim": "B", "opacity": 0.12, "intensity": 0.5 },
-        { "kind": "orb", "count": 3, "scale": [0.4, 0.8], "rim": "A", "intensity": 0.5 },
-        { "kind": "portal", "to": "inside-cocoon", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.4 }
+        {
+          "kind": "shard",
+          "count": 1,
+          "scale": [
+            3.4,
+            3.4
+          ],
+          "rim": "A",
+          "anchor": true,
+          "intensity": 1.2
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            6,
+            6
+          ],
+          "rim": "B",
+          "opacity": 0.3,
+          "intensity": 0.8
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            8.5,
+            8.5
+          ],
+          "rim": "B",
+          "opacity": 0.12,
+          "intensity": 0.5
+        },
+        {
+          "kind": "orb",
+          "count": 3,
+          "scale": [
+            0.4,
+            0.8
+          ],
+          "rim": "A",
+          "intensity": 0.5
+        },
+        {
+          "kind": "portal",
+          "to": "inside-cocoon",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "B",
+          "intensity": 1.4
+        }
       ]
     },
     {
@@ -117,23 +225,65 @@
       "stops": [
         {
           "variant": "room-title",
-          "eyebrow": "Fourth chamber",
+          "eyebrow": "V.4 Chamber",
           "title": "The Relics",
-          "body": "Monuments to things not built yet. This hall becomes the marketplace — rooms you can buy inside, products floating where paintings would hang."
+          "body": "This open space becomes the marketplace — rooms you can buy inside, products floating for your pleasure.  Does this space fit you?",
+          "tags": "Galactic Artifact Gift Shop"
         },
         {
           "num": "◆",
           "title": "Future artifacts",
-          "tags": "Products / collections / drops",
-          "body": "Print-on-demand lines, collaborations, limited pieces — each will get its own monolith in this hall. Checkout happens without leaving the dark.",
-          "link": { "label": "Nothing for sale yet", "href": "#" }
+          "tags": "Products / Collections / Drops",
+          "body": "Look and feel, see something you like? A collection of merchadise and collectabled fill this vast open space marketplace. Look out for custom one offs and memorabilia items of your journey through Erebus, a very dark space for dark beings. Checkout happens without leaving the dark.",
+          "link": {
+            "label": "Nothing for sale yet",
+            "href": "#"
+          }
         }
       ],
       "structures": [
-        { "kind": "monolith", "count": 4, "scale": [6, 11], "rim": "A", "anchor": true },
-        { "kind": "portal", "film": "./asset-video-monolith.mp4?v=2", "filmEyebrow": "A film from the relic hall", "filmTitle": "The Fractured Monolith", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.5 },
-        { "kind": "ring", "count": 3, "scale": [4, 8], "rim": "B", "opacity": 0.2 },
-        { "kind": "shard", "count": 5, "scale": [0.5, 1.2], "rim": "B", "intensity": 0.4 }
+        {
+          "kind": "monolith",
+          "count": 4,
+          "scale": [
+            6,
+            11
+          ],
+          "rim": "A",
+          "anchor": true
+        },
+        {
+          "kind": "portal",
+          "film": "./asset-video-monolith.mp4?v=2",
+          "filmEyebrow": "A film from the relic hall",
+          "filmTitle": "The Fractured Monolith",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "B",
+          "intensity": 1.5
+        },
+        {
+          "kind": "ring",
+          "count": 3,
+          "scale": [
+            4,
+            8
+          ],
+          "rim": "B",
+          "opacity": 0.2
+        },
+        {
+          "kind": "shard",
+          "count": 5,
+          "scale": [
+            0.5,
+            1.2
+          ],
+          "rim": "B",
+          "intensity": 0.4
+        }
       ]
     },
     {
@@ -154,26 +304,106 @@
         },
         {
           "num": "∞",
-          "title": "We are all network",
-          "tags": "5D / biological / cosmic",
+          "title": "We are all network.",
+          "tags": "5D / Biological / Cosmic Networks",
           "body": "Filaments under the forest floor. Filaments between the stars. The world grows the way mycelium grows — toward whatever feeds it. Feed it.",
-          "link": { "label": "Feed the world", "href": "mailto:psm026@gmail.com?subject=A%20seed%20for%20EREBUS" }
+          "link": {
+            "label": "Feed the world",
+            "href": "mailto:psm026@gmail.com?subject=A%20seed%20for%20EREBUS"
+          }
         }
       ],
       "structures": [
-        { "kind": "network", "count": 3, "scale": [8, 14], "rim": "A", "intensity": 1.1, "nodes": 24 },
-        { "kind": "portal", "film": "./asset-video-galaxy.mp4?v=2", "filmEyebrow": "A film from the network", "filmTitle": "The Living Galaxy", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.5, "anchor": false },
-        { "kind": "network", "count": 2, "scale": [4, 7], "rim": "B", "intensity": 0.7, "nodes": 14 },
-        { "kind": "orb", "count": 4, "scale": [0.5, 1.0], "rim": "B", "intensity": 1.4 },
-        { "kind": "portal", "to": "spore-field", "scale": [2.6, 2.6], "rim": "A", "intensity": 1.4 },
-        { "kind": "portal", "to": "inside-network", "scale": [2.2, 2.2], "rim": "B", "intensity": 1.3, "anchor": false },
-        { "kind": "swarm", "count": 2, "scale": [6, 9], "rim": "A" },
-        { "kind": "ring", "count": 1, "scale": [9, 12], "rim": "B", "opacity": 0.15 }
+        {
+          "kind": "network",
+          "count": 3,
+          "scale": [
+            8,
+            14
+          ],
+          "rim": "A",
+          "intensity": 1.1,
+          "nodes": 24
+        },
+        {
+          "kind": "portal",
+          "film": "./asset-video-galaxy.mp4?v=2",
+          "filmEyebrow": "A film from the network",
+          "filmTitle": "The Living Galaxy",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "B",
+          "intensity": 1.5,
+          "anchor": false
+        },
+        {
+          "kind": "network",
+          "count": 2,
+          "scale": [
+            4,
+            7
+          ],
+          "rim": "B",
+          "intensity": 0.7,
+          "nodes": 14
+        },
+        {
+          "kind": "orb",
+          "count": 4,
+          "scale": [
+            0.5,
+            1
+          ],
+          "rim": "B",
+          "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "to": "spore-field",
+          "scale": [
+            2.6,
+            2.6
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "to": "inside-network",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            6,
+            9
+          ],
+          "rim": "A"
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            9,
+            12
+          ],
+          "rim": "B",
+          "opacity": 0.15
+        }
       ]
     },
     {
       "id": "approach",
-      "sector": "EREBUS // APPROACH",
+      "sector": "EREBUS // LAST STOP",
       "accentA": "#6f9fff",
       "accentB": "#8b7bff",
       "fog": "#030307",
@@ -184,14 +414,26 @@
       "stops": [
         {
           "variant": "contact",
-          "eyebrow": "Approaching the planet",
-          "title": "Let's build yours.",
-          "body": "Branding, websites, products, worlds. Say hello and tell me what you're making.",
-          "link": { "label": "psm026@gmail.com", "href": "mailto:psm026@gmail.com" }
+          "eyebrow": "Last Stop",
+          "title": "For now......",
+          "body": "Come back and see us soon, as this always changing and growing space continues to change for your viewing pleasure.",
+          "link": {
+            "label": "psm026@gmail.com",
+            "href": "mailto:psm026@gmail.com"
+          }
         }
       ],
       "structures": [
-        { "kind": "shard", "count": 4, "scale": [0.8, 1.6], "rim": "A", "intensity": 0.5 }
+        {
+          "kind": "shard",
+          "count": 4,
+          "scale": [
+            0.8,
+            1.6
+          ],
+          "rim": "A",
+          "intensity": 0.5
+        }
       ]
     }
   ]
