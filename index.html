@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=9" />
 
   <script type="importmap">
     {
@@ -24,7 +24,7 @@
       }
     }
   </script>
-  <script type="module" src="script.js?v=10"></script>
+  <script type="module" src="script.js?v=11"></script>
   <script>
     // rescue hatch: if the module/CDN never loads, don't strand visitors on the loader
     setTimeout(function () {
@@ -34,6 +34,19 @@
 </head>
 <body>
   <a class="skip" href="#content">Skip to content</a>
+
+  <!-- The screening room: a film takes the page when a burning ring is opened -->
+  <div id="cinema" aria-hidden="true">
+    <video id="cinemaFilm" playsinline preload="metadata"></video>
+    <div class="cin-head">
+      <p class="cin-eyebrow"></p>
+      <h2 class="cin-title"></h2>
+    </div>
+    <div class="cin-ui">
+      <button class="cin-mute" type="button">● sound</button>
+      <button class="cin-exit" type="button">◦ surface</button>
+    </div>
+  </div>
 
   <!-- The first link: entry film. Plays once per session, then the world. -->
   <div id="entry" hidden>

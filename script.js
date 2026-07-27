@@ -871,7 +871,9 @@ async function boot() {
           const rim = new THREE.Mesh(coreGeo, rimMaterial(col, intensity * 1.2));
           rim.scale.setScalar(1.9);
           group.add(core); group.add(rim);
-          core.userData = { type: 'portal', to: spec.to || 'main' };
+          core.userData = spec.film
+            ? { type: 'film', src: spec.film, title: spec.filmTitle || '', eyebrow: spec.filmEyebrow || 'A film' }
+            : { type: 'portal', to: spec.to || 'main' };
           // the ring is clickable too — bigger target
           group.children[0].userData = core.userData;
           W.clickables.push(core, group.children[0]);
@@ -1132,6 +1134,7 @@ async function boot() {
     }
   }, { passive: true });
   window.addEventListener('pointerdown', (e) => {
+    if (document.body.classList.contains('cinema-open')) return;
     if (W.immersive && !(e.target.closest && e.target.closest('.hud, #hud-exit, #egg-veil'))) {
       dragging = true; lastX = e.clientX; lastY = e.clientY; lastMoveAt = performance.now();
       armTilt();
@@ -1158,11 +1161,62 @@ async function boot() {
         v.muted = !v.muted;
         if (v.paused) v.play().catch(() => {});
       }
+    } else if (data.type === 'film') {
+      openCinema(data);
     }
   });
   eggVeil.querySelector('.egg-close').addEventListener('click', () => {
     document.body.classList.remove('egg-open');
   });
+
+  /* the screening room: a film takes the whole page, flat and clean.
+     Entered by clicking a burning ring that carries a film. Sound is on —
+     the click was the permission. Surface returns to the exact same spot. */
+  const cinema = document.getElementById('cinema');
+  const cinFilm = document.getElementById('cinemaFilm');
+  let cinIdleTimer = null;
+  function cinWakeUI() {
+    if (!cinema) return;
+    cinema.classList.remove('ui-idle');
+    clearTimeout(cinIdleTimer);
+    cinIdleTimer = setTimeout(() => cinema.classList.add('ui-idle'), 3600);
+  }
+  function openCinema(data) {
+    if (!cinema || !cinFilm) return;
+    cinema.querySelector('.cin-eyebrow').textContent = data.eyebrow || '';
+    cinema.querySelector('.cin-title').textContent = data.title || '';
+    cinFilm.src = data.src;
+    cinFilm.currentTime = 0;
+    cinFilm.muted = false;
+    document.body.classList.add('cinema-open');
+    requestAnimationFrame(() => cinema.classList.add('on'));
+    const p = cinFilm.play();
+    if (p && p.catch) p.catch(() => { cinFilm.muted = true; cinFilm.play().catch(() => {}); });
+    const mute = cinema.querySelector('.cin-mute');
+    if (mute) mute.textContent = '● sound';
+    cinWakeUI();
+  }
+  function closeCinema() {
+    if (!cinema || !document.body.classList.contains('cinema-open')) return;
+    cinema.classList.remove('on');
+    setTimeout(() => {
+      document.body.classList.remove('cinema-open');
+      cinFilm.pause();
+      cinFilm.removeAttribute('src');
+      cinFilm.load();
+    }, 900);
+  }
+  if (cinema && cinFilm) {
+    cinFilm.addEventListener('ended', closeCinema);
+    cinFilm.addEventListener('error', closeCinema);
+    cinema.querySelector('.cin-exit').addEventListener('click', closeCinema);
+    cinema.querySelector('.cin-mute').addEventListener('click', (e) => {
+      cinFilm.muted = !cinFilm.muted;
+      e.target.textContent = cinFilm.muted ? '◦ sound' : '● sound';
+    });
+    cinema.addEventListener('pointermove', cinWakeUI);
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCinema(); });
+  }
 
   /* surface: the always-available way back out of a dive */
   const exitBtn = document.getElementById('hud-exit');
