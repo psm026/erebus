@@ -298,9 +298,9 @@
       "stops": [
         {
           "variant": "room-title",
-          "eyebrow": "Fifth chamber",
+          "eyebrow": "Mushrooms think in threads. ",
           "title": "The Mycelium",
-          "body": "Mushrooms think in threads. Galaxies hang on the same web. One network at every scale — forests below, superclusters above, and you, a node between them."
+          "body": "Galaxies hang on the same web. One network at every scale — forests below, superclusters above, and you, a node between them."
         },
         {
           "num": "∞",
@@ -308,8 +308,8 @@
           "tags": "5D / Biological / Cosmic Networks",
           "body": "Filaments under the forest floor. Filaments between the stars. The world grows the way mycelium grows — toward whatever feeds it. Feed it.",
           "link": {
-            "label": "Feed the world",
-            "href": "mailto:psm026@gmail.com?subject=A%20seed%20for%20EREBUS"
+            "label": "",
+            "href": ""
           }
         }
       ],
@@ -418,7 +418,7 @@
           "title": "For now......",
           "body": "Come back and see us soon, as this always changing and growing space continues to change for your viewing pleasure.",
           "link": {
-            "label": "psm026@gmail.com",
+            "label": "Make contact with words.",
             "href": "mailto:psm026@gmail.com"
           }
         }
