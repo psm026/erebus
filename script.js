@@ -543,6 +543,10 @@ async function boot() {
       try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {}
     }
     W.videos = [];
+    if (W.worldAudio) {
+      try { W.worldAudio.pause(); W.worldAudio.removeAttribute('src'); W.worldAudio.load(); } catch (e) {}
+      W.worldAudio = null;
+    }
     for (const g of W.groups) scene.remove(g);
     if (W.dust) scene.remove(W.dust);
     if (W.planetGroup) scene.remove(W.planetGroup);
@@ -808,6 +812,57 @@ async function boot() {
           registerGroup(group, group.position.y, 0, 0.15);
           continue;
 
+        } else if (spec.kind === 'codebox') {
+          // a box-shaped room whose walls RUN — binary rain in drowned violet.
+          // stand inside it; every wall streams 1s and 0s, dark, half-seen.
+          const boxMat = new THREE.ShaderMaterial({
+            side: THREE.BackSide,
+            uniforms: {
+              uTime: { value: 0 },
+              uPresence: { value: 1 },
+              uColA: { value: new THREE.Color(spec.colA || '#a05cff') },
+              uColB: { value: new THREE.Color(spec.colB || '#2a1052') },
+            },
+            vertexShader: /* glsl */`
+              varying vec2 vUv;
+              void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+            `,
+            fragmentShader: /* glsl */`
+              varying vec2 vUv;
+              uniform float uTime, uPresence;
+              uniform vec3 uColA, uColB;
+              float hash21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+              void main() {
+                float cols = 26.0, rows = 40.0;
+                vec2 g = vUv * vec2(cols, rows);
+                vec2 cell = floor(g);
+                vec2 f = fract(g);
+                float colSeed = hash21(vec2(cell.x, 7.0));
+                float speed = 1.2 + colSeed * 3.0;
+                float scroll = uTime * speed;
+                float row = cell.y + floor(scroll);
+                float bit = step(0.5, hash21(vec2(cell.x, row)));
+                float one = step(abs(f.x - 0.5), 0.10) * step(0.16, f.y) * step(f.y, 0.84);
+                vec2 c = (f - vec2(0.5, 0.5)) * vec2(1.0, 0.8);
+                float r = length(c);
+                float zero = step(0.17, r) * step(r, 0.30);
+                float glyph = mix(zero, one, bit);
+                float phase = fract((cell.y + scroll) / rows);
+                float trail = pow(1.0 - phase, 2.6);
+                float fl = 0.7 + 0.3 * hash21(vec2(row, cell.x + floor(uTime * 7.0)));
+                vec3 col = mix(uColB, uColA, trail) * glyph * (0.12 + 0.88 * trail) * fl * uPresence;
+                gl_FragColor = vec4(col, 1.0);
+              }
+            `,
+          });
+          const box = new THREE.Mesh(new THREE.BoxGeometry(s, s * 0.7, s), boxMat);
+          group.add(box);
+          if (W.immersive) group.position.set(0, 3, 0);
+          else group.position.copy(besidePath(room, 14, 22, i));
+          group.userData.breathe = false;
+          registerGroup(group, group.position.y, 0, 0);
+          continue;
+
         } else if (spec.kind === 'screen' && spec.src) {
           // CINEMA: a colossal curved screen you stand before — the film IS the
           // room. Click the screen to give it a voice; click again to hush it.
@@ -917,6 +972,18 @@ async function boot() {
     W.returnTo = data.returnTo || 'main';
     W.wakeAt = clock ? clock.getElapsedTime() : 0;
     document.body.classList.toggle('immersive', W.immersive);
+    // a world may carry ambient sound: starts on the visitor's first touch,
+    // loops quietly, dies when they leave. Wordless — no player, no controls.
+    if (data.audio) {
+      const au = document.createElement('audio');
+      au.src = data.audio;
+      au.loop = true;
+      au.volume = 0.55;
+      W.worldAudio = au;
+      addEventListener('pointerdown', () => {
+        if (W.worldAudio === au) au.play().catch(() => {});
+      }, { once: true });
+    }
     W.rooms = sanitizeRooms(data.rooms);
     if (!W.rooms.length) throw new Error('world "' + id + '" has no valid rooms');
 

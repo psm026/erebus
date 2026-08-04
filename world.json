@@ -89,11 +89,11 @@
 "tags": "Still green at the core. "
 },
 {
-"num": "◐",
-"title": "Half-grown, half-carved.",
-"tags": "Transitional / do not disturb",
-"body": "This is where living ideas harden into objects. The ring burning beside it opens inward. Come back later. ",
-"eyebrow": "It will not be this."
+"num": "01",
+"title": "It runs underneath.",
+"tags": "Enter the ring",
+"body": "Every chamber here is written in something. The ring burning beside you opens the walls.",
+"eyebrow": "Do you see it yet?"
 }
 ],
 "structures": [
@@ -101,7 +101,7 @@
 { "kind": "ring", "count": 1, "scale": [6, 6], "rim": "B", "opacity": 0.3, "intensity": 0.8 },
 { "kind": "ring", "count": 1, "scale": [8.5, 8.5], "rim": "B", "opacity": 0.12, "intensity": 0.5 },
 { "kind": "orb", "count": 3, "scale": [0.4, 0.8], "rim": "A", "intensity": 0.5 },
-{ "kind": "portal", "to": "inside-cocoon", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.4 }
+{ "kind": "portal", "to": "undercode", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.4 }
 ]
 },
 {

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "title": "EREBUS — The Undercode",
+    "version": 1,
+    "note": "A box-shaped chamber whose walls run binary rain in drowned violet. Entered through the ring in The Chrysalis. Optional: add \"audio\": \"./asset-undercode.mp3\" once the loop exists."
+  },
+  "mode": "immersive",
+  "returnTo": "main",
+  "audio": "./asset-undercode.m4a",
+  "rooms": [
+    {
+      "id": "undercode",
+      "sector": "DIVE // THE UNDERCODE",
+      "accentA": "#a05cff",
+      "accentB": "#5b3bd6",
+      "fog": "#030208",
+      "nebulaA": "#0a0417",
+      "nebulaB": "#100722",
+      "dust": "#8a5cf6",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Beneath every chamber",
+          "title": "The Undercode",
+          "body": "Everything here is written in something. The ring behind you leads back out."
+        }
+      ],
+      "structures": [
+        { "kind": "codebox", "scale": [34, 34] },
+        { "kind": "orb", "count": 3, "scale": [1.2, 2.4], "rim": "A", "intensity": 0.5, "dark": true },
+        { "kind": "swarm", "count": 1, "scale": [4, 6], "rim": "B" },
+        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+      ]
+    }
+  ]
+}
