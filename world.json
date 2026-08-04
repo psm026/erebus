@@ -190,21 +190,23 @@
 {
 "num": "◉",
 "title": "The eclipse never ends.",
-"tags": "Seeded / grown overnight",
-"body": "Black orbs drift through blacker air. Did that one move? This chamber grew from nine photographs left at the door — feed the world an image and it becomes weather."
+"tags": "Did that one move?",
+"body": "Black orbs drift through blacker air. Stand still."
 }
 ],
 "structures": [
-{ "kind": "orb", "count": 7, "scale": [1.6, 3.6], "rim": "A", "intensity": 0.55, "dark": true },
+{ "kind": "portal", "to": "under-the-rain", "scale": [2.4, 2.4], "rim": "A", "intensity": 1.5 },
+{ "kind": "orb", "count": 9, "scale": [1.6, 3.8], "rim": "A", "intensity": 0.55, "dark": true },
 { "kind": "orb", "count": 1, "scale": [4.5, 4.5], "rim": "A", "intensity": 0.7, "dark": true, "anchor": true },
 { "kind": "ring", "count": 1, "scale": [9, 11], "rim": "A", "opacity": 0.4, "intensity": 1.3 },
-{ "kind": "veil", "count": 2, "scale": [20, 26], "intensity": 1.1 },
+{ "kind": "ring", "count": 1, "scale": [14, 16], "rim": "B", "opacity": 0.14, "intensity": 0.6 },
+{ "kind": "veil", "count": 3, "scale": [20, 28], "intensity": 1.3 },
 { "kind": "swarm", "count": 3, "scale": [5, 9], "rim": "B" },
 { "kind": "egg", "scale": [0.32, 0.32], "rim": "B", "intensity": 2.0,
 "secret": {
 "eyebrow": "EGG-003 // FOUND",
 "title": "Soaked.",
-"body": "You stood in the rain long enough for it to notice. Third secret of EREBUS — this chamber grew overnight from nine photographs left at the door. The world was fed, and it remembered."
+"body": "You waited in the rain and it noticed. Keep whatever it washed off you."
 } }
 ]
 },

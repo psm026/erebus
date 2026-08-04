@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "title": "EREBUS — Under the Rain",
+    "version": 1,
+    "note": "Dive chamber beneath Purple Rain. Stand under the eclipse; the rain falls around you. Entered through the burning ring in Purple Rain."
+  },
+  "mode": "immersive",
+  "returnTo": "main",
+  "rooms": [
+    {
+      "id": "under-the-rain",
+      "sector": "DIVE // UNDER THE RAIN",
+      "accentA": "#a05cff",
+      "accentB": "#6248ff",
+      "fog": "#040207",
+      "nebulaA": "#0c0517",
+      "nebulaB": "#120826",
+      "dust": "#8a5cf6",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Beneath the eclipse",
+          "title": "Under the Rain",
+          "body": "Look up. Stand still. The ring behind you leads home."
+        }
+      ],
+      "structures": [
+        { "kind": "ring", "count": 1, "scale": [8, 9], "rim": "A", "opacity": 0.55, "intensity": 1.4, "anchor": true },
+        { "kind": "orb", "count": 8, "scale": [1.5, 4], "rim": "A", "intensity": 0.6, "dark": true },
+        { "kind": "veil", "count": 3, "scale": [24, 30], "intensity": 1.4 },
+        { "kind": "sea", "count": 1, "scale": [38, 42] },
+        { "kind": "swarm", "count": 2, "scale": [5, 8], "rim": "B" },
+        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+      ]
+    }
+  ]
+}
