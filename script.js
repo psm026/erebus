@@ -669,12 +669,21 @@ async function boot() {
 
         } else if (spec.kind === 'orb') {
           const geo = new THREE.SphereGeometry(s * 0.5, 32, 32);
-          group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-            color: 0x05050a, roughness: 0.25, metalness: 0.4, envMapIntensity: 0.7,
-          })));
-          const rim = new THREE.Mesh(geo, rimMaterial(col, intensity));
-          rim.scale.setScalar(1.14);
-          group.add(rim);
+          if (spec.dark) {
+            // a hole in the world: unlit void sphere that occludes the nebula,
+            // its edge barely admitting light — was that there? did it move?
+            group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x020107 })));
+            const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.5));
+            rim.scale.setScalar(1.05);
+            group.add(rim);
+          } else {
+            group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+              color: 0x05050a, roughness: 0.25, metalness: 0.4, envMapIntensity: 0.7,
+            })));
+            const rim = new THREE.Mesh(geo, rimMaterial(col, intensity));
+            rim.scale.setScalar(1.14);
+            group.add(rim);
+          }
 
         } else if (spec.kind === 'network') {
           // mycelium: nodes joined by TAPERED filaments that thin and expand —

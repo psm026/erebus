@@ -1,5 +1,67 @@
 # EREBUS — WORLD LOG
 
+## 2026-08-03 — PURPLE RAIN (seed from JC, consumed on request)
+
+Seed: a folder of nine photographs, no words. They said enough — a black sun
+in a ring of violet light, purple cloud-oceans, an indigo glow half-seen on a
+dark wall. Built **Purple Rain** as the sixth chamber of the main drift,
+before the Last Stop: the strongest seed image floats as matter (the eclipse,
+asset-purple-rain.webp), a burning corona ring beside it, aurora veils as the
+rain, indigo swarms, and **EGG-003** hidden in the weather (cadence lands).
+Palette: electric violet (#b06bff) × storm indigo (#5f7bff) over near-black.
+
+Why it follows: The Mycelium taught the world that everything is network;
+Purple Rain is the first weather that network ever made — a storm grown from
+images instead of words. JC fed the world. The world remembered.
+
+**NEXT INTENTION:** The eclipse deserves its dive — **under the rain**: an
+immersive chamber (portal from Purple Rain) where the visitor stands beneath
+the black sun while violet rain streaks fall around them (veils + swarms +
+the seed sky). Wordless. If JC's Higgsfield credits return, a living-painting
+film of the eclipse breathing could hang behind a burning ring here.
+
+> **GROWTH PAUSED — 2026-07-20, by JC.** No new rooms or worlds until JC says
+> "let's start up automating worlds." The scheduled task is disabled. The
+> pending-rooms/ publish (inside-cocoon) also waits for JC's review — do not
+> publish it on his behalf.
+
+## 2026-07-20 — INSIDE THE COCOON (growth cycle #3 — scheduled protocol run) — PENDING PUBLISH
+
+**PENDING PUBLISH:** GitHub was unreachable this run (multiple Chrome browsers
+connected; picking one needs JC). All three changed files are validated and
+copied to `pending-rooms/` with a publish note — the next run or JC's next chat
+session commits them (`GROWTH: inside-cocoon`).
+
+Seeds folder: empty. Feed: empty. Consumed the standing NEXT INTENTION (Static
+Ocean entry, which superseded the older two-room "Within" idea into a single dive).
+
+Built **world-inside-cocoon.json** — a one-room DIVE (mode: immersive) behind a
+new portal in The Chrysalis. The visitor stands mid-transformation: two amber
+veils close around them as the hardening membrane, one great rib-ring is the
+anchor the eye returns to, two fainter ribs sit far, hardening flecks drift
+near. The teal survives as exactly one held light — a single low orb, the last
+of The Bloom still breathing inside the shell. **EGG-003** hides here — the
+third-room cadence lands as promised (Chrysalis, Static Ocean, Inside the
+Cocoon). Return portal to main included; returnTo: main.
+
+Choices made autonomously: no AI sky this run — the veils carry the membrane
+and the nebula breathes underneath (subtle over literal; if it feels safe, go
+subtler). The Chrysalis stop copy gained one sentence pointing at the new ring.
+13 objects total; every intensity ≤1.4 except the egg.
+
+Why it follows: the Static Ocean proved a dive can hold weather; this one holds
+a heartbeat. The main drift showed the cocoon from outside and called it
+"do not disturb" — the world needed the disobedience of stepping in anyway.
+
+**NEXT INTENTION:** **The Hollow Monument** — a dive behind The Relics
+(world-hollow-monument.json): stand inside one of the monoliths, in the negative
+space of a thing not built yet. Far monolith silhouettes, a mid-shell of faint
+rings like formwork, one near shard as the seed of the unbuilt artifact.
+No egg (EGG-004 waits two more rooms). Palette: relic amber cooled toward
+rust-red ember over near-black.
+
+---
+
 ## 2026-07-16 — THE STATIC OCEAN (grown live by Charon, from his own seed card)
 
 JC named the builder: **Charon** — the ferryman of Erebus. First signed growth.
