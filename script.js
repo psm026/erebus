@@ -838,7 +838,7 @@ async function boot() {
                 vec2 cell = floor(g);
                 vec2 f = fract(g);
                 float colSeed = hash21(vec2(cell.x, 7.0));
-                float speed = 1.2 + colSeed * 3.0;
+                float speed = 0.3 + colSeed * 0.8; // slow. the code creeps, it does not race
                 float scroll = uTime * speed;
                 float row = cell.y + floor(scroll);
                 float bit = step(0.5, hash21(vec2(cell.x, row)));
@@ -849,8 +849,8 @@ async function boot() {
                 float glyph = mix(zero, one, bit);
                 float phase = fract((cell.y + scroll) / rows);
                 float trail = pow(1.0 - phase, 2.6);
-                float fl = 0.7 + 0.3 * hash21(vec2(row, cell.x + floor(uTime * 7.0)));
-                vec3 col = mix(uColB, uColA, trail) * glyph * (0.12 + 0.88 * trail) * fl * uPresence;
+                float fl = 0.78 + 0.22 * hash21(vec2(row, cell.x + floor(uTime * 2.0)));
+                vec3 col = mix(uColB, uColA, trail) * glyph * (0.1 + 0.9 * pow(trail, 1.4)) * fl * uPresence;
                 gl_FragColor = vec4(col, 1.0);
               }
             `,
