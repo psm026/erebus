@@ -1,237 +1,554 @@
 {
-"meta": {
-"title": "EREBUS",
-"version": 2,
-"note": "The world is data. Each room here is rendered by script.js. Add a room, commit, and the world grows. Colors are hex. 'stops' are places the camera pauses (each gets a text panel). 'structures' are what floats in that room's stretch of space."
-},
-"rooms": [
-{
-"id": "drift",
-"sector": "EREBUS // DRIFT",
-"accentA": "#8b7bff",
-"accentB": "#7de8ff",
-"fog": "#030307",
-"nebulaA": "#1a1048",
-"nebulaB": "#0a2a33",
-"dust": "#8b7bff",
-"stops": [
-{
-"variant": "intro",
-"eyebrow": "Somewhere in the dark",
-"title": "It's Beautiful here..",
-"body": "Spaces & places that grows while you're away."
-},
-{
-"num": "◦",
-"title": "Soon this will all make sense.",
-"tags": "you trippin'",
-"body": "Strange rooms grow in the dark past this point — some burn, some hide, some watch back. Smile for the darkness.",
-"eyebrow": "watch your step"
-}
-],
-"structures": [
-{ "kind": "shard", "count": 3, "scale": [2.4, 3.2], "rim": "A", "anchor": true },
-{ "kind": "shard", "count": 6, "scale": [0.5, 1.4], "rim": "A", "intensity": 0.35 }
-]
-},
-{
-"id": "bloom",
-"sector": "EREBUS // BLOOM",
-"accentA": "#3fd9ad",
-"accentB": "#9fe86e",
-"fog": "#020806",
-"nebulaA": "#06231c",
-"nebulaB": "#122b06",
-"dust": "#4ef0c0",
-"stops": [
-{
-"variant": "room-title",
-"eyebrow": "V.1 Chamber",
-"title": "The Bloom Bloom Room.",
-"body": "A garden that grows without light. Ideas seed here before they become. — some of them glow, some of them wait till you're away."
-},
-{
-"num": "??",
-"title": "Something is growing.",
-"tags": "A burning ring to your left goes deeper.",
-"body": "This chamber rearranges itself as the world learns. Look closely — not everything here is asleep. ",
-"eyebrow": "V.2 Chamber"
-}
-],
-"structures": [
-{ "kind": "orb", "count": 5, "scale": [0.8, 1.8], "rim": "A", "intensity": 1.15 },
-{ "kind": "swarm", "count": 2, "scale": [7, 10], "rim": "B" },
-{ "kind": "ring", "count": 2, "scale": [5, 9], "rim": "A", "opacity": 0.25 },
-{ "kind": "portal", "to": "bloom-depths", "scale": [2.6, 2.6], "rim": "B", "intensity": 1.5 },
-{ "kind": "egg", "scale": [0.32, 0.32], "rim": "B", "intensity": 2.1,
-"secret": {
-"eyebrow": "EGG-001 // FOUND",
-"title": "You looked closer.",
-"body": "This is the first hidden thing in EREBUS. There will be others, buried deeper, as the agents keep building rooms. Screenshot this — you were here before the world grew."
-} }
-]
-},
-{
-"id": "chrysalis",
-"sector": "EREBUS // CHRYSALIS",
-"accentA": "#49d6a4",
-"accentB": "#e8a55f",
-"fog": "#050604",
-"nebulaA": "#0a2318",
-"nebulaB": "#241206",
-"dust": "#6bd9a2",
-"stops": [
-{
-"variant": "room-title",
-"eyebrow": "V.3 Chamber",
-"title": "The Chrysalis",
-"body": "Between the garden and the relic hall, something stopped mid-turn. ",
-"tags": "Still green at the core. "
-},
-{
-"num": "01",
-"title": "It runs underneath.",
-"tags": "Enter the ring",
-"body": "Every chamber here is written in something. The ring burning beside you opens the walls.",
-"eyebrow": "Do you see it yet?"
-}
-],
-"structures": [
-{ "kind": "shard", "count": 1, "scale": [3.4, 3.4], "rim": "A", "anchor": true, "intensity": 1.2 },
-{ "kind": "ring", "count": 1, "scale": [6, 6], "rim": "B", "opacity": 0.3, "intensity": 0.8 },
-{ "kind": "ring", "count": 1, "scale": [8.5, 8.5], "rim": "B", "opacity": 0.12, "intensity": 0.5 },
-{ "kind": "orb", "count": 3, "scale": [0.4, 0.8], "rim": "A", "intensity": 0.5 },
-{ "kind": "portal", "to": "undercode", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.4 }
-]
-},
-{
-"id": "relics",
-"sector": "EREBUS // RELICS",
-"accentA": "#ff9d5c",
-"accentB": "#ffd27d",
-"fog": "#070403",
-"nebulaA": "#2b1206",
-"nebulaB": "#1f0a14",
-"dust": "#ff9d5c",
-"stops": [
-{
-"variant": "room-title",
-"eyebrow": "V.4 Chamber",
-"title": "The Relics",
-"body": "This open space becomes the marketplace — rooms you can buy inside, products floating for your pleasure. Does this space fit you?",
-"tags": "Galactic Artifact Gift Shop"
-},
-{
-"num": "◆",
-"title": "Future artifacts",
-"tags": "Products / Collections / Drops",
-"body": "Look and feel, see something you like? A collection of merchadise and collectabled fill this vast open space marketplace. Look out for custom one offs and memorabilia items of your journey through Erebus, a very dark space for dark beings. Checkout happens without leaving the dark.",
-"link": { "label": "Nothing for sale yet", "href": "#" }
-}
-],
-"structures": [
-{ "kind": "monolith", "count": 4, "scale": [6, 11], "rim": "A", "anchor": true },
-{ "kind": "portal", "film": "./asset-video-monolith.mp4?v=2", "filmEyebrow": "A film from the relic hall", "filmTitle": "The Fractured Monolith", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.5 },
-{ "kind": "ring", "count": 3, "scale": [4, 8], "rim": "B", "opacity": 0.2 },
-{ "kind": "shard", "count": 5, "scale": [0.5, 1.2], "rim": "B", "intensity": 0.4 }
-]
-},
-{
-"id": "mycelium",
-"sector": "EREBUS // MYCELIUM",
-"accentA": "#c9a2ff",
-"accentB": "#7df2c8",
-"fog": "#04030a",
-"nebulaA": "#1a0d3e",
-"nebulaB": "#07261d",
-"dust": "#c9a2ff",
-"stops": [
-{
-"variant": "room-title",
-"eyebrow": "Fifth chamber",
-"title": "The Mycelium",
-"body": "Mushrooms think in threads. Galaxies hang on the same web. One network at every scale — forests below, superclusters above, and you, a node between them."
-},
-{
-"num": "∞",
-"title": "We are all network.",
-"tags": "5D / Biological / Cosmic Networks",
-"body": "Filaments under the forest floor. Filaments between the stars. The world grows the way mycelium grows — toward whatever feeds it. Feed it.",
-"link": { "label": "Feed the world", "href": "mailto:psm026@gmail.com?subject=A%20seed%20for%20EREBUS" }
-}
-],
-"structures": [
-{ "kind": "network", "count": 3, "scale": [8, 14], "rim": "A", "intensity": 1.1, "nodes": 24 },
-{ "kind": "portal", "film": "./asset-video-galaxy.mp4?v=2", "filmEyebrow": "A film from the network", "filmTitle": "The Living Galaxy", "scale": [2.4, 2.4], "rim": "B", "intensity": 1.5, "anchor": false },
-{ "kind": "network", "count": 2, "scale": [4, 7], "rim": "B", "intensity": 0.7, "nodes": 14 },
-{ "kind": "orb", "count": 4, "scale": [0.5, 1], "rim": "B", "intensity": 1.4 },
-{ "kind": "portal", "to": "spore-field", "scale": [2.6, 2.6], "rim": "A", "intensity": 1.4 },
-{ "kind": "portal", "to": "inside-network", "scale": [2.2, 2.2], "rim": "B", "intensity": 1.3, "anchor": false },
-{ "kind": "swarm", "count": 2, "scale": [6, 9], "rim": "A" },
-{ "kind": "ring", "count": 1, "scale": [9, 12], "rim": "B", "opacity": 0.15 }
-]
-},
-{
-"id": "purple-rain",
-"sector": "EREBUS // PURPLE RAIN",
-"accentA": "#a05cff",
-"accentB": "#6248ff",
-"fog": "#040207",
-"nebulaA": "#0c0517",
-"nebulaB": "#120826",
-"dust": "#8a5cf6",
-"stops": [
-{
-"variant": "room-title",
-"eyebrow": "V.6 Chamber",
-"title": "Purple Rain",
-"body": "The sky broke violet here — so dark it reads black, until it doesn't. The rain falls like slow electricity. Stand still. Let it soak."
-},
-{
-"num": "◉",
-"title": "The eclipse never ends.",
-"tags": "Did that one move?",
-"body": "Black orbs drift through blacker air. Stand still."
-}
-],
-"structures": [
-{ "kind": "portal", "to": "under-the-rain", "scale": [2.4, 2.4], "rim": "A", "intensity": 1.5 },
-{ "kind": "orb", "count": 9, "scale": [1.6, 3.8], "rim": "A", "intensity": 0.55, "dark": true },
-{ "kind": "orb", "count": 1, "scale": [4.5, 4.5], "rim": "A", "intensity": 0.7, "dark": true, "anchor": true },
-{ "kind": "ring", "count": 1, "scale": [9, 11], "rim": "A", "opacity": 0.4, "intensity": 1.3 },
-{ "kind": "ring", "count": 1, "scale": [14, 16], "rim": "B", "opacity": 0.14, "intensity": 0.6 },
-{ "kind": "veil", "count": 3, "scale": [20, 28], "intensity": 1.3 },
-{ "kind": "swarm", "count": 3, "scale": [5, 9], "rim": "B" },
-{ "kind": "egg", "scale": [0.32, 0.32], "rim": "B", "intensity": 2.0,
-"secret": {
-"eyebrow": "EGG-003 // FOUND",
-"title": "Soaked.",
-"body": "You waited in the rain and it noticed. Keep whatever it washed off you."
-} }
-]
-},
-{
-"id": "approach",
-"sector": "EREBUS // LAST STOP",
-"accentA": "#6f9fff",
-"accentB": "#8b7bff",
-"fog": "#030307",
-"nebulaA": "#0d1240",
-"nebulaB": "#1a1048",
-"dust": "#6f9fff",
-"planet": true,
-"stops": [
-{
-"variant": "contact",
-"eyebrow": "Last Stop",
-"title": "For now......",
-"body": "Come back and see us soon, as this always changing and growing space continues to change for your viewing pleasure.",
-"link": { "label": "psm026@gmail.com", "href": "mailto:psm026@gmail.com" }
-}
-],
-"structures": [
-{ "kind": "shard", "count": 4, "scale": [0.8, 1.6], "rim": "A", "intensity": 0.5 }
-]
-}
-]
+  "meta": {
+    "title": "EREBUS",
+    "version": 2,
+    "note": "The world is data. Each room here is rendered by script.js. Add a room, commit, and the world grows. Colors are hex. 'stops' are places the camera pauses (each gets a text panel). 'structures' are what floats in that room's stretch of space."
+  },
+  "rooms": [
+    {
+      "id": "drift",
+      "sector": "EREBUS // DRIFT",
+      "accentA": "#8b7bff",
+      "accentB": "#7de8ff",
+      "fog": "#030307",
+      "nebulaA": "#1a1048",
+      "nebulaB": "#0a2a33",
+      "dust": "#8b7bff",
+      "stops": [
+        {
+          "variant": "intro",
+          "eyebrow": "Somewhere in the dark",
+          "title": "It's Beautiful here..",
+          "body": "Spaces & places that grows while you're away."
+        },
+        {
+          "num": "◦",
+          "title": "Soon this will all make sense.",
+          "tags": "you trippin'",
+          "body": "Strange rooms grow in the dark past this point — some burn, some hide, some watch back. Smile for the darkness.",
+          "eyebrow": "watch your step"
+        }
+      ],
+      "structures": [
+        {
+          "kind": "shard",
+          "count": 3,
+          "scale": [
+            2.4,
+            3.2
+          ],
+          "rim": "A",
+          "anchor": true
+        },
+        {
+          "kind": "shard",
+          "count": 6,
+          "scale": [
+            0.5,
+            1.4
+          ],
+          "rim": "A",
+          "intensity": 0.35
+        }
+      ]
+    },
+    {
+      "id": "bloom",
+      "sector": "EREBUS // BLOOM",
+      "accentA": "#3fd9ad",
+      "accentB": "#9fe86e",
+      "fog": "#020806",
+      "nebulaA": "#06231c",
+      "nebulaB": "#122b06",
+      "dust": "#4ef0c0",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "V.1 Chamber",
+          "title": "The Bloom Bloom Room.",
+          "body": "A garden that grows without light. Ideas seed here before they become. — some of them glow, some of them wait till you're away."
+        },
+        {
+          "num": "??",
+          "title": "Something is growing.",
+          "tags": "A burning ring to your left goes deeper.",
+          "body": "This chamber rearranges itself as the world learns. Look closely — not everything here is asleep. ",
+          "eyebrow": "V.2 Chamber"
+        }
+      ],
+      "structures": [
+        {
+          "kind": "orb",
+          "count": 5,
+          "scale": [
+            0.8,
+            1.8
+          ],
+          "rim": "A",
+          "intensity": 1.15
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            7,
+            10
+          ],
+          "rim": "B"
+        },
+        {
+          "kind": "ring",
+          "count": 2,
+          "scale": [
+            5,
+            9
+          ],
+          "rim": "A",
+          "opacity": 0.25
+        },
+        {
+          "kind": "portal",
+          "to": "bloom-depths",
+          "scale": [
+            2.6,
+            2.6
+          ],
+          "rim": "B",
+          "intensity": 1.5
+        },
+        {
+          "kind": "egg",
+          "scale": [
+            0.32,
+            0.32
+          ],
+          "rim": "B",
+          "intensity": 2.1,
+          "secret": {
+            "eyebrow": "EGG-001 // FOUND",
+            "title": "You looked closer.",
+            "body": "This is the first hidden thing in EREBUS. There will be others, buried deeper, as the agents keep building rooms. Screenshot this — you were here before the world grew."
+          }
+        }
+      ]
+    },
+    {
+      "id": "chrysalis",
+      "sector": "EREBUS // CHRYSALIS",
+      "accentA": "#49d6a4",
+      "accentB": "#e8a55f",
+      "fog": "#050604",
+      "nebulaA": "#0a2318",
+      "nebulaB": "#241206",
+      "dust": "#6bd9a2",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "V.3 Chamber",
+          "title": "The Chrysalis",
+          "body": "Between the garden and the relic hall, something stopped mid-turn. ",
+          "tags": "Still green at the core. "
+        },
+        {
+          "num": "01",
+          "title": "It runs underneath.",
+          "tags": "Enter the ring",
+          "body": "Every chamber here is written in something. The ring burning beside you opens the walls.",
+          "eyebrow": "Do you see it yet?"
+        }
+      ],
+      "structures": [
+        {
+          "kind": "shard",
+          "count": 1,
+          "scale": [
+            3.4,
+            3.4
+          ],
+          "rim": "A",
+          "anchor": true,
+          "intensity": 1.2
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            6,
+            6
+          ],
+          "rim": "B",
+          "opacity": 0.3,
+          "intensity": 0.8
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            8.5,
+            8.5
+          ],
+          "rim": "B",
+          "opacity": 0.12,
+          "intensity": 0.5
+        },
+        {
+          "kind": "orb",
+          "count": 3,
+          "scale": [
+            0.4,
+            0.8
+          ],
+          "rim": "A",
+          "intensity": 0.5
+        },
+        {
+          "kind": "portal",
+          "to": "undercode",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "B",
+          "intensity": 1.4
+        }
+      ]
+    },
+    {
+      "id": "relics",
+      "sector": "EREBUS // RELICS",
+      "accentA": "#ff9d5c",
+      "accentB": "#ffd27d",
+      "fog": "#070403",
+      "nebulaA": "#2b1206",
+      "nebulaB": "#1f0a14",
+      "dust": "#ff9d5c",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "V.4 Chamber",
+          "title": "The Relics",
+          "body": "This open space becomes the marketplace — rooms you can buy inside, products floating for your pleasure. Does this space fit you?",
+          "tags": "Galactic Artifact Gift Shop"
+        },
+        {
+          "num": "◆",
+          "title": "Future artifacts",
+          "tags": "Products / Collections / Drops",
+          "body": "Look and feel, see something you like? A collection of merchadise and collectabled fill this vast open space marketplace. Look out for custom one offs and memorabilia items of your journey through Erebus, a very dark space for dark beings. Checkout happens without leaving the dark.",
+          "link": {
+            "label": "Nothing for sale yet",
+            "href": "#"
+          }
+        }
+      ],
+      "structures": [
+        {
+          "kind": "monolith",
+          "count": 4,
+          "scale": [
+            6,
+            11
+          ],
+          "rim": "A",
+          "anchor": true
+        },
+        {
+          "kind": "portal",
+          "film": "./asset-video-monolith.mp4?v=2",
+          "filmEyebrow": "A film from the relic hall",
+          "filmTitle": "The Fractured Monolith",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "B",
+          "intensity": 1.5
+        },
+        {
+          "kind": "ring",
+          "count": 3,
+          "scale": [
+            4,
+            8
+          ],
+          "rim": "B",
+          "opacity": 0.2
+        },
+        {
+          "kind": "shard",
+          "count": 5,
+          "scale": [
+            0.5,
+            1.2
+          ],
+          "rim": "B",
+          "intensity": 0.4
+        }
+      ]
+    },
+    {
+      "id": "mycelium",
+      "sector": "EREBUS // MYCELIUM",
+      "accentA": "#c9a2ff",
+      "accentB": "#7df2c8",
+      "fog": "#04030a",
+      "nebulaA": "#1a0d3e",
+      "nebulaB": "#07261d",
+      "dust": "#c9a2ff",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Fifth chamber",
+          "title": "The Mycelium",
+          "body": "Mushrooms think in threads. Galaxies hang on the same web. One network at every scale — forests below, superclusters above, and you, a node between them."
+        },
+        {
+          "num": "∞",
+          "title": "We are all network.",
+          "tags": "5D / Biological / Cosmic Networks",
+          "body": "Filaments under the forest floor. Filaments between the stars. The world grows the way mycelium grows — toward whatever feeds it. Feed it.",
+          "link": {
+            "label": "Feed the world",
+            "href": "mailto:psm026@gmail.com?subject=A%20seed%20for%20EREBUS"
+          }
+        }
+      ],
+      "structures": [
+        {
+          "kind": "network",
+          "count": 3,
+          "scale": [
+            8,
+            14
+          ],
+          "rim": "A",
+          "intensity": 1.1,
+          "nodes": 24
+        },
+        {
+          "kind": "portal",
+          "film": "./asset-video-galaxy.mp4?v=2",
+          "filmEyebrow": "A film from the network",
+          "filmTitle": "The Living Galaxy",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "B",
+          "intensity": 1.5,
+          "anchor": false
+        },
+        {
+          "kind": "network",
+          "count": 2,
+          "scale": [
+            4,
+            7
+          ],
+          "rim": "B",
+          "intensity": 0.7,
+          "nodes": 14
+        },
+        {
+          "kind": "orb",
+          "count": 4,
+          "scale": [
+            0.5,
+            1
+          ],
+          "rim": "B",
+          "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "to": "spore-field",
+          "scale": [
+            2.6,
+            2.6
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "to": "inside-network",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            6,
+            9
+          ],
+          "rim": "A"
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            9,
+            12
+          ],
+          "rim": "B",
+          "opacity": 0.15
+        }
+      ]
+    },
+    {
+      "id": "purple-rain",
+      "sector": "EREBUS // PURPLE RAIN",
+      "accentA": "#a05cff",
+      "accentB": "#6248ff",
+      "fog": "#040207",
+      "nebulaA": "#0c0517",
+      "nebulaB": "#120826",
+      "dust": "#8a5cf6",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "V.6 Chamber",
+          "title": "Purple Rain",
+          "body": "The sky broke violet here — so dark it reads black, until it doesn't. The rain falls like slow electricity. Stand still. Let it soak."
+        },
+        {
+          "num": "◉",
+          "title": "The eclipse never ends.",
+          "tags": "Did that one move?",
+          "body": "Black orbs drift through blacker air. Stand still."
+        }
+      ],
+      "structures": [
+        {
+          "kind": "portal",
+          "to": "under-the-rain",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "A",
+          "intensity": 1.5
+        },
+        {
+          "kind": "orb",
+          "count": 9,
+          "scale": [
+            1.6,
+            3.8
+          ],
+          "rim": "A",
+          "intensity": 0.55,
+          "dark": true
+        },
+        {
+          "kind": "orb",
+          "count": 1,
+          "scale": [
+            4.5,
+            4.5
+          ],
+          "rim": "A",
+          "intensity": 0.7,
+          "dark": true,
+          "anchor": true
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            9,
+            11
+          ],
+          "rim": "A",
+          "opacity": 0.4,
+          "intensity": 1.3
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            14,
+            16
+          ],
+          "rim": "B",
+          "opacity": 0.14,
+          "intensity": 0.6
+        },
+        {
+          "kind": "veil",
+          "count": 3,
+          "scale": [
+            20,
+            28
+          ],
+          "intensity": 1.3
+        },
+        {
+          "kind": "swarm",
+          "count": 3,
+          "scale": [
+            5,
+            9
+          ],
+          "rim": "B"
+        },
+        {
+          "kind": "egg",
+          "scale": [
+            0.32,
+            0.32
+          ],
+          "rim": "B",
+          "intensity": 2.0,
+          "secret": {
+            "eyebrow": "EGG-003 // FOUND",
+            "title": "Soaked.",
+            "body": "You waited in the rain and it noticed. Keep whatever it washed off you."
+          }
+        }
+      ]
+    },
+    {
+      "id": "approach",
+      "sector": "EREBUS // LAST STOP",
+      "accentA": "#6f9fff",
+      "accentB": "#8b7bff",
+      "fog": "#030307",
+      "nebulaA": "#0d1240",
+      "nebulaB": "#1a1048",
+      "dust": "#6f9fff",
+      "planet": true,
+      "stops": [
+        {
+          "variant": "contact",
+          "eyebrow": "Last Stop",
+          "title": "For now......",
+          "body": "Come back and see us soon, as this always changing and growing space continues to change for your viewing pleasure.",
+          "link": {
+            "label": "psm026@gmail.com",
+            "href": "mailto:psm026@gmail.com"
+          }
+        }
+      ],
+      "structures": [
+        {
+          "kind": "shard",
+          "count": 4,
+          "scale": [
+            0.8,
+            1.6
+          ],
+          "rim": "A",
+          "intensity": 0.5
+        }
+      ]
+    }
+  ],
+  "audio": "./asset-audio-drift.m4a"
 }

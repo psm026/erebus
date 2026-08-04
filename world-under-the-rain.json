@@ -25,13 +25,67 @@
         }
       ],
       "structures": [
-        { "kind": "ring", "count": 1, "scale": [8, 9], "rim": "A", "opacity": 0.55, "intensity": 1.4, "anchor": true },
-        { "kind": "orb", "count": 8, "scale": [1.5, 4], "rim": "A", "intensity": 0.6, "dark": true },
-        { "kind": "veil", "count": 3, "scale": [24, 30], "intensity": 1.4 },
-        { "kind": "sea", "count": 1, "scale": [38, 42] },
-        { "kind": "swarm", "count": 2, "scale": [5, 8], "rim": "B" },
-        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            8,
+            9
+          ],
+          "rim": "A",
+          "opacity": 0.55,
+          "intensity": 1.4,
+          "anchor": true
+        },
+        {
+          "kind": "orb",
+          "count": 8,
+          "scale": [
+            1.5,
+            4
+          ],
+          "rim": "A",
+          "intensity": 0.6,
+          "dark": true
+        },
+        {
+          "kind": "veil",
+          "count": 3,
+          "scale": [
+            24,
+            30
+          ],
+          "intensity": 1.4
+        },
+        {
+          "kind": "sea",
+          "count": 1,
+          "scale": [
+            38,
+            42
+          ]
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            5,
+            8
+          ],
+          "rim": "B"
+        },
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        }
       ]
     }
-  ]
+  ],
+  "audio": "./asset-audio-under-the-rain.m4a"
 }

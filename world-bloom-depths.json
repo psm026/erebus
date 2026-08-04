@@ -29,9 +29,35 @@
         }
       ],
       "structures": [
-        { "kind": "swarm", "count": 3, "scale": [6, 12], "rim": "A" },
-        { "kind": "shard", "count": 7, "scale": [0.5, 2.2], "rim": "B", "intensity": 0.6 },
-        { "kind": "ring", "count": 4, "scale": [3, 10], "rim": "A", "opacity": 0.18 }
+        {
+          "kind": "swarm",
+          "count": 3,
+          "scale": [
+            6,
+            12
+          ],
+          "rim": "A"
+        },
+        {
+          "kind": "shard",
+          "count": 7,
+          "scale": [
+            0.5,
+            2.2
+          ],
+          "rim": "B",
+          "intensity": 0.6
+        },
+        {
+          "kind": "ring",
+          "count": 4,
+          "scale": [
+            3,
+            10
+          ],
+          "rim": "A",
+          "opacity": 0.18
+        }
       ]
     },
     {
@@ -52,12 +78,62 @@
         }
       ],
       "structures": [
-        { "kind": "orb", "count": 3, "scale": [1.2, 2.6], "rim": "A", "intensity": 1.3 },
-        { "kind": "portal", "film": "./asset-video-ocean.mp4?v=2", "filmEyebrow": "A film from beneath", "filmTitle": "The Inverted Ocean", "scale": [2.2, 2.2], "rim": "B", "intensity": 1.4, "anchor": false },
-        { "kind": "monolith", "count": 3, "scale": [5, 9], "rim": "B", "intensity": 0.5 },
-        { "kind": "portal", "to": "static-ocean", "scale": [2.2, 2.2], "rim": "B", "intensity": 1.3, "anchor": false },
-        { "kind": "portal", "to": "main", "scale": [2.6, 2.6], "rim": "A", "intensity": 1.5 }
+        {
+          "kind": "orb",
+          "count": 3,
+          "scale": [
+            1.2,
+            2.6
+          ],
+          "rim": "A",
+          "intensity": 1.3
+        },
+        {
+          "kind": "portal",
+          "film": "./asset-video-ocean.mp4?v=2",
+          "filmEyebrow": "A film from beneath",
+          "filmTitle": "The Inverted Ocean",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "B",
+          "intensity": 1.4,
+          "anchor": false
+        },
+        {
+          "kind": "monolith",
+          "count": 3,
+          "scale": [
+            5,
+            9
+          ],
+          "rim": "B",
+          "intensity": 0.5
+        },
+        {
+          "kind": "portal",
+          "to": "static-ocean",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
+        },
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.6,
+            2.6
+          ],
+          "rim": "A",
+          "intensity": 1.5
+        }
       ]
     }
-  ]
+  ],
+  "audio": "./asset-audio-bloom-depths.m4a"
 }
