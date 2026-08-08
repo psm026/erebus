@@ -549,6 +549,7 @@ async function boot() {
     }
     W.analyser = null;
     W.audioLevel = 0;
+    if (W.backdropMesh) { camera.remove(W.backdropMesh); W.backdropMesh = null; W.backdropFit = null; }
     for (const g of W.groups) scene.remove(g);
     if (W.dust) scene.remove(W.dust);
     if (W.planetGroup) scene.remove(W.planetGroup);
@@ -776,14 +777,30 @@ async function boot() {
           })));
 
           if (spec.backdrop) {
-            // the far wall: a matte painting hung dead ahead — full-lit, out of the fog
-            const bm = group.children[0].material;
-            bm.opacity = 1; bm.toneMapped = false; bm.fog = false;
-            const by = spec.y != null ? spec.y : 3;
-            group.position.set(spec.x || 0, by, spec.z != null ? spec.z : -22);
-            group.lookAt(0, by, 0);
-            group.userData.breathe = false;
-            registerGroup(group, group.position.y, 0, 0.15);
+            // WALLPAPER: the image IS the page — mounted on the lens, cover-fit,
+            // so the whole background is the wall and the matter floats before it
+            const px = group.children[0];
+            const bm = px.material;
+            bm.opacity = 1; bm.toneMapped = false; bm.fog = false; bm.depthWrite = false;
+            px.geometry.dispose();
+            px.geometry = new THREE.PlaneGeometry(1, 1);
+            px.renderOrder = -20;
+            group.remove(px);
+            const dist = 190;
+            const imgRatio = spec.ratio ? (1 / spec.ratio) : 16 / 9;
+            const fit = () => {
+              const vh = 2 * dist * Math.tan(camera.fov * Math.PI / 360);
+              const vw = vh * camera.aspect;
+              if (vw / vh > imgRatio) px.scale.set(vw * 1.02, (vw / imgRatio) * 1.02, 1);
+              else px.scale.set(vh * imgRatio * 1.02, vh * 1.02, 1);
+            };
+            fit();
+            px.position.set(0, 0, -dist);
+            if (!camera.parent) scene.add(camera);
+            camera.add(px);
+            W.backdropMesh = px;
+            W.backdropFit = fit;
+            track(px);
             continue;
           }
 
@@ -989,18 +1006,19 @@ async function boot() {
     W.returnTo = data.returnTo || 'main';
     W.wakeAt = clock ? clock.getElapsedTime() : 0;
     document.body.classList.toggle('immersive', W.immersive);
+    document.body.classList.toggle('hud-off', data.hud === false);
     // a world may carry ambient sound: starts on the visitor's first touch,
     // loops quietly, dies when they leave. Wordless — no player, no controls.
     if (data.audio) {
       const au = document.createElement('audio');
       au.src = data.audio;
       au.loop = true;
-      au.volume = 0.55;
+      au.volume = 0.32;
       au.crossOrigin = 'anonymous';
       W.worldAudio = au;
       addEventListener('pointerdown', () => {
         if (W.worldAudio !== au) return;
-        au.play().catch(() => {});
+        if (!document.body.classList.contains('listen-open')) au.play().catch(() => {});
         try {
           if (!W.audioCtx) W.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           if (W.audioCtx.state === 'suspended') W.audioCtx.resume();
@@ -1315,24 +1333,62 @@ async function boot() {
     }, 900);
   }
   const listen = document.getElementById('listen');
+  let listenCtrl = null;
   function openListen(data) {
     if (!listen) return;
     listen.querySelector('.lst-eyebrow').textContent = data.eyebrow || '';
     listen.querySelector('.lst-title').textContent = data.title || '';
-    const frame = listen.querySelector('iframe');
+    const host = listen.querySelector('.lst-embed');
     const id = String(data.embed || '').replace(/^https?:\/\/open\.spotify\.com\/(embed\/)?/, '').replace(/\?.*$/, '');
-    frame.src = 'https://open.spotify.com/embed/' + id + '?theme=0';
+    const plain = () => {
+      host.innerHTML = '';
+      const f = document.createElement('iframe');
+      f.title = 'The listening deck';
+      f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+      f.src = 'https://open.spotify.com/embed/' + id + '?theme=0';
+      host.appendChild(f);
+    };
+    const mount = () => {
+      if (!document.body.classList.contains('listen-open')) return;
+      host.innerHTML = '<div></div>';
+      try {
+        window.SpotifyIframeApi.createController(host.firstChild, {
+          uri: 'spotify:' + id.replace(/\//g, ':'), width: '100%', height: 420, theme: 'dark',
+        }, (ctrl) => {
+          listenCtrl = ctrl;
+          // the deck click was the visitor's gesture — drop the needle for them
+          ctrl.addListener('ready', () => { try { ctrl.play(); } catch (e) {} });
+        });
+      } catch (e) { plain(); }
+    };
     document.body.classList.add('listen-open');
     requestAnimationFrame(() => listen.classList.add('on'));
+    // the room's hum steps aside while the records spin
     if (W.worldAudio) W.worldAudio.pause();
+    if (window.SpotifyIframeApi) mount();
+    else {
+      window.onSpotifyIframeApiReady = (api) => { window.SpotifyIframeApi = api; mount(); };
+      if (!document.getElementById('spotify-api')) {
+        const s = document.createElement('script');
+        s.id = 'spotify-api';
+        s.src = 'https://open.spotify.com/embed/iframe-api/v1';
+        s.async = true;
+        s.onerror = plain;
+        document.head.appendChild(s);
+      }
+      setTimeout(() => {
+        if (!window.SpotifyIframeApi && document.body.classList.contains('listen-open') && !host.querySelector('iframe')) plain();
+      }, 3000);
+    }
   }
   function closeListen() {
     if (!listen || !document.body.classList.contains('listen-open')) return;
     listen.classList.remove('on');
     setTimeout(() => {
       document.body.classList.remove('listen-open');
-      const frame = listen.querySelector('iframe');
-      frame.src = 'about:blank';
+      if (listenCtrl) { try { listenCtrl.destroy(); } catch (e) {} listenCtrl = null; }
+      const host = listen.querySelector('.lst-embed');
+      if (host) host.innerHTML = '';
       if (W.worldAudio) W.worldAudio.play().catch(() => {});
     }, 700);
   }
@@ -1516,6 +1572,7 @@ async function boot() {
     }
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+    if (W.backdropFit) W.backdropFit();
     renderer.setSize(window.innerWidth, window.innerHeight);
     const pr = Math.min(window.devicePixelRatio, PR_CAP);
     renderer.setPixelRatio(pr);
