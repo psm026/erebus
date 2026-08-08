@@ -547,6 +547,8 @@ async function boot() {
       try { W.worldAudio.pause(); W.worldAudio.removeAttribute('src'); W.worldAudio.load(); } catch (e) {}
       W.worldAudio = null;
     }
+    W.analyser = null;
+    W.audioLevel = 0;
     for (const g of W.groups) scene.remove(g);
     if (W.dust) scene.remove(W.dust);
     if (W.planetGroup) scene.remove(W.planetGroup);
@@ -937,7 +939,9 @@ async function boot() {
           group.add(core); group.add(rim);
           core.userData = spec.film
             ? { type: 'film', src: spec.film, title: spec.filmTitle || '', eyebrow: spec.filmEyebrow || 'A film' }
-            : { type: 'portal', to: spec.to || 'main' };
+            : spec.spotify
+              ? { type: 'listen', embed: spec.spotify, title: spec.listenTitle || 'Now spinning', eyebrow: spec.listenEyebrow || 'The listening room' }
+              : { type: 'portal', to: spec.to || 'main' };
           // the ring is clickable too — bigger target
           group.children[0].userData = core.userData;
           W.clickables.push(core, group.children[0]);
@@ -979,9 +983,22 @@ async function boot() {
       au.src = data.audio;
       au.loop = true;
       au.volume = 0.55;
+      au.crossOrigin = 'anonymous';
       W.worldAudio = au;
       addEventListener('pointerdown', () => {
-        if (W.worldAudio === au) au.play().catch(() => {});
+        if (W.worldAudio !== au) return;
+        au.play().catch(() => {});
+        try {
+          if (!W.audioCtx) W.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (W.audioCtx.state === 'suspended') W.audioCtx.resume();
+          const src = W.audioCtx.createMediaElementSource(au);
+          const an = W.audioCtx.createAnalyser();
+          an.fftSize = 64;
+          src.connect(an);
+          an.connect(W.audioCtx.destination);
+          W.analyser = an;
+          W.audioData = new Uint8Array(an.frequencyBinCount);
+        } catch (e) { W.analyser = null; }
       }, { once: true });
     }
     W.rooms = sanitizeRooms(data.rooms);
@@ -1239,6 +1256,8 @@ async function boot() {
       }
     } else if (data.type === 'film') {
       openCinema(data);
+    } else if (data.type === 'listen') {
+      openListen(data);
     }
   });
   eggVeil.querySelector('.egg-close').addEventListener('click', () => {
@@ -1282,6 +1301,33 @@ async function boot() {
       cinFilm.load();
     }, 900);
   }
+  const listen = document.getElementById('listen');
+  function openListen(data) {
+    if (!listen) return;
+    listen.querySelector('.lst-eyebrow').textContent = data.eyebrow || '';
+    listen.querySelector('.lst-title').textContent = data.title || '';
+    const frame = listen.querySelector('iframe');
+    const id = String(data.embed || '').replace(/^https?:\/\/open\.spotify\.com\/(embed\/)?/, '').replace(/\?.*$/, '');
+    frame.src = 'https://open.spotify.com/embed/' + id + '?theme=0';
+    document.body.classList.add('listen-open');
+    requestAnimationFrame(() => listen.classList.add('on'));
+    if (W.worldAudio) W.worldAudio.pause();
+  }
+  function closeListen() {
+    if (!listen || !document.body.classList.contains('listen-open')) return;
+    listen.classList.remove('on');
+    setTimeout(() => {
+      document.body.classList.remove('listen-open');
+      const frame = listen.querySelector('iframe');
+      frame.src = 'about:blank';
+      if (W.worldAudio) W.worldAudio.play().catch(() => {});
+    }, 700);
+  }
+  if (listen) {
+    listen.querySelector('.lst-exit').addEventListener('click', closeListen);
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeListen(); });
+  }
+
   if (cinema && cinFilm) {
     cinFilm.addEventListener('ended', closeCinema);
     cinFilm.addEventListener('error', closeCinema);
@@ -1403,6 +1449,13 @@ async function boot() {
       s.group.position.y = s.baseY + Math.sin(t * s.bobSpeed + s.bobPhase) * 0.35;
       // presence: things surface out of the dark, hold, and sink back —
       // "was that something I saw"
+      if (W.analyser && W._lvlT !== t) {
+        W._lvlT = t;
+        W.analyser.getByteFrequencyData(W.audioData);
+        let _sum = 0;
+        for (let _i = 0; _i < W.audioData.length; _i++) _sum += W.audioData[_i];
+        W.audioLevel = _sum / (W.audioData.length * 255);
+      }
       let presence = 1;
       if (s.breathe && !reduced) {
         const raw = 0.5 + 0.5 * Math.sin(t * s.breatheSpeed + s.breathePhase);
@@ -1413,6 +1466,7 @@ async function boot() {
       // dive rooms wake slowly: the reveal is the arrival
       const wakeRaw = Math.min(1, Math.max(0, (tAbs - W.wakeAt) / 3.5));
       presence *= wakeRaw * wakeRaw * (3 - 2 * wakeRaw);
+      presence *= 1 + (W.audioLevel || 0) * 0.4;
       for (const g of s.glow) {
         if (g.kind === 'rim') g.mat.uniforms.uIntensity.value = g.base * (0.06 + 0.94 * presence);
         else if (g.kind === 'fil') g.mat.uniforms.uPresence.value = presence;

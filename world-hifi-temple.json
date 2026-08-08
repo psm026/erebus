@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "title": "EREBUS — The Hifi Temple",
+    "version": 1,
+    "note": "Low-orbit listening room. Warm wood in cold space. Swap the playlist by changing the 'spotify' value (playlist/<id>, album/<id> or track/<id>)."
+  },
+  "mode": "immersive",
+  "returnTo": "main",
+  "audio": "./asset-audio-hifi-temple.m4a",
+  "rooms": [
+    {
+      "id": "hifi-temple",
+      "sector": "HIFI // THE TEMPLE",
+      "accentA": "#eaa25e",
+      "accentB": "#6f9fff",
+      "fog": "#070402",
+      "nebulaA": "#1c0f05",
+      "nebulaB": "#10091f",
+      "dust": "#d98e50",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Low orbit listening room",
+          "title": "The Hifi Temple",
+          "body": "Warm wood in cold space. The burning deck spins records — touch it. The ring behind you leads home."
+        }
+      ],
+      "structures": [
+        {
+          "kind": "portal",
+          "spotify": "playlist/37i9dQZF1DWV7EzJMK2FUI",
+          "listenTitle": "The Hifi Temple",
+          "listenEyebrow": "Now spinning — bring your own records",
+          "scale": [
+            3.2,
+            3.2
+          ],
+          "rim": "B",
+          "intensity": 1.5,
+          "anchor": true
+        },
+        {
+          "kind": "monolith",
+          "count": 10,
+          "scale": [
+            4,
+            9
+          ],
+          "rim": "A",
+          "intensity": 0.9
+        },
+        {
+          "kind": "monolith",
+          "count": 6,
+          "scale": [
+            2,
+            4
+          ],
+          "rim": "A",
+          "intensity": 0.6
+        },
+        {
+          "kind": "ring",
+          "count": 5,
+          "scale": [
+            2,
+            5
+          ],
+          "rim": "A",
+          "opacity": 0.5,
+          "intensity": 1.1
+        },
+        {
+          "kind": "orb",
+          "count": 8,
+          "scale": [
+            0.3,
+            0.7
+          ],
+          "rim": "A",
+          "intensity": 1.3
+        },
+        {
+          "kind": "veil",
+          "count": 1,
+          "scale": [
+            22,
+            26
+          ],
+          "intensity": 0.9
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            5,
+            8
+          ],
+          "rim": "B"
+        },
+        {
+          "kind": "sea",
+          "count": 1,
+          "scale": [
+            38,
+            42
+          ]
+        },
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        }
+      ]
+    }
+  ]
+}

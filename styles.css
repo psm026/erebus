@@ -407,6 +407,64 @@ body.cinema-open #cinema { display: block; }
 #cinema.ui-idle .cin-ui, #cinema.ui-idle .cin-head { opacity: 0; }
 body.cinema-open .hud, body.cinema-open .hud-bottom, body.cinema-open #hud-exit { opacity: 0; pointer-events: none; }
 
+/* ---------- the listening room: wood-dark spotify deck ---------- */
+#listen {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: none;
+  place-content: center;
+  background: rgba(4, 2, 4, 0.82);
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+body.listen-open #listen { display: grid; }
+#listen.on { opacity: 1; }
+.lst-panel {
+  width: min(92vw, 560px);
+  background: linear-gradient(160deg, #17100a 0%, #0d0806 55%, #120a12 100%);
+  border: 1px solid rgba(234, 162, 94, 0.35);
+  box-shadow: 0 0 80px rgba(234, 162, 94, 0.12), inset 0 1px 0 rgba(234, 162, 94, 0.2);
+  padding: 26px 26px 20px;
+}
+.lst-eyebrow {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: #c98d5a;
+  margin-bottom: 8px;
+}
+.lst-title {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-size: clamp(22px, 3vw, 30px);
+  color: #f0e2d0;
+  margin-bottom: 18px;
+}
+.lst-panel iframe {
+  width: 100%;
+  height: 420px;
+  border: 0;
+  border-radius: 12px;
+  display: block;
+  background: #0d0806;
+}
+.lst-exit {
+  margin-top: 16px;
+  background: rgba(4, 2, 4, 0.5);
+  border: 1px solid rgba(234, 162, 94, 0.35);
+  color: #f0e2d0;
+  font: 10px/1 'Space Grotesk', system-ui, sans-serif;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  padding: 11px 15px;
+  cursor: pointer;
+  transition: border-color 0.4s ease;
+}
+.lst-exit:hover { border-color: rgba(234, 162, 94, 0.8); }
+@media (max-width: 720px) { .lst-panel iframe { height: 352px; } }
+
 /* ---------- entry film: the first link ---------- */
 #entry {
   position: fixed;
