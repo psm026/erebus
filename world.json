@@ -288,12 +288,12 @@
           "kind": "portal",
           "to": "hifi-temple",
           "scale": [
-            2.6,
-            2.6
+            3.4,
+            3.4
           ],
           "rim": "A",
-          "intensity": 1.5,
-          "anchor": false
+          "intensity": 1.8,
+          "anchor": true
         }
       ]
     },

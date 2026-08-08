@@ -775,6 +775,18 @@ async function boot() {
             map: tex, transparent: true, opacity: 0.92, side: THREE.DoubleSide,
           })));
 
+          if (spec.backdrop) {
+            // the far wall: a matte painting hung dead ahead — full-lit, out of the fog
+            const bm = group.children[0].material;
+            bm.opacity = 1; bm.toneMapped = false; bm.fog = false;
+            const by = spec.y != null ? spec.y : 3;
+            group.position.set(spec.x || 0, by, spec.z != null ? spec.z : -22);
+            group.lookAt(0, by, 0);
+            group.userData.breathe = false;
+            registerGroup(group, group.position.y, 0, 0.15);
+            continue;
+          }
+
         } else if (spec.kind === 'video' && spec.src) {
           // a living painting: AI film matter floating in the dark, muted loop
           const vid = document.createElement('video');
@@ -947,7 +959,8 @@ async function boot() {
           W.clickables.push(core, group.children[0]);
           if (W.immersive) {
             // exit gate floats behind your entry gaze — turn around to leave
-            group.position.set(rand(-3, 3), rand(-1, 3), rand(18, 24));
+            if (spec.z != null) { group.position.set(spec.x || 0, spec.y != null ? spec.y : 1.2, spec.z); }
+            else group.position.set(rand(-3, 3), rand(-1, 3), rand(18, 24));
           } else if (spec.anchor !== false) {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
             const p = W.curve.getPointAt(stopT(stopIdx));

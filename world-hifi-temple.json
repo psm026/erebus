@@ -2,7 +2,7 @@
   "meta": {
     "title": "EREBUS — The Hifi Temple",
     "version": 1,
-    "note": "Low-orbit listening room. Warm wood in cold space. Swap the playlist by changing the 'spotify' value (playlist/<id>, album/<id> or track/<id>)."
+    "note": "Low-orbit listening room. The speaker wall is the room — the burning deck before it spins records. Door in The Relics. Swap the playlist by changing the spotify value (playlist/<id>, album/<id> or track/<id>)."
   },
   "mode": "immersive",
   "returnTo": "main",
@@ -27,48 +27,52 @@
       ],
       "structures": [
         {
+          "kind": "image",
+          "src": "./asset-hifi-wall.webp",
+          "backdrop": true,
+          "ratio": 0.5581,
+          "scale": [
+            30,
+            30
+          ],
+          "y": 2.5,
+          "z": -20
+        },
+        {
           "kind": "portal",
           "spotify": "playlist/37i9dQZF1DWV7EzJMK2FUI",
           "listenTitle": "The Hifi Temple",
           "listenEyebrow": "Now spinning — bring your own records",
           "scale": [
-            3.2,
-            3.2
+            2.6,
+            2.6
           ],
           "rim": "B",
-          "intensity": 1.5,
-          "anchor": true
+          "intensity": 1.6,
+          "x": 0,
+          "y": 0.4,
+          "z": -12
         },
         {
           "kind": "monolith",
-          "count": 10,
+          "count": 4,
           "scale": [
-            4,
-            9
+            2.5,
+            6
           ],
           "rim": "A",
-          "intensity": 0.9
+          "intensity": 0.7
         },
         {
-          "kind": "monolith",
-          "count": 6,
+          "kind": "ring",
+          "count": 3,
           "scale": [
             2,
             4
           ],
           "rim": "A",
-          "intensity": 0.6
-        },
-        {
-          "kind": "ring",
-          "count": 5,
-          "scale": [
-            2,
-            5
-          ],
-          "rim": "A",
           "opacity": 0.5,
-          "intensity": 1.1
+          "intensity": 1
         },
         {
           "kind": "orb",
@@ -87,11 +91,11 @@
             22,
             26
           ],
-          "intensity": 0.9
+          "intensity": 0.8
         },
         {
           "kind": "swarm",
-          "count": 2,
+          "count": 1,
           "scale": [
             5,
             8
