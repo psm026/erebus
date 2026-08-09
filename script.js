@@ -966,7 +966,7 @@ async function boot() {
             // THE RECORD: a small vinyl disc spins inside the ring — the deck itself
             const discMat = new THREE.ShaderMaterial({
               transparent: true, side: THREE.DoubleSide,
-              uniforms: { uTime: { value: 0 }, uPresence: { value: 1 }, uColA: { value: col.clone() } },
+              uniforms: { uTime: { value: 0 }, uPresence: { value: 1 }, uColA: { value: new THREE.Color(col) } },
               vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
               fragmentShader: [
                 'varying vec2 vUv;',
