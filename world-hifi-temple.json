@@ -28,7 +28,7 @@
       "structures": [
         {
           "kind": "image",
-          "src": "./asset-hifi-wall.webp",
+          "src": "./asset-hifi-wall.webp?v=2",
           "backdrop": true,
           "ratio": 0.5581,
           "scale": [
