@@ -528,3 +528,6 @@ body.hud-off .hud { display: none; }
 .lst-embed { min-height: 420px; }
 .lst-embed iframe { width: 100%; height: 420px; border: 0; border-radius: 12px; display: block; background: #0d0806; }
 @media (max-width: 720px) { .lst-embed { min-height: 352px; } .lst-embed iframe { height: 352px; } }
+
+/* no badge, no banner — the world is the interface */
+.hud { display: none !important; }
