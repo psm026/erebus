@@ -961,11 +961,44 @@ async function boot() {
             color: col, transparent: true, opacity: 0.85,
             blending: THREE.AdditiveBlending, depthWrite: false,
           })));
-          const coreGeo = new THREE.SphereGeometry(s * 0.34, 24, 24);
-          const core = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({ color: col }));
-          const rim = new THREE.Mesh(coreGeo, rimMaterial(col, intensity * 1.2));
-          rim.scale.setScalar(1.9);
-          group.add(core); group.add(rim);
+          let core;
+          if (spec.spotify) {
+            // THE RECORD: a small vinyl disc spins inside the ring — the deck itself
+            const discMat = new THREE.ShaderMaterial({
+              transparent: true, side: THREE.DoubleSide,
+              uniforms: { uTime: { value: 0 }, uPresence: { value: 1 }, uColA: { value: col.clone() } },
+              vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+              fragmentShader: [
+                'varying vec2 vUv;',
+                'uniform float uTime, uPresence;',
+                'uniform vec3 uColA;',
+                'void main() {',
+                '  vec2 c = (vUv - 0.5) * 2.0;',
+                '  float r = length(c);',
+                '  float spin = atan(c.y, c.x) + uTime * 0.9;',
+                '  float grooves = 0.5 + 0.5 * sin(r * 300.0);',
+                '  float bands = 0.5 + 0.5 * sin(r * 24.0 + 2.0);',
+                '  vec3 vinyl = vec3(0.030, 0.026, 0.034) + vec3(0.05) * grooves * (0.35 + 0.65 * bands);',
+                '  float sheen = pow(abs(cos(spin)), 8.0) * (1.0 - smoothstep(0.2, 0.95, r));',
+                '  vinyl += uColA * sheen * 0.35;',
+                '  float label = 1.0 - smoothstep(0.30, 0.315, r);',
+                '  vec3 labelCol = uColA * (0.45 + 0.2 * sin(spin * 3.0));',
+                '  vec3 col = mix(vinyl, labelCol, label);',
+                '  col *= smoothstep(0.03, 0.05, r);',
+                '  float alpha = 1.0 - smoothstep(0.97, 1.0, r);',
+                '  gl_FragColor = vec4(col * (0.3 + 0.7 * uPresence), alpha);',
+                '}',
+              ].join('\n'),
+            });
+            core = new THREE.Mesh(new THREE.CircleGeometry(s * 0.8, 64), discMat);
+            group.add(core);
+          } else {
+            const coreGeo = new THREE.SphereGeometry(s * 0.34, 24, 24);
+            core = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({ color: col }));
+            const rim = new THREE.Mesh(coreGeo, rimMaterial(col, intensity * 1.2));
+            rim.scale.setScalar(1.9);
+            group.add(core); group.add(rim);
+          }
           core.userData = spec.film
             ? { type: 'film', src: spec.film, title: spec.filmTitle || '', eyebrow: spec.filmEyebrow || 'A film' }
             : spec.spotify
@@ -1389,11 +1422,12 @@ async function boot() {
       if (listenCtrl) { try { listenCtrl.destroy(); } catch (e) {} listenCtrl = null; }
       const host = listen.querySelector('.lst-embed');
       if (host) host.innerHTML = '';
-      if (W.worldAudio) W.worldAudio.play().catch(() => {});
+      // the hum stays out once records have spun — silence until the next descent
     }, 700);
   }
   if (listen) {
     listen.querySelector('.lst-exit').addEventListener('click', closeListen);
+    window.addEventListener('blur', () => { if (document.body.classList.contains('listen-open') && W.worldAudio) W.worldAudio.pause(); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeListen(); });
   }
 

@@ -44,13 +44,13 @@
           "listenTitle": "The Hifi Temple",
           "listenEyebrow": "Now spinning — bring your own records",
           "scale": [
-            2.6,
-            2.6
+            1.2,
+            1.2
           ],
           "rim": "B",
           "intensity": 1.6,
           "x": 0,
-          "y": 0.4,
+          "y": 0.1,
           "z": -12
         },
         {
