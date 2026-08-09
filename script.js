@@ -992,6 +992,10 @@ async function boot() {
             });
             core = new THREE.Mesh(new THREE.CircleGeometry(s * 0.8, 64), discMat);
             group.add(core);
+            // a generous unseen hit-pad: the record is small, the reach is not
+            const hit = new THREE.Mesh(new THREE.CircleGeometry(s * 1.7, 24), new THREE.MeshBasicMaterial({ visible: false }));
+            group.add(hit);
+            group.userData.hitMesh = hit;
           } else {
             const coreGeo = new THREE.SphereGeometry(s * 0.34, 24, 24);
             core = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({ color: col }));
@@ -1007,6 +1011,7 @@ async function boot() {
           // the ring is clickable too — bigger target
           group.children[0].userData = core.userData;
           W.clickables.push(core, group.children[0]);
+          if (group.userData.hitMesh) { group.userData.hitMesh.userData = core.userData; W.clickables.push(group.userData.hitMesh); }
           if (W.immersive) {
             // exit gate floats behind your entry gaze — turn around to leave
             if (spec.z != null) { group.position.set(spec.x || 0, spec.y != null ? spec.y : 1.2, spec.z); }
