@@ -550,7 +550,7 @@ async function boot() {
     W.analyser = null;
     W.audioLevel = 0;
     if (W.backdropMesh) { camera.remove(W.backdropMesh); W.backdropMesh = null; W.backdropFit = null; }
-    for (const g of W.groups) scene.remove(g);
+    for (const g of W.groups) { scene.remove(g); if (g.parent === camera) camera.remove(g); }
     if (W.dust) scene.remove(W.dust);
     if (W.planetGroup) scene.remove(W.planetGroup);
     for (const d of W.disposables) {
@@ -1026,6 +1026,12 @@ async function boot() {
           group.userData.breathe = true;
           group.userData.breatheMin = 0.7; // portals pulse, never hide
           registerGroup(group, group.position.y, 0.12, 0.3);
+          if (spec.z != null && W.immersive) {
+            // a pinned deck rides the lens: always before you, never lost to the drift
+            camera.add(group);
+            const a = W.animated[W.animated.length - 1];
+            a.rotSpeed = 0; a.baseY = group.position.y;
+          }
           continue;
         } else {
           continue;
