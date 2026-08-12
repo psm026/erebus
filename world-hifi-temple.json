@@ -6,7 +6,6 @@
   },
   "mode": "immersive",
   "returnTo": "main",
-  "audio": "./asset-audio-hifi-temple.m4a",
   "rooms": [
     {
       "id": "hifi-temple",

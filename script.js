@@ -922,6 +922,16 @@ async function boot() {
           }));
           screen.userData = { type: 'screen', vid };
           W.clickables.push(screen);
+          const hoop = new THREE.Mesh(
+            new THREE.TorusGeometry(R * 1.02, Math.max(0.02, R * 0.005), 8, 128),
+            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false })
+          );
+          hoop.rotation.x = Math.PI / 2;
+          hoop.position.y = -h * 0.58;
+          hoop.userData = screen.userData;
+          group.add(hoop);
+          W.clickables.push(hoop);
+          group.userData.beacon = true;
           group.add(screen);
           if (W.immersive) {
             group.position.set(0, spec.y != null ? spec.y : 2.5, 0);
@@ -940,6 +950,15 @@ async function boot() {
           group.add(core); group.add(rim);
           core.userData = { type: 'egg', secret: spec.secret };
           W.clickables.push(core);
+          const eggRing = new THREE.Mesh(
+            new THREE.TorusGeometry(scale[0] * 3.0, Math.max(0.012, scale[0] * 0.05), 10, 96),
+            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false })
+          );
+          eggRing.rotation.x = rand(0.4, 1.2);
+          eggRing.userData = core.userData;
+          group.add(eggRing);
+          W.clickables.push(eggRing);
+          group.userData.beacon = true;
           if (W.immersive) {
             const dir = new THREE.Vector3().randomDirection();
             group.position.copy(dir.multiplyScalar(rand(12, 20)));
@@ -1012,6 +1031,7 @@ async function boot() {
           group.children[0].userData = core.userData;
           W.clickables.push(core, group.children[0]);
           if (group.userData.hitMesh) { group.userData.hitMesh.userData = core.userData; W.clickables.push(group.userData.hitMesh); }
+          group.userData.beacon = true;
           if (W.immersive) {
             // exit gate floats behind your entry gaze — turn around to leave
             if (spec.z != null) { group.position.set(spec.x || 0, spec.y != null ? spec.y : 1.2, spec.z); }
@@ -1575,6 +1595,10 @@ async function boot() {
         const raw = 0.5 + 0.5 * Math.sin(t * s.breatheSpeed + s.breathePhase);
         const shaped = raw * raw * (3 - 2 * raw);
         presence = s.breatheMin + (1 - s.breatheMin) * shaped;
+      }
+      if (s.group.userData && s.group.userData.beacon && !reduced) {
+        const bp = 0.5 + 0.5 * Math.sin(t * 1.7 + (s.breathePhase || 0));
+        presence = Math.max(presence, 0.55 + 0.3 * bp * bp);
       }
       if (s.group === hoveredGroup) presence = Math.max(presence, 0.95); // hover wakes it fully
       // dive rooms wake slowly: the reveal is the arrival

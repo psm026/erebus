@@ -531,3 +531,65 @@ body.hud-off .hud { display: none; }
 
 /* no badge, no banner — the world is the interface */
 .hud { display: none !important; }
+
+
+/* ---------- v14 — the clickable law: orb in ring, breathing ---------- */
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.22); opacity: 1; }
+}
+@keyframes btnBreath {
+  0%, 100% { box-shadow: 0 0 0 rgba(234, 162, 94, 0); }
+  50% { box-shadow: 0 0 16px rgba(234, 162, 94, 0.3); }
+}
+.p-link { position: relative; padding-left: 24px; }
+.p-link::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.42em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0), 0 0 0 4px currentColor, 0 0 14px currentColor;
+  animation: orbPulse 2.8s ease-in-out infinite;
+}
+#hud-exit, .lst-exit, .cin-exit, .cin-mute { animation: btnBreath 3.6s ease-in-out infinite; border-radius: 999px; }
+
+/* the listening deck melts into the temple */
+#listen { background: rgba(3, 2, 2, 0.9); backdrop-filter: blur(16px) saturate(0.85); -webkit-backdrop-filter: blur(16px) saturate(0.85); }
+.lst-panel {
+  border: 0;
+  border-radius: 20px;
+  background: radial-gradient(130% 150% at 50% 0%, rgba(30, 16, 6, 0.92) 0%, rgba(11, 6, 4, 0.97) 55%, rgba(8, 4, 3, 0.99) 100%);
+  box-shadow: 0 0 130px rgba(234, 162, 94, 0.10), 0 30px 90px rgba(0, 0, 0, 0.65);
+  position: relative;
+}
+.lst-panel::before {
+  content: "";
+  position: absolute;
+  inset: -90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(234, 162, 94, 0.13) 0%, rgba(234, 162, 94, 0.04) 42%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  animation: orbHalo 6s ease-in-out infinite;
+}
+@keyframes orbHalo {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.lst-embed { position: relative; }
+.lst-panel iframe { border-radius: 16px; box-shadow: 0 0 46px rgba(234, 162, 94, 0.10); }
+.lst-embed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  pointer-events: none;
+  box-shadow: inset 0 0 44px 10px rgba(8, 4, 3, 0.5);
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-link::before, #hud-exit, .lst-exit, .cin-exit, .cin-mute, .lst-panel::before { animation: none; }
+}
