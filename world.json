@@ -210,6 +210,16 @@
           ],
           "rim": "B",
           "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "to": "inside-cocoon",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.3
         }
       ]
     },
@@ -505,7 +515,7 @@
             0.32
           ],
           "rim": "B",
-          "intensity": 2,
+          "intensity": 2.0,
           "secret": {
             "eyebrow": "EGG-003 // FOUND",
             "title": "Soaked.",

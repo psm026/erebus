@@ -21,16 +21,12 @@ the seed sky). Wordless. If JC's Higgsfield credits return, a living-painting
 film of the eclipse breathing could hang behind a burning ring here.
 
 > **GROWTH PAUSED — 2026-07-20, by JC.** No new rooms or worlds until JC says
-> "let's start up automating worlds." The scheduled task is disabled. The
-> pending-rooms/ publish (inside-cocoon) also waits for JC's review — do not
-> publish it on his behalf.
+> "let's start up automating worlds." The scheduled task is disabled.
 
-## 2026-07-20 — INSIDE THE COCOON (growth cycle #3 — scheduled protocol run) — PENDING PUBLISH
+## 2026-07-20 — INSIDE THE COCOON (growth cycle #3 — scheduled protocol run; published 2026-08-12 at JC's request)
 
-**PENDING PUBLISH:** GitHub was unreachable this run (multiple Chrome browsers
-connected; picking one needs JC). All three changed files are validated and
-copied to `pending-rooms/` with a publish note — the next run or JC's next chat
-session commits them (`GROWTH: inside-cocoon`).
+Publish was blocked on the run day (browser selection needed JC); JC reviewed
+and shipped it himself on 2026-08-12. Growth remains paused.
 
 Seeds folder: empty. Feed: empty. Consumed the standing NEXT INTENTION (Static
 Ocean entry, which superseded the older two-room "Within" idea into a single dive).
@@ -40,9 +36,9 @@ new portal in The Chrysalis. The visitor stands mid-transformation: two amber
 veils close around them as the hardening membrane, one great rib-ring is the
 anchor the eye returns to, two fainter ribs sit far, hardening flecks drift
 near. The teal survives as exactly one held light — a single low orb, the last
-of The Bloom still breathing inside the shell. **EGG-003** hides here — the
-third-room cadence lands as promised (Chrysalis, Static Ocean, Inside the
-Cocoon). Return portal to main included; returnTo: main.
+of The Bloom still breathing inside the shell. **EGG-004** hides here —
+renumbered at publish time: Purple Rain (2026-08-03) claimed EGG-003 while this
+room sat in pending-rooms/. Return portal to main included; returnTo: main.
 
 Choices made autonomously: no AI sky this run — the veils carry the membrane
 and the nebula breathes underneath (subtle over literal; if it feels safe, go
@@ -57,7 +53,7 @@ a heartbeat. The main drift showed the cocoon from outside and called it
 (world-hollow-monument.json): stand inside one of the monoliths, in the negative
 space of a thing not built yet. Far monolith silhouettes, a mid-shell of faint
 rings like formwork, one near shard as the seed of the unbuilt artifact.
-No egg (EGG-004 waits two more rooms). Palette: relic amber cooled toward
+No egg (EGG-005 waits two more rooms). Palette: relic amber cooled toward
 rust-red ember over near-black.
 
 ---
