@@ -10,12 +10,12 @@
     {
       "id": "inside-cocoon",
       "sector": "DIVE // INSIDE THE COCOON",
-      "accentA": "#e08a45",
-      "accentB": "#3fc9a0",
+      "accentA": "#ff9d5c",
+      "accentB": "#c9a2ff",
       "fog": "#060302",
       "nebulaA": "#2a1204",
-      "nebulaB": "#0d1f16",
-      "dust": "#cf8b4d",
+      "nebulaB": "#170812",
+      "dust": "#d98e50",
       "stops": [
         {
           "variant": "room-title",
@@ -25,15 +25,73 @@
         }
       ],
       "structures": [
-        { "kind": "veil", "count": 2, "scale": [20, 26], "intensity": 0.8 },
-        { "kind": "ring", "count": 1, "scale": [13, 13], "rim": "A", "opacity": 0.28, "intensity": 0.9, "anchor": true },
-        { "kind": "ring", "count": 2, "scale": [18, 24], "rim": "A", "opacity": 0.08, "intensity": 0.4 },
-        { "kind": "swarm", "count": 2, "scale": [4, 6], "rim": "A" },
-        { "kind": "shard", "count": 3, "scale": [0.4, 0.9], "rim": "A", "intensity": 0.5 },
-        { "kind": "orb", "count": 1, "scale": [0.7, 0.7], "rim": "B", "intensity": 1.1 },
+        {
+          "kind": "veil",
+          "count": 2,
+          "scale": [
+            20,
+            26
+          ],
+          "intensity": 0.8
+        },
+        {
+          "kind": "ring",
+          "count": 1,
+          "scale": [
+            13,
+            13
+          ],
+          "rim": "A",
+          "opacity": 0.28,
+          "intensity": 0.9,
+          "anchor": true
+        },
+        {
+          "kind": "ring",
+          "count": 2,
+          "scale": [
+            18,
+            24
+          ],
+          "rim": "A",
+          "opacity": 0.08,
+          "intensity": 0.4
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            4,
+            6
+          ],
+          "rim": "A"
+        },
+        {
+          "kind": "shard",
+          "count": 3,
+          "scale": [
+            0.4,
+            0.9
+          ],
+          "rim": "A",
+          "intensity": 0.5
+        },
+        {
+          "kind": "orb",
+          "count": 1,
+          "scale": [
+            0.7,
+            0.7
+          ],
+          "rim": "B",
+          "intensity": 1.1
+        },
         {
           "kind": "egg",
-          "scale": [0.3, 0.3],
+          "scale": [
+            0.3,
+            0.3
+          ],
           "rim": "B",
           "intensity": 1.8,
           "secret": {
@@ -42,7 +100,16 @@
             "body": "You stood inside a thing mid-becoming and it did not stop for you. Fourth secret. Whatever hatches from this room will remember who watched."
           }
         },
-        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "B", "intensity": 1.4 }
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "B",
+          "intensity": 1.4
+        }
       ]
     }
   ]

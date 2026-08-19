@@ -12,7 +12,7 @@
       "id": "undercode",
       "sector": "DIVE // THE UNDERCODE",
       "accentA": "#a05cff",
-      "accentB": "#5b3bd6",
+      "accentB": "#6248ff",
       "fog": "#030208",
       "nebulaA": "#0a0417",
       "nebulaB": "#100722",
@@ -26,10 +26,43 @@
         }
       ],
       "structures": [
-        { "kind": "codebox", "scale": [34, 34] },
-        { "kind": "orb", "count": 3, "scale": [1.2, 2.4], "rim": "A", "intensity": 0.5, "dark": true },
-        { "kind": "swarm", "count": 1, "scale": [4, 6], "rim": "B" },
-        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+        {
+          "kind": "codebox",
+          "scale": [
+            34,
+            34
+          ]
+        },
+        {
+          "kind": "orb",
+          "count": 3,
+          "scale": [
+            1.2,
+            2.4
+          ],
+          "rim": "A",
+          "intensity": 0.5,
+          "dark": true
+        },
+        {
+          "kind": "swarm",
+          "count": 1,
+          "scale": [
+            4,
+            6
+          ],
+          "rim": "B"
+        },
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        }
       ]
     }
   ]

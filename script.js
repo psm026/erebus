@@ -71,7 +71,7 @@ function fallback(err) {
     content.innerHTML = '<section class="panel intro is-active" style="position:static;opacity:1;transform:none;filter:none;margin:18vh 7vw">' +
       '<p class="eyebrow">EREBUS</p><h1>The dark is resting.</h1>' +
       '<p class="lede">Something didn’t load. Refresh to try again — or say hello: ' +
-      '<a href="mailto:psm026@gmail.com">psm026@gmail.com</a></p></section>';
+      '<a href="mailto:psm026@gmail.com">Click here</a></p></section>';
   }
 }
 
@@ -1030,6 +1030,19 @@ async function boot() {
           // the ring is clickable too — bigger target
           group.children[0].userData = core.userData;
           W.clickables.push(core, group.children[0]);
+          // a door reads as a door from anywhere: counter-breathing halo + quiet ground pool
+          const halo = new THREE.Mesh(new THREE.TorusGeometry(s * 1.35, s * 0.008, 8, 128), new THREE.MeshBasicMaterial({
+            color: col, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false,
+          }));
+          halo.material.userData.counter = true;
+          group.add(halo);
+          const pool = new THREE.Mesh(new THREE.CircleGeometry(s * 2.2, 48), new THREE.MeshBasicMaterial({
+            color: col, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+          }));
+          pool.material.userData.still = true;
+          pool.rotation.x = -Math.PI / 2;
+          pool.position.y = -1.2;
+          group.add(pool);
           if (group.userData.hitMesh) { group.userData.hitMesh.userData = core.userData; W.clickables.push(group.userData.hitMesh); }
           group.userData.beacon = true;
           if (W.immersive) {
@@ -1044,7 +1057,7 @@ async function boot() {
             group.position.copy(besidePath(room, 9, 16, i));
           }
           group.userData.breathe = true;
-          group.userData.breatheMin = 0.7; // portals pulse, never hide
+          group.userData.breatheMin = 0.82; // portals pulse, never hide
           registerGroup(group, group.position.y, 0.12, 0.3);
           if (spec.z != null && W.immersive) {
             // a pinned deck rides the lens: always before you, never lost to the drift
@@ -1379,6 +1392,8 @@ async function boot() {
     cinFilm.currentTime = 0;
     cinFilm.muted = false;
     document.body.classList.add('cinema-open');
+    cinFilm.volume = 1;
+    cinFilm.style.opacity = 1;
     requestAnimationFrame(() => cinema.classList.add('on'));
     const p = cinFilm.play();
     if (p && p.catch) p.catch(() => { cinFilm.muted = true; cinFilm.play().catch(() => {}); });
@@ -1463,7 +1478,15 @@ async function boot() {
   }
 
   if (cinema && cinFilm) {
-    cinFilm.addEventListener('ended', closeCinema);
+    // every film exhales before it ends — image and sound decay together
+  cinFilm.addEventListener('timeupdate', () => {
+    if (!cinFilm.duration || !isFinite(cinFilm.duration)) return;
+    const k = Math.min(1, Math.max(0, (cinFilm.duration - cinFilm.currentTime) / 2.5));
+    const e = k * k * (3 - 2 * k);
+    cinFilm.volume = e;
+    cinFilm.style.opacity = e;
+  });
+  cinFilm.addEventListener('ended', closeCinema);
     cinFilm.addEventListener('error', closeCinema);
     cinema.querySelector('.cin-exit').addEventListener('click', closeCinema);
     cinema.querySelector('.cin-mute').addEventListener('click', (e) => {
@@ -1610,7 +1633,7 @@ async function boot() {
         else if (g.kind === 'fil') g.mat.uniforms.uPresence.value = presence;
         else if (g.kind === 'veil') { g.mat.uniforms.uPresence.value = presence; g.mat.uniforms.uTime.value = t; }
         else if (g.kind === 'points') { g.mat.uniforms.uAlpha.value = g.base * presence; g.mat.uniforms.uTime.value = t; }
-        else if (g.kind === 'basic') g.mat.opacity = g.base * presence;
+        else if (g.kind === 'basic') g.mat.opacity = g.mat.userData.still ? g.base : g.base * (g.mat.userData.counter ? Math.max(0, 1.25 - presence) : presence);
       }
     }
     if (W.planetGroup) W.planetGroup.rotation.y += 0.0003;

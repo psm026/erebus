@@ -55,12 +55,12 @@
     {
       "id": "bloom",
       "sector": "EREBUS // BLOOM",
-      "accentA": "#3fd9ad",
-      "accentB": "#9fe86e",
-      "fog": "#020806",
-      "nebulaA": "#06231c",
-      "nebulaB": "#122b06",
-      "dust": "#4ef0c0",
+      "accentA": "#cf7bde",
+      "accentB": "#ffd27d",
+      "fog": "#04030a",
+      "nebulaA": "#1a0d3e",
+      "nebulaB": "#241206",
+      "dust": "#ffd27d",
       "stops": [
         {
           "variant": "room-title",
@@ -135,12 +135,12 @@
     {
       "id": "chrysalis",
       "sector": "EREBUS // CHRYSALIS",
-      "accentA": "#49d6a4",
-      "accentB": "#e8a55f",
-      "fog": "#050604",
-      "nebulaA": "#0a2318",
+      "accentA": "#c9a2ff",
+      "accentB": "#d98e50",
+      "fog": "#04030a",
+      "nebulaA": "#120826",
       "nebulaB": "#241206",
-      "dust": "#6bd9a2",
+      "dust": "#c9a2ff",
       "stops": [
         {
           "variant": "room-title",
@@ -311,10 +311,10 @@
       "id": "mycelium",
       "sector": "EREBUS // MYCELIUM",
       "accentA": "#c9a2ff",
-      "accentB": "#7df2c8",
+      "accentB": "#7de8ff",
       "fog": "#04030a",
       "nebulaA": "#1a0d3e",
-      "nebulaB": "#07261d",
+      "nebulaB": "#041c2b",
       "dust": "#c9a2ff",
       "stops": [
         {
@@ -515,7 +515,7 @@
             0.32
           ],
           "rim": "B",
-          "intensity": 2.0,
+          "intensity": 2,
           "secret": {
             "eyebrow": "EGG-003 // FOUND",
             "title": "Soaked.",
@@ -541,7 +541,7 @@
           "title": "For now......",
           "body": "Come back and see us soon, as this always changing and growing space continues to change for your viewing pleasure.",
           "link": {
-            "label": "psm026@gmail.com",
+            "label": "Click here",
             "href": "mailto:psm026@gmail.com"
           }
         }

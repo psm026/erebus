@@ -8,12 +8,12 @@
     {
       "id": "roots",
       "sector": "DEPTHS // ROOTS",
-      "accentA": "#2fe6a8",
-      "accentB": "#0f8f70",
-      "fog": "#010504",
-      "nebulaA": "#02241a",
-      "nebulaB": "#03170f",
-      "dust": "#2fe6a8",
+      "accentA": "#d98e50",
+      "accentB": "#cf7bde",
+      "fog": "#060302",
+      "nebulaA": "#241206",
+      "nebulaB": "#10081f",
+      "dust": "#d98e50",
       "stops": [
         {
           "variant": "room-title",
@@ -64,10 +64,10 @@
       "id": "hollow",
       "sector": "DEPTHS // HOLLOW",
       "accentA": "#7de8ff",
-      "accentB": "#2fe6a8",
+      "accentB": "#8b7bff",
       "fog": "#010407",
       "nebulaA": "#041c2b",
-      "nebulaB": "#02241a",
+      "nebulaB": "#10081f",
       "dust": "#7de8ff",
       "stops": [
         {

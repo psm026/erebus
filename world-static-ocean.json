@@ -13,10 +13,10 @@
       "sky": "./asset-ocean-sky.webp",
       "skyOpacity": 0.55,
       "accentA": "#8fd8ff",
-      "accentB": "#b48cff",
+      "accentB": "#c9a2ff",
       "fog": "#010206",
       "nebulaA": "#050b18",
-      "nebulaB": "#12081f",
+      "nebulaB": "#10081f",
       "dust": "#8fd8ff",
       "stops": [
         {

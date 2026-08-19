@@ -8,12 +8,12 @@
     {
       "id": "spore-field",
       "sector": "SPORES // FIELD",
-      "accentA": "#e8d9a8",
+      "accentA": "#ffd27d",
       "accentB": "#c9a2ff",
-      "fog": "#050403",
-      "nebulaA": "#2b2210",
+      "fog": "#070403",
+      "nebulaA": "#241206",
       "nebulaB": "#1a0d3e",
-      "dust": "#e8d9a8",
+      "dust": "#ffd27d",
       "stops": [
         {
           "variant": "room-title",
@@ -74,12 +74,12 @@
     {
       "id": "the-hush",
       "sector": "SPORES // HUSH",
-      "accentA": "#d9b96a",
-      "accentB": "#e8d9a8",
-      "fog": "#040302",
-      "nebulaA": "#241a08",
-      "nebulaB": "#100a1e",
-      "dust": "#d9b96a",
+      "accentA": "#d98e50",
+      "accentB": "#ffd27d",
+      "fog": "#060302",
+      "nebulaA": "#241206",
+      "nebulaB": "#10081f",
+      "dust": "#d98e50",
       "stops": [
         {
           "variant": "room-title",
@@ -116,7 +116,7 @@
             0.3
           ],
           "rim": "A",
-          "intensity": 2.0,
+          "intensity": 2,
           "secret": {
             "eyebrow": "EGG-002 // FOUND",
             "title": "Patience pays in the dark.",

@@ -11,10 +11,10 @@
       "id": "galaxy-cinema",
       "sector": "CINEMA // THE LIVING GALAXY",
       "accentA": "#c9a2ff",
-      "accentB": "#7df2c8",
+      "accentB": "#6f9fff",
       "fog": "#04030a",
       "nebulaA": "#0d0722",
-      "nebulaB": "#071710",
+      "nebulaB": "#050b18",
       "dust": "#c9a2ff",
       "stops": [
         {
@@ -25,11 +25,51 @@
         }
       ],
       "structures": [
-        { "kind": "screen", "src": "./asset-video-galaxy.mp4?v=2", "scale": [26, 26] },
-        { "kind": "sea", "count": 1, "scale": [38, 42] },
-        { "kind": "swarm", "count": 2, "scale": [5, 8], "rim": "B" },
-        { "kind": "orb", "count": 2, "scale": [0.4, 0.8], "rim": "A", "intensity": 1.1 },
-        { "kind": "portal", "to": "main", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+        {
+          "kind": "screen",
+          "src": "./asset-video-galaxy.mp4?v=2",
+          "scale": [
+            26,
+            26
+          ]
+        },
+        {
+          "kind": "sea",
+          "count": 1,
+          "scale": [
+            38,
+            42
+          ]
+        },
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            5,
+            8
+          ],
+          "rim": "B"
+        },
+        {
+          "kind": "orb",
+          "count": 2,
+          "scale": [
+            0.4,
+            0.8
+          ],
+          "rim": "A",
+          "intensity": 1.1
+        },
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        }
       ]
     }
   ]

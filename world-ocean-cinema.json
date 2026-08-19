@@ -11,7 +11,7 @@
       "id": "ocean-cinema",
       "sector": "CINEMA // THE INVERTED OCEAN",
       "accentA": "#7de8ff",
-      "accentB": "#b48cff",
+      "accentB": "#c9a2ff",
       "fog": "#010407",
       "nebulaA": "#041426",
       "nebulaB": "#10081f",
@@ -25,10 +25,41 @@
         }
       ],
       "structures": [
-        { "kind": "screen", "src": "./asset-video-ocean.mp4?v=2", "scale": [26, 26] },
-        { "kind": "sea", "count": 1, "scale": [38, 42] },
-        { "kind": "veil", "count": 1, "scale": [22, 26], "intensity": 0.9 },
-        { "kind": "portal", "to": "bloom-depths", "scale": [2.2, 2.2], "rim": "A", "intensity": 1.4 }
+        {
+          "kind": "screen",
+          "src": "./asset-video-ocean.mp4?v=2",
+          "scale": [
+            26,
+            26
+          ]
+        },
+        {
+          "kind": "sea",
+          "count": 1,
+          "scale": [
+            38,
+            42
+          ]
+        },
+        {
+          "kind": "veil",
+          "count": 1,
+          "scale": [
+            22,
+            26
+          ],
+          "intensity": 0.9
+        },
+        {
+          "kind": "portal",
+          "to": "bloom-depths",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        }
       ]
     }
   ]
