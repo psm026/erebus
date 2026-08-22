@@ -614,3 +614,6 @@ body.listen-open #listen { display: block; }
 
 /* the room stays sharp behind the docked deck */
 #listen { backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* dock centering, animation-proof */
+.lst-panel, #listen.on .lst-panel { left: 0; right: 0; margin: 0 auto; transform: none !important; width: min(560px, 94vw); bottom: 18px; top: auto; position: fixed; }
