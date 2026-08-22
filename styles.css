@@ -611,3 +611,6 @@ body.listen-open #listen { display: block; }
 .lst-embed, .lst-embed iframe, .lst-panel iframe { min-height: 152px; height: 152px; }
 .lst-exit { position: absolute; top: 8px; right: 10px; padding: 4px 10px; font-size: 10px; }
 @media (max-width: 720px) { .lst-embed, .lst-embed iframe, .lst-panel iframe { min-height: 152px; height: 152px; } }
+
+/* the room stays sharp behind the docked deck */
+#listen { backdrop-filter: none; -webkit-backdrop-filter: none; }
