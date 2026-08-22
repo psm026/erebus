@@ -1415,6 +1415,7 @@ async function boot() {
   let listenCtrl = null;
   function openListen(data) {
     if (!listen) return;
+    if (document.body.classList.contains('listen-open')) return; // the deck is already spinning
     listen.querySelector('.lst-eyebrow').textContent = data.eyebrow || '';
     listen.querySelector('.lst-title').textContent = data.title || '';
     const host = listen.querySelector('.lst-embed');
@@ -1432,7 +1433,7 @@ async function boot() {
       host.innerHTML = '<div></div>';
       try {
         window.SpotifyIframeApi.createController(host.firstChild, {
-          uri: 'spotify:' + id.replace(/\//g, ':'), width: '100%', height: 420, theme: 'dark',
+          uri: 'spotify:' + id.replace(/\//g, ':'), width: '100%', height: 152, theme: 'dark',
         }, (ctrl) => {
           listenCtrl = ctrl;
           // the deck click was the visitor's gesture — drop the needle for them

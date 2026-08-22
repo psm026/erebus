@@ -593,3 +593,21 @@ body.hud-off .hud { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .p-link::before, #hud-exit, .lst-exit, .cin-exit, .cin-mute, .lst-panel::before { animation: none; }
 }
+
+/* v15.1 — the deck docks: records spin over the room, not over a menu */
+#listen { pointer-events: none; background: none; }
+body.listen-open #listen { display: block; }
+.lst-panel {
+  pointer-events: auto;
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+  width: min(560px, 94vw); margin: 0; padding: 12px 14px 12px;
+  background: linear-gradient(160deg, rgba(23,16,10,.82), rgba(13,8,6,.88));
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(234,162,94,.25); border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.55);
+}
+.lst-title { font-size: 15px; margin: 0 0 6px; }
+.lst-eyebrow { font-size: 9px; margin: 0 0 2px; }
+.lst-embed, .lst-embed iframe, .lst-panel iframe { min-height: 152px; height: 152px; }
+.lst-exit { position: absolute; top: 8px; right: 10px; padding: 4px 10px; font-size: 10px; }
+@media (max-width: 720px) { .lst-embed, .lst-embed iframe, .lst-panel iframe { min-height: 152px; height: 152px; } }
