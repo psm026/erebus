@@ -1052,7 +1052,8 @@ async function boot() {
           } else if (spec.anchor !== false) {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
             const p = W.curve.getPointAt(stopT(stopIdx));
-            group.position.set(p.x - 9 - (i % 2) * 2, p.y + rand(-1, 2), p.z - 10);
+            if (isPortrait()) group.position.set(p.x + (i % 2 ? 2.6 : -2.6), p.y + rand(4.5, 6), p.z - 11);
+            else group.position.set(p.x - 9 - (i % 2) * 2, p.y + rand(-1, 2), p.z - 10); // phones hold their doors above the words, never off-frame
           } else {
             group.position.copy(besidePath(room, 9, 16, i));
           }
