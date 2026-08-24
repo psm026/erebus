@@ -1044,6 +1044,11 @@ async function boot() {
           pool.position.y = -1.2;
           group.add(pool);
           if (group.userData.hitMesh) { group.userData.hitMesh.userData = core.userData; W.clickables.push(group.userData.hitMesh); }
+          // every door gets a generous unseen reach
+          const reach = new THREE.Mesh(new THREE.SphereGeometry(s * 1.55, 12, 12), new THREE.MeshBasicMaterial({ visible: false }));
+          reach.userData = core.userData;
+          group.add(reach);
+          W.clickables.push(reach);
           group.userData.beacon = true;
           if (W.immersive) {
             // exit gate floats behind your entry gaze — turn around to leave
@@ -1346,8 +1351,24 @@ async function boot() {
     if (e.target.closest && e.target.closest('.panel, .hud, .hud-bottom, #egg-veil, #hud-exit')) return;
     clickNDC.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(clickNDC, camera);
-    const hits = raycaster.intersectObjects(W.clickables, false);
-    if (!hits.length) return;
+    let hits = raycaster.intersectObjects(W.clickables, false);
+    if (!hits.length) {
+      // forgiveness: a near miss within a thumb's width still opens the door
+      const v = new THREE.Vector3();
+      let best = null, bestD = (isMobile ? 90 : 60);
+      for (const c of W.clickables) {
+        const t = c.userData && c.userData.type;
+        if (!t || t === 'screen') continue;
+        c.getWorldPosition(v).project(camera);
+        if (v.z > 1 || v.z < -1) continue;
+        const dx = (v.x - clickNDC.x) * window.innerWidth / 2;
+        const dy = (v.y - clickNDC.y) * window.innerHeight / 2;
+        const d = Math.hypot(dx, dy);
+        if (d < bestD) { bestD = d; best = c; }
+      }
+      if (!best) return;
+      hits = [{ object: best }];
+    }
     const data = hits[0].object.userData || {};
     if (data.type === 'egg') {
       const secret = data.secret || {};
