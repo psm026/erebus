@@ -1,5 +1,5 @@
 /* ============================================================
-   EREBUS — obsidian dream space
+   EREBUS â obsidian dream space
    Tune the whole mood from these tokens.
    ============================================================ */
 :root {
@@ -230,13 +230,13 @@ h2 {
   padding-bottom: 0.35em;
   transition: color 0.3s, border-color 0.3s;
 }
-.p-link::after { content: "  →"; white-space: pre; }
+.p-link::after { content: "  â"; white-space: pre; }
 .p-link:hover, .p-link:focus-visible { color: var(--cyan); border-color: var(--cyan); }
 .p-link:focus-visible { outline: 1px dashed var(--cyan); outline-offset: 6px; }
 
 .contact-link { font-size: 15px; text-transform: none; letter-spacing: 0.05em; }
 
-/* ---------- dive rooms (immersive 360°) ---------- */
+/* ---------- dive rooms (immersive 360Â°) ---------- */
 body.immersive {
   overflow: hidden;
   touch-action: none;
@@ -269,7 +269,7 @@ body.immersive .progress { display: none; }
 #hud-exit:hover { color: var(--ink); border-color: var(--dim); }
 body.immersive #hud-exit { display: block; }
 
-/* dive-room title: appears, then dissolves — the room speaks visually */
+/* dive-room title: appears, then dissolves â the room speaks visually */
 .panel.ephemeral { transition: opacity 2.4s var(--ease), filter 2.4s var(--ease), visibility 2.4s; }
 .panel.ephemeral.gone { opacity: 0; visibility: hidden; filter: blur(8px); pointer-events: none; }
 
@@ -356,7 +356,7 @@ body.cinema-open #cinema { display: block; }
 #cinema video {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* full-bleed takeover — the film IS the page */
+  object-fit: cover; /* full-bleed takeover â the film IS the page */
   display: block;
   background: #000;
 }
@@ -529,11 +529,11 @@ body.hud-off .hud { display: none; }
 .lst-embed iframe { width: 100%; height: 420px; border: 0; border-radius: 12px; display: block; background: #0d0806; }
 @media (max-width: 720px) { .lst-embed { min-height: 352px; } .lst-embed iframe { height: 352px; } }
 
-/* no badge, no banner — the world is the interface */
+/* no badge, no banner â the world is the interface */
 .hud { display: none !important; }
 
 
-/* ---------- v14 — the clickable law: orb in ring, breathing ---------- */
+/* ---------- v14 â the clickable law: orb in ring, breathing ---------- */
 @keyframes orbPulse {
   0%, 100% { transform: scale(1); opacity: 0.7; }
   50% { transform: scale(1.22); opacity: 1; }
@@ -594,7 +594,7 @@ body.hud-off .hud { display: none; }
   .p-link::before, #hud-exit, .lst-exit, .cin-exit, .cin-mute, .lst-panel::before { animation: none; }
 }
 
-/* v15.1 — the deck docks: records spin over the room, not over a menu */
+/* v15.1 â the deck docks: records spin over the room, not over a menu */
 #listen { pointer-events: none; background: none; }
 body.listen-open #listen { display: block; }
 .lst-panel {
@@ -618,15 +618,15 @@ body.listen-open #listen { display: block; }
 /* dock centering, animation-proof */
 .lst-panel, #listen.on .lst-panel { left: 0; right: 0; margin: 0 auto; transform: none !important; width: min(560px, 94vw); bottom: 18px; top: auto; position: fixed; }
 
-/* door markers — every door says its name and is a real click target */
+/* door markers â every door says its name and is a real click target */
 #markers { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
 .dm {
   position: absolute; top: 0; left: 0; opacity: 0;
-  display: flex; align-items: center; gap: 8px;
-  padding: 9px 16px 9px 12px; margin: 0;
-  font: 500 11px/1 'Space Grotesk', system-ui, sans-serif; letter-spacing: .22em; text-transform: uppercase;
+  display: block; 
+  padding: 4px 9px; margin: 0;
+  font: 400 8px/1 'Space Grotesk', system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase;
   color: rgba(238,230,246,.92); white-space: nowrap; cursor: pointer;
-  background: rgba(8,4,16,.42); border: 1px solid rgba(201,162,255,.35); border-radius: 999px;
+  background: rgba(8,4,16,.42); border: 1px solid rgba(201,162,255,.20); border-radius: 999px;
   backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
   transition: opacity .5s ease, border-color .3s ease, background .3s ease, transform .08s linear;
 }
@@ -634,4 +634,11 @@ body.listen-open #listen { display: block; }
 .dm-dot { width: 6px; height: 6px; border-radius: 50%; background: #eaa25e; box-shadow: 0 0 10px 2px rgba(234,162,94,.75); animation: dmPulse 2.8s ease-in-out infinite; }
 @keyframes dmPulse { 0%,100% { opacity: .55; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.15); } }
 body.cinema-open #markers, body.egg-open #markers { display: none; }
-@media (max-width: 720px) { .dm { padding: 11px 18px 11px 14px; font-size: 11px; } }
+@media (max-width: 720px) { .dm { padding: 5px 10px; font-size: 11px; } }
+
+.dm { color: rgba(232,224,244,.72); }
+.dm:hover, .dm:focus-visible { color: #fff; }
+
+.dm { color: rgba(232,224,244,.72); border-color: rgba(201,162,255,.20); }
+.dm:hover, .dm:focus-visible { color: #fff; }
+.dm-dot { display: none; }

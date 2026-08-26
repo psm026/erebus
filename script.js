@@ -1044,7 +1044,8 @@ async function boot() {
             const el = document.createElement('button');
             el.className = 'dm';
             el.type = 'button';
-            el.innerHTML = '<span class="dm-dot"></span><span class="dm-txt">' + txt + '</span>';
+            el.textContent = txt;
+            el.dataset.pri = (d.type === 'portal' && (d.to === 'main' || d.to === '__back')) ? '1' : '2';
             el.addEventListener('click', (ev) => { ev.stopPropagation(); activateTarget(d); });
             host.appendChild(el);
             group.userData.marker = el;
@@ -1690,6 +1691,18 @@ async function boot() {
         const on = _v.z < 1 && _v.x > -1.15 && _v.x < 1.15 && _v.y > -1.15 && _v.y < 1.15 && !document.body.classList.contains('cinema-open');
         if (!on) { if (m.el.style.opacity !== '0') { m.el.style.opacity = '0'; m.el.style.pointerEvents = 'none'; } continue; }
         m.el.style.transform = 'translate(-50%,-50%) translate(' + Math.round((_v.x * 0.5 + 0.5) * window.innerWidth) + 'px,' + Math.round((-_v.y * 0.5 + 0.5) * window.innerHeight + 46) + 'px)';
+        m._sx = (_v.x * 0.5 + 0.5) * window.innerWidth;
+        m._sy = (-_v.y * 0.5 + 0.5) * window.innerHeight + 46;
+        m._on = true;
+      }
+      const shown = [];
+      for (const m of [...W.markers].sort((a, b) => (a.el.dataset.pri || '2').localeCompare(b.el.dataset.pri || '2'))) {
+        if (!m._on) continue;
+        m._on = false;
+        let clash = false;
+        for (const s of shown) { if (Math.abs(s._sx - m._sx) < 150 && Math.abs(s._sy - m._sy) < 34) { clash = true; break; } }
+        if (clash) { m.el.style.opacity = '0'; m.el.style.pointerEvents = 'none'; continue; }
+        shown.push(m);
         m.el.style.opacity = '1';
         m.el.style.pointerEvents = 'auto';
       }
