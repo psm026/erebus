@@ -549,6 +549,7 @@ async function boot() {
     }
     W.analyser = null;
     W.audioLevel = 0;
+    if (W.markers) { for (const m of W.markers) m.el.remove(); W.markers = []; }
     if (W.backdropMesh) { camera.remove(W.backdropMesh); W.backdropMesh = null; W.backdropFit = null; }
     for (const g of W.groups) { scene.remove(g); if (g.parent === camera) camera.remove(g); }
     if (W.dust) scene.remove(W.dust);
@@ -1030,6 +1031,25 @@ async function boot() {
           // the ring is clickable too — bigger target
           group.children[0].userData = core.userData;
           W.clickables.push(core, group.children[0]);
+          // a door says its own name: an HTML tag you can read and click
+          (function () {
+            const host = document.getElementById('markers');
+            if (!host) return;
+            const d = core.userData || {};
+            const nice = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+            const txt = d.type === 'film' ? (d.title || 'A film')
+              : d.type === 'listen' ? (d.title || 'The listening deck')
+              : (d.to === 'main' || d.to === '__back') ? 'Surface'
+              : nice(d.to);
+            const el = document.createElement('button');
+            el.className = 'dm';
+            el.type = 'button';
+            el.innerHTML = '<span class="dm-dot"></span><span class="dm-txt">' + txt + '</span>';
+            el.addEventListener('click', (ev) => { ev.stopPropagation(); activateTarget(d); });
+            host.appendChild(el);
+            group.userData.marker = el;
+            (W.markers || (W.markers = [])).push({ el, group });
+          })();
           // a door reads as a door from anywhere: counter-breathing halo + quiet ground pool
           const halo = new THREE.Mesh(new THREE.TorusGeometry(s * 1.35, s * 0.008, 8, 128), new THREE.MeshBasicMaterial({
             color: col, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false,
@@ -1370,6 +1390,9 @@ async function boot() {
       hits = [{ object: best }];
     }
     const data = hits[0].object.userData || {};
+    activateTarget(data);
+  });
+  function activateTarget(data) {
     if (data.type === 'egg') {
       const secret = data.secret || {};
       eggVeil.querySelector('.egg-eyebrow').textContent = secret.eyebrow || 'FOUND';
@@ -1389,7 +1412,7 @@ async function boot() {
     } else if (data.type === 'listen') {
       openListen(data);
     }
-  });
+  }
   eggVeil.querySelector('.egg-close').addEventListener('click', () => {
     document.body.classList.remove('egg-open');
   });
@@ -1660,6 +1683,17 @@ async function boot() {
       }
     }
     if (W.planetGroup) W.planetGroup.rotation.y += 0.0003;
+    if (W.markers && W.markers.length) {
+      const _v = new THREE.Vector3();
+      for (const m of W.markers) {
+        m.group.getWorldPosition(_v).project(camera);
+        const on = _v.z < 1 && _v.x > -1.15 && _v.x < 1.15 && _v.y > -1.15 && _v.y < 1.15 && !document.body.classList.contains('cinema-open');
+        if (!on) { if (m.el.style.opacity !== '0') { m.el.style.opacity = '0'; m.el.style.pointerEvents = 'none'; } continue; }
+        m.el.style.transform = 'translate(-50%,-50%) translate(' + Math.round((_v.x * 0.5 + 0.5) * window.innerWidth) + 'px,' + Math.round((-_v.y * 0.5 + 0.5) * window.innerHeight + 46) + 'px)';
+        m.el.style.opacity = '1';
+        m.el.style.pointerEvents = 'auto';
+      }
+    }
 
     if (!W.immersive) {
       setActiveStop(Math.round(progress * (W.totalStops - 1)));

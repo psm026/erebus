@@ -617,3 +617,21 @@ body.listen-open #listen { display: block; }
 
 /* dock centering, animation-proof */
 .lst-panel, #listen.on .lst-panel { left: 0; right: 0; margin: 0 auto; transform: none !important; width: min(560px, 94vw); bottom: 18px; top: auto; position: fixed; }
+
+/* door markers — every door says its name and is a real click target */
+#markers { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.dm {
+  position: absolute; top: 0; left: 0; opacity: 0;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px 9px 12px; margin: 0;
+  font: 500 11px/1 'Space Grotesk', system-ui, sans-serif; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(238,230,246,.92); white-space: nowrap; cursor: pointer;
+  background: rgba(8,4,16,.42); border: 1px solid rgba(201,162,255,.35); border-radius: 999px;
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  transition: opacity .5s ease, border-color .3s ease, background .3s ease, transform .08s linear;
+}
+.dm:hover, .dm:focus-visible { background: rgba(20,10,32,.72); border-color: rgba(234,162,94,.75); color: #fff; outline: none; }
+.dm-dot { width: 6px; height: 6px; border-radius: 50%; background: #eaa25e; box-shadow: 0 0 10px 2px rgba(234,162,94,.75); animation: dmPulse 2.8s ease-in-out infinite; }
+@keyframes dmPulse { 0%,100% { opacity: .55; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.15); } }
+body.cinema-open #markers, body.egg-open #markers { display: none; }
+@media (max-width: 720px) { .dm { padding: 11px 18px 11px 14px; font-size: 11px; } }
