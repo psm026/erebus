@@ -1,15 +1,15 @@
 {
   "meta": {
-    "title": "EREBUS — The Hifi Temple",
+    "title": "EREBUS — Hifi Cosmic Fungi",
     "version": 1,
-    "note": "Low-orbit listening room. The speaker wall is the room — the burning deck before it spins records. Door in The Relics. Swap the playlist by changing the spotify value (playlist/<id>, album/<id> or track/<id>)."
+    "note": "Chrome listening chamber in deep space, mycelium threading the metal. Door lives in The Mycelium. Swap the playlist by changing the spotify value."
   },
   "mode": "immersive",
   "returnTo": "main",
   "rooms": [
     {
       "id": "hifi-temple",
-      "sector": "HIFI // THE TEMPLE",
+      "sector": "HIFI // COSMIC FUNGI",
       "accentA": "#eaa25e",
       "accentB": "#6f9fff",
       "fog": "#070402",
@@ -19,15 +19,15 @@
       "stops": [
         {
           "variant": "room-title",
-          "eyebrow": "Low orbit listening room",
-          "title": "The Hifi Temple",
-          "body": "Warm wood in cold space. The burning deck spins records — touch it. The ring behind you leads home."
+          "eyebrow": "Deep space listening chamber",
+          "title": "Hifi Cosmic Fungi",
+          "body": "Chrome, vacuum, and something growing in the seams. The disc spins when you touch it. The ring behind you leads home."
         }
       ],
       "structures": [
         {
           "kind": "image",
-          "src": "./asset-hifi-wall.webp?v=2",
+          "src": "./asset-hifi-wall-cosmic.webp",
           "backdrop": true,
           "ratio": 0.5581,
           "scale": [
@@ -40,17 +40,18 @@
         {
           "kind": "portal",
           "spotify": "playlist/0ptSiNdYwtKmuyMwgdH6kb",
-          "listenTitle": "The Hifi Temple",
+          "listenTitle": "Hifi Cosmic Fungi",
           "listenEyebrow": "Now spinning — dark space soundtracks",
           "scale": [
-            1.2,
-            1.2
+            0.62,
+            0.62
           ],
           "rim": "B",
           "intensity": 1.6,
           "x": 0,
           "y": 0.1,
-          "z": -12
+          "z": -12,
+          "chrome": true
         },
         {
           "kind": "monolith",

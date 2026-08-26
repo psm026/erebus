@@ -293,17 +293,6 @@
           ],
           "rim": "B",
           "intensity": 0.4
-        },
-        {
-          "kind": "portal",
-          "to": "hifi-temple",
-          "scale": [
-            3.4,
-            3.4
-          ],
-          "rim": "A",
-          "intensity": 1.8,
-          "anchor": true
         }
       ]
     },
@@ -419,6 +408,17 @@
           ],
           "rim": "B",
           "opacity": 0.15
+        },
+        {
+          "kind": "portal",
+          "to": "hifi-temple",
+          "scale": [
+            3,
+            3
+          ],
+          "rim": "A",
+          "intensity": 1.7,
+          "anchor": true
         }
       ]
     },
