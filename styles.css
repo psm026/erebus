@@ -642,3 +642,6 @@ body.cinema-open #markers, body.egg-open #markers { display: none; }
 .dm { color: rgba(232,224,244,.72); border-color: rgba(201,162,255,.20); }
 .dm:hover, .dm:focus-visible { color: #fff; }
 .dm-dot { display: none; }
+
+/* the doors speak for themselves */
+#markers { display: none !important; }

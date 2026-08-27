@@ -575,8 +575,10 @@ async function boot() {
     const t = stopT(rand(room.firstStop, room.lastStop));
     const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
     const side = i % 2 ? 1 : -1;
-    p.x += side * rand(lateralMin, lateralMax);
-    p.y += rand(-13, 13);
+    // a narrow frame keeps its matter close: phones see the world, not its edges
+    const squeeze = isPortrait() ? 0.42 : 1;
+    p.x += side * rand(lateralMin * squeeze, lateralMax * squeeze);
+    p.y += rand(-13, 13) * (isPortrait() ? 0.72 : 1);
     return p;
   }
 
@@ -1089,8 +1091,8 @@ async function boot() {
           } else if (spec.anchor !== false) {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
             const p = W.curve.getPointAt(stopT(stopIdx));
-            if (isPortrait()) group.position.set(p.x + (i % 2 ? 2.6 : -2.6), p.y + rand(4.5, 6), p.z - 11);
-            else group.position.set(p.x - 9 - (i % 2) * 2, p.y + rand(-1, 2), p.z - 10); // phones hold their doors above the words, never off-frame
+            if (isPortrait()) group.position.set(p.x + (i % 2 ? 3.4 : -3.4), p.y + 4.2 + i * 3.6, p.z - 11);
+            else group.position.set(p.x - 8 - (i % 2) * 3.5, p.y + 1 + i * 3.2, p.z - 10); // phones hold their doors above the words, never off-frame
           } else {
             group.position.copy(besidePath(room, 9, 16, i));
           }
