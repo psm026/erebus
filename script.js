@@ -797,8 +797,19 @@ async function boot() {
             };
             fit();
             px.position.set(0, 0, -dist);
-            if (!camera.parent) scene.add(camera);
-            camera.add(px);
+            if (W.immersive) {
+              if (!camera.parent) scene.add(camera);
+              camera.add(px);
+            } else {
+              // the drift: hang it in world space behind the room's own stops
+              const p0 = W.curve.getPointAt(stopT(room.firstStop));
+              const vh = 2 * 120 * Math.tan(camera.fov * Math.PI / 360);
+              px.scale.set(vh * imgRatio * 1.3, vh * 1.3, 1);
+              px.position.set(p0.x, p0.y + 6, p0.z - 120);
+              px.lookAt(p0.x, p0.y + 6, p0.z + 10);
+              scene.add(px);
+              W.groups.push(px);
+            }
             W.backdropMesh = px;
             W.backdropFit = fit;
             track(px);
