@@ -576,9 +576,9 @@ async function boot() {
     const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
     const side = i % 2 ? 1 : -1;
     // a narrow frame keeps its matter close: phones see the world, not its edges
-    const squeeze = isPortrait() ? 0.42 : 1;
+    const squeeze = isPortrait() ? 0.22 : 1;
     p.x += side * rand(lateralMin * squeeze, lateralMax * squeeze);
-    p.y += rand(-13, 13) * (isPortrait() ? 0.72 : 1);
+    p.y += rand(-13, 13) * (isPortrait() ? 0.5 : 1);
     return p;
   }
 
@@ -980,7 +980,7 @@ async function boot() {
             const t = stopT(rand(room.firstStop, room.lastStop));
             const p = W.curve.getPointAt(Math.min(1, Math.max(0, t)));
             // within reach of the look-around: off the path, never out of sight
-            group.position.set(p.x + rand(-6, 6), p.y + rand(4.5, 7.5) * (Math.random() > 0.5 ? 1 : -1), p.z - 6);
+            group.position.set(p.x + rand(-6, 6) * (isPortrait() ? 0.35 : 1), p.y + rand(4.5, 7.5) * (isPortrait() ? 0.6 : 1) * (Math.random() > 0.5 ? 1 : -1), p.z - 6);
           }
           group.userData.breathe = true;
           group.userData.breatheMin = 0.7; // eggs dim but stay findable
@@ -1087,11 +1087,12 @@ async function boot() {
           if (W.immersive) {
             // exit gate floats behind your entry gaze — turn around to leave
             if (spec.z != null) { group.position.set(spec.x || 0, spec.y != null ? spec.y : 1.2, spec.z); }
+            else if (isPortrait()) group.position.set(rand(-1.5, 1.5), rand(0, 2), rand(15, 19));
             else group.position.set(rand(-3, 3), rand(-1, 3), rand(18, 24));
           } else if (spec.anchor !== false) {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
             const p = W.curve.getPointAt(stopT(stopIdx));
-            if (isPortrait()) group.position.set(p.x + (i % 2 ? 3.4 : -3.4), p.y + 4.2 + i * 3.6, p.z - 11);
+            if (isPortrait()) group.position.set(p.x + (i % 2 ? 1.6 : -1.6), p.y + 3.4 + i * 4.4, p.z - 10);
             else group.position.set(p.x - 8 - (i % 2) * 3.5, p.y + 1 + i * 3.2, p.z - 10); // phones hold their doors above the words, never off-frame
           } else {
             group.position.copy(besidePath(room, 9, 16, i));
