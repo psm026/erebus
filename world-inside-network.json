@@ -26,6 +26,18 @@
       ],
       "structures": [
         {
+          "kind": "image",
+          "src": "./bg-inside-network.webp",
+          "backdrop": true,
+          "ratio": 0.5581,
+          "scale": [
+            30,
+            30
+          ],
+          "y": 2.5,
+          "z": -20
+        },
+        {
           "kind": "network",
           "count": 1,
           "scale": [
