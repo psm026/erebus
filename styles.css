@@ -645,3 +645,7 @@ body.cinema-open #markers, body.egg-open #markers { display: none; }
 
 /* the doors speak for themselves */
 #markers { display: none !important; }
+
+
+/* v20-no-index-counter */
+#hud-index { display: none !important; }
