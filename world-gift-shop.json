@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "title": "EREBUS — The Gift Shop",
+    "version": 1,
+    "note": "Galactic gift shop for celestial beings. Door lives in The Relics. Products ship on transparent backgrounds so they float."
+  },
+  "mode": "immersive",
+  "returnTo": "main",
+  "rooms": [
+    {
+      "id": "gift-shop",
+      "sector": "EREBUS // GIFT SHOP",
+      "accentA": "#ff9d5c",
+      "accentB": "#ffd27d",
+      "fog": "#070403",
+      "nebulaA": "#2b1206",
+      "nebulaB": "#1f0a14",
+      "dust": "#ff9d5c",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Trading post at the rim of the dark",
+          "title": "The Gift Shop",
+          "body": "Nothing in Erebus is manufactured. Things are cultivated, fruit once, and are let go. What floats here is for sale. What has stopped floating already found its owner."
+        },
+        {
+          "num": "◆",
+          "title": "What grows on these shelves",
+          "tags": "Drops / One-offs / Souvenirs",
+          "body": "Wearables that remember the dark. Prints pulled straight off the walls of rooms you have already walked. Objects with no listed function — celestial beings rarely need one. Stock arrives the way mushrooms do: several at once, then nothing for a season. Checkout happens here. You never leave the dark to pay.",
+          "link": {
+            "label": "Tell me when the doors open",
+            "href": "mailto:psm026@gmail.com?subject=EREBUS%20Gift%20Shop"
+          }
+        }
+      ],
+      "structures": [
+        {
+          "kind": "image",
+          "src": "./bg-relics.webp",
+          "backdrop": true,
+          "ratio": 0.558,
+          "scale": [
+            30,
+            30
+          ],
+          "y": 2.5,
+          "z": -20
+        },
+        {
+          "kind": "orb",
+          "count": 5,
+          "scale": [
+            0.6,
+            1.3
+          ],
+          "rim": "B",
+          "intensity": 1.5
+        },
+        {
+          "kind": "orb",
+          "count": 3,
+          "scale": [
+            0.35,
+            0.7
+          ],
+          "rim": "A",
+          "intensity": 1.2
+        },
+        {
+          "kind": "ring",
+          "count": 2,
+          "scale": [
+            5,
+            9
+          ],
+          "rim": "B",
+          "opacity": 0.16
+        },
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.4
+        }
+      ]
+    }
+  ]
+}
