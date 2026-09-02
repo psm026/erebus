@@ -487,20 +487,64 @@ async function boot() {
 
   // photographic/AI sky: a second sphere that carries an equirectangular image
   // (rooms opt in with "sky": "./asset-name.webp" — 2:1 equirect, AI-generated or shot)
-  const skyPhotoMat = new THREE.MeshBasicMaterial({
-    transparent: true, opacity: 0, depthWrite: false, side: THREE.BackSide,
+  /* THE DOME — a room with no walls.
+     An image is never hung in front of you. It becomes the entire sphere of
+     sky: mirrored in yaw and pitch so no edge exists in any direction, dimmed
+     behind you so the fold reads as distance, thinned toward the poles so the
+     starfield keeps burning through. Turn your head anywhere and there is
+     always world. There is never a rectangle. */
+  const DOME_VERT = `
+    varying vec3 vDir;
+    void main() {
+      vDir = normalize(position);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`;
+  const DOME_FRAG = `
+    precision highp float;
+    varying vec3 vDir;
+    uniform sampler2D uMap;
+    uniform float uOpacity, uTime, uRatio, uHas;
+    float fold(float x) { float m = mod(x, 2.0); return m > 1.0 ? 2.0 - m : m; }
+    void main() {
+      if (uHas < 0.5 || uOpacity <= 0.001) discard;
+      vec3 d = normalize(vDir);
+      float yaw = atan(d.x, -d.z);
+      float pitch = asin(clamp(d.y, -1.0, 1.0));
+      float span = 2.60;
+      float u = fold(yaw / span + 0.5 + sin(uTime * 0.008) * 0.010);
+      float v = fold(pitch / (span * max(uRatio, 0.2)) + 0.5);
+      vec3 c = pow(texture2D(uMap, vec2(u, v)).rgb, vec3(2.2));
+      float ahead = 0.5 + 0.5 * cos(yaw);
+      float polar = 1.0 - smoothstep(0.30, 1.35, abs(pitch));
+      c *= mix(0.26, 1.0, ahead * ahead) * mix(0.20, 1.0, polar);
+      float a = uOpacity * mix(0.34, 1.0, ahead) * mix(0.30, 1.0, polar);
+      gl_FragColor = vec4(c, a);
+    }`;
+  const skyPhotoMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uMap: { value: null }, uOpacity: { value: 0 }, uTime: { value: 0 },
+      uRatio: { value: 0.5625 }, uHas: { value: 0 },
+    },
+    vertexShader: DOME_VERT, fragmentShader: DOME_FRAG,
+    transparent: true, depthWrite: false, side: THREE.BackSide, fog: false,
   });
-  const skyPhoto = new THREE.Mesh(new THREE.SphereGeometry(255, 48, 32), skyPhotoMat);
-  skyPhoto.rotation.y = Math.PI; // seam behind the entry gaze
+  const skyPhoto = new THREE.Mesh(new THREE.SphereGeometry(250, 64, 48), skyPhotoMat);
   sky.add(skyPhoto);
-  function setSkyPhoto(url, opacity) {
-    if (skyPhotoMat.map) { skyPhotoMat.map.dispose(); skyPhotoMat.map = null; }
-    skyPhotoMat.opacity = 0;
-    if (!url) { skyPhotoMat.needsUpdate = true; return; }
+  function setSkyPhoto(url, opacity, ratio) {
+    const su = skyPhotoMat.uniforms;
+    if (su.uMap.value) { su.uMap.value.dispose(); su.uMap.value = null; }
+    su.uHas.value = 0; su.uOpacity.value = 0;
+    su.uRatio.value = ratio || 0.5625;
+    if (!url) return;
     texLoaderGlobal.load(url, (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
-      skyPhotoMat.map = tex;
-      skyPhotoMat.opacity = opacity != null ? opacity : 0.85;
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      su.uMap.value = tex;
+      su.uHas.value = 1;
+      su.uOpacity.value = opacity != null ? opacity : 0.94;
       skyPhotoMat.needsUpdate = true;
     });
   }
@@ -780,41 +824,14 @@ async function boot() {
           })));
 
           if (spec.backdrop) {
-            // WALLPAPER: the image IS the page — mounted on the lens, cover-fit,
-            // so the whole background is the wall and the matter floats before it
+            // the wall became the world — hand the image to the dome, drop the plane
             const px = group.children[0];
-            const bm = px.material;
-            bm.opacity = 1; bm.toneMapped = false; bm.fog = false; bm.depthWrite = false;
-            px.geometry.dispose();
-            px.geometry = new THREE.PlaneGeometry(1, 1);
-            px.renderOrder = -20;
             group.remove(px);
-            const dist = 190;
-            const imgRatio = spec.ratio ? (1 / spec.ratio) : 16 / 9;
-            const fit = () => {
-              const vh = 2 * dist * Math.tan(camera.fov * Math.PI / 360);
-              const vw = vh * camera.aspect;
-              if (vw / vh > imgRatio) px.scale.set(vw * 1.02, (vw / imgRatio) * 1.02, 1);
-              else px.scale.set(vh * imgRatio * 1.02, vh * 1.02, 1);
-            };
-            fit();
-            px.position.set(0, 0, -dist);
-            if (W.immersive) {
-              if (!camera.parent) scene.add(camera);
-              camera.add(px);
-            } else {
-              // the drift: hang it in world space behind the room's own stops
-              const p0 = W.curve.getPointAt(stopT(room.firstStop));
-              const vh = 2 * 120 * Math.tan(camera.fov * Math.PI / 360);
-              px.scale.set(vh * imgRatio * 1.3, vh * 1.3, 1);
-              px.position.set(p0.x, p0.y + 6, p0.z - 120);
-              px.lookAt(p0.x, p0.y + 6, p0.z + 10);
-              scene.add(px);
-              W.groups.push(px);
-            }
-            W.backdropMesh = px;
-            W.backdropFit = fit;
-            track(px);
+            px.geometry.dispose();
+            px.material.dispose();
+            W.domeSrc = spec.src;
+            W.domeRatio = spec.ratio || 0.5625;
+            W.domeOpacity = spec.opacity != null ? spec.opacity : 0.94;
             continue;
           }
 
@@ -1201,6 +1218,7 @@ async function boot() {
     scene.add(W.dust);
     track(W.dust);
 
+    W.domeSrc = null; W.domeRatio = 0.5625; W.domeOpacity = 0.94;
     W.rooms.forEach((room) => room.structures.forEach((spec) => buildStructure(spec, room)));
 
     const planetRoom = W.rooms.find((r) => r.planet);
@@ -1223,7 +1241,11 @@ async function boot() {
     hudSector.textContent = W.rooms[0].sector || '';
 
     // photographic/AI sky if the room asks for one
-    setSkyPhoto(W.rooms[0].sky || null, W.rooms[0].skyOpacity);
+    setSkyPhoto(
+      W.rooms[0].sky || W.domeSrc || null,
+      W.rooms[0].sky ? W.rooms[0].skyOpacity : W.domeOpacity,
+      W.rooms[0].sky ? (W.rooms[0].skyRatio || 0.5) : W.domeRatio
+    );
 
     // palette snap targets to the first room of the new world
     const r0 = W.rooms[0];
@@ -1659,6 +1681,7 @@ async function boot() {
     lightB.color.lerp(lightBTarget, pl);
 
     nebulaMat.uniforms.uTime.value = t;
+    skyPhotoMat.uniforms.uTime.value = t;
     stars.material.uniforms.uTime.value = t;
     if (W.dust) W.dust.material.uniforms.uTime.value = t;
     for (const s of W.animated) {
