@@ -1,8 +1,8 @@
 {
   "meta": {
     "title": "EREBUS — The Gift Shop",
-    "version": 1,
-    "note": "Galactic gift shop for celestial beings. Door lives in The Relics. Products ship on transparent backgrounds so they float."
+    "version": 2,
+    "note": "Door lives in The Relics. The room is a dome, not a plane: sky wraps 360. Plinths and cases give parallax when you turn your head. Products ship on transparent backgrounds so they float."
   },
   "mode": "immersive",
   "returnTo": "main",
@@ -16,12 +16,15 @@
       "nebulaA": "#2b1206",
       "nebulaB": "#1f0a14",
       "dust": "#ff9d5c",
+      "sky": "./bg-relics.webp",
+      "skyRatio": 0.558,
+      "skyOpacity": 0.95,
       "stops": [
         {
           "variant": "room-title",
           "eyebrow": "Trading post at the rim of the dark",
           "title": "The Gift Shop",
-          "body": "Nothing in Erebus is manufactured. Things are cultivated, fruit once, and are let go. What floats here is for sale. What has stopped floating already found its owner."
+          "body": "Nothing in Erebus is manufactured. Things are cultivated, fruit once, and are let go. Drag to turn your head — the hall runs all the way around you. What floats here is for sale. What has stopped floating already found its owner."
         },
         {
           "num": "◆",
@@ -36,46 +39,75 @@
       ],
       "structures": [
         {
-          "kind": "image",
-          "src": "./bg-relics.webp",
-          "backdrop": true,
-          "ratio": 0.558,
+          "kind": "monolith",
+          "count": 1,
           "scale": [
-            30,
-            30
+            9,
+            9
           ],
-          "y": 2.5,
-          "z": -20
+          "rim": "A",
+          "intensity": 1.1,
+          "anchor": true
+        },
+        {
+          "kind": "monolith",
+          "count": 8,
+          "scale": [
+            3.5,
+            8.5
+          ],
+          "rim": "A",
+          "intensity": 0.85
         },
         {
           "kind": "orb",
           "count": 5,
           "scale": [
-            0.6,
-            1.3
-          ],
-          "rim": "B",
-          "intensity": 1.5
-        },
-        {
-          "kind": "orb",
-          "count": 3,
-          "scale": [
-            0.35,
-            0.7
+            2.6,
+            6.5
           ],
           "rim": "A",
-          "intensity": 1.2
+          "intensity": 0.5,
+          "dark": true
         },
         {
           "kind": "ring",
+          "count": 5,
+          "scale": [
+            3.5,
+            8
+          ],
+          "rim": "B",
+          "opacity": 0.17
+        },
+        {
+          "kind": "orb",
+          "count": 8,
+          "scale": [
+            0.45,
+            1.15
+          ],
+          "rim": "B",
+          "intensity": 1.35
+        },
+        {
+          "kind": "swarm",
           "count": 2,
           "scale": [
             5,
             9
           ],
-          "rim": "B",
-          "opacity": 0.16
+          "rim": "B"
+        },
+        {
+          "kind": "shard",
+          "count": 6,
+          "scale": [
+            0.4,
+            1.1
+          ],
+          "rim": "A",
+          "intensity": 0.45
         },
         {
           "kind": "portal",
