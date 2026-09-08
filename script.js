@@ -18,7 +18,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 window.__erebusBooted = true;
 
 const PR_CAP = 1.5;
-const VERSION = 4;
+const VERSION = 5;
 
 /* ---------- tuning ---------- */
 const CONFIG = {
@@ -503,7 +503,7 @@ async function boot() {
     precision highp float;
     varying vec3 vDir;
     uniform sampler2D uMap;
-    uniform float uOpacity, uTime, uRatio, uHas;
+    uniform float uOpacity, uTime, uRatio, uHas, uSwirl;
     float fold(float x) { float m = mod(x, 2.0); return m > 1.0 ? 2.0 - m : m; }
     void main() {
       if (uHas < 0.5 || uOpacity <= 0.001) discard;
@@ -511,6 +511,13 @@ async function boot() {
       float yaw = atan(d.x, -d.z);
       float pitch = asin(clamp(d.y, -1.0, 1.0));
       float span = 2.60;
+      if (uSwirl > 0.001) {
+        float sw = uSwirl;
+        yaw += uTime * 0.055 * sw;
+        yaw += sin(pitch * 3.0 + uTime * 0.13) * 0.55 * sw;
+        pitch += sin(yaw * 1.5 + uTime * 0.09) * 0.13 * sw;
+        pitch = clamp(pitch, -1.5707, 1.5707);
+      }
       float u = fold(yaw / span + 0.5 + sin(uTime * 0.008) * 0.010);
       float v = fold(pitch / (span * max(uRatio, 0.2)) + 0.5);
       vec3 c = pow(texture2D(uMap, vec2(u, v)).rgb, vec3(2.2));
@@ -523,15 +530,16 @@ async function boot() {
   const skyPhotoMat = new THREE.ShaderMaterial({
     uniforms: {
       uMap: { value: null }, uOpacity: { value: 0 }, uTime: { value: 0 },
-      uRatio: { value: 0.5625 }, uHas: { value: 0 },
+      uRatio: { value: 0.5625 }, uHas: { value: 0 }, uSwirl: { value: 0 },
     },
     vertexShader: DOME_VERT, fragmentShader: DOME_FRAG,
     transparent: true, depthWrite: false, side: THREE.BackSide, fog: false,
   });
   const skyPhoto = new THREE.Mesh(new THREE.SphereGeometry(250, 64, 48), skyPhotoMat);
   sky.add(skyPhoto);
-  function setSkyPhoto(url, opacity, ratio) {
+  function setSkyPhoto(url, opacity, ratio, swirl) {
     const su = skyPhotoMat.uniforms;
+    su.uSwirl.value = swirl || 0;
     if (su.uMap.value) { su.uMap.value.dispose(); su.uMap.value = null; }
     su.uHas.value = 0; su.uOpacity.value = 0;
     su.uRatio.value = ratio || 0.5625;
@@ -1105,12 +1113,13 @@ async function boot() {
             // exit gate floats behind your entry gaze — turn around to leave
             if (spec.z != null) { group.position.set(spec.x || 0, spec.y != null ? spec.y : 1.2, spec.z); }
             else if (isPortrait()) group.position.set(rand(-1.5, 1.5), rand(0, 2), rand(15, 19));
-            else group.position.set(rand(-3, 3), rand(-1, 3), rand(18, 24));
+            else { const k2 = (room.__doors = (room.__doors || 0) + 1) - 1, a = k2 * 2.3; group.position.set(Math.sin(a) * 20, rand(-1, 3), Math.cos(a) * 20); }
           } else if (spec.anchor !== false) {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
             const p = W.curve.getPointAt(stopT(stopIdx));
-            if (isPortrait()) group.position.set(p.x + (i % 2 ? 1.6 : -1.6), p.y + 3.4 + i * 4.4, p.z - 10);
-            else group.position.set(p.x - 8 - (i % 2) * 3.5, p.y + 1 + i * 3.2, p.z - 10); // phones hold their doors above the words, never off-frame
+            const k = (room.__doors = (room.__doors || 0) + 1) - 1; // doors count themselves
+            if (isPortrait()) group.position.set(p.x + (k % 2 ? 2.4 : -2.4), p.y + 3.4 + k * 8.5, p.z - 10 - k * 5);
+            else group.position.set(p.x + (k % 2 ? 11 : -10) - (k >> 1) * 3, p.y + 1 + (k >> 1) * 8 + (k % 2 ? 3 : 0), p.z - 10 - k * 7); // phones hold their doors above the words, never off-frame
           } else {
             group.position.copy(besidePath(room, 9, 16, i));
           }
@@ -1244,7 +1253,8 @@ async function boot() {
     setSkyPhoto(
       W.rooms[0].sky || W.domeSrc || null,
       W.rooms[0].sky ? W.rooms[0].skyOpacity : W.domeOpacity,
-      W.rooms[0].sky ? (W.rooms[0].skyRatio || 0.5) : W.domeRatio
+      W.rooms[0].sky ? (W.rooms[0].skyRatio || 0.5) : W.domeRatio,
+      W.rooms[0].skySwirl || 0
     );
 
     // palette snap targets to the first room of the new world

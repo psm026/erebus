@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "title": "EREBUS — The Broadcast",
+    "version": 1,
+    "note": "Dive behind The Bloom. The TV grid is the SKY, not a picture — wrapped in every direction, no edge anywhere, swirling (skySwirl). Built from JC's tv-grid seed."
+  },
+  "mode": "immersive",
+  "returnTo": "main",
+  "rooms": [
+    {
+      "id": "broadcast",
+      "sector": "DIVE // THE BROADCAST",
+      "sky": "./asset-tv-grid.webp",
+      "skyOpacity": 0.95,
+      "skyRatio": 0.5625,
+      "skySwirl": 1,
+      "accentA": "#8a5cf6",
+      "accentB": "#5f7bff",
+      "fog": "#030207",
+      "nebulaA": "#0c0517",
+      "nebulaB": "#0a0620",
+      "dust": "#8a5cf6",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Inside the signal",
+          "title": "The Broadcast",
+          "body": "No screen. No edges. You are in the picture now. The ring behind you leads out."
+        }
+      ],
+      "structures": [
+        {
+          "kind": "swarm",
+          "count": 2,
+          "scale": [
+            5,
+            8
+          ],
+          "rim": "A"
+        },
+        {
+          "kind": "orb",
+          "count": 2,
+          "scale": [
+            0.5,
+            0.9
+          ],
+          "rim": "B",
+          "intensity": 1
+        },
+        {
+          "kind": "portal",
+          "to": "main",
+          "scale": [
+            2.4,
+            2.4
+          ],
+          "rim": "B",
+          "intensity": 1.4
+        }
+      ]
+    }
+  ]
+}

@@ -72,7 +72,7 @@
           "num": "▒",
           "title": "It never stopped broadcasting.",
           "tags": "Dead channel / still warm",
-          "body": "A wall of violet dots that almost resolves. Look too long and something steps forward out of the static. The burning ring to your left goes deeper.",
+          "body": "A dead channel still warm somewhere past the garden. Step through the second ring and you are inside the picture — no screen, no edges.",
           "eyebrow": "V.2 Chamber"
         }
       ],
@@ -131,13 +131,14 @@
           }
         },
         {
-          "kind": "image",
-          "src": "./asset-tv-grid.webp",
+          "kind": "portal",
+          "to": "broadcast",
           "scale": [
-            10,
-            10
+            2.6,
+            2.6
           ],
-          "ratio": 0.5625
+          "rim": "B",
+          "intensity": 1.5
         }
       ]
     },
