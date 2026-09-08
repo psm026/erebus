@@ -11,7 +11,7 @@
       "id": "broadcast",
       "sector": "DIVE // THE BROADCAST",
       "sky": "./asset-tv-grid.webp",
-      "skyOpacity": 0.95,
+      "skyOpacity": 1,
       "skyRatio": 0.5625,
       "skySwirl": 1,
       "accentA": "#8a5cf6",
@@ -58,7 +58,8 @@
           "rim": "B",
           "intensity": 1.4
         }
-      ]
+      ],
+      "skyGain": 3.4
     }
   ]
 }

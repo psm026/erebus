@@ -503,7 +503,7 @@ async function boot() {
     precision highp float;
     varying vec3 vDir;
     uniform sampler2D uMap;
-    uniform float uOpacity, uTime, uRatio, uHas, uSwirl;
+    uniform float uOpacity, uTime, uRatio, uHas, uSwirl, uGain;
     float fold(float x) { float m = mod(x, 2.0); return m > 1.0 ? 2.0 - m : m; }
     void main() {
       if (uHas < 0.5 || uOpacity <= 0.001) discard;
@@ -525,21 +525,24 @@ async function boot() {
       float polar = 1.0 - smoothstep(0.30, 1.35, abs(pitch));
       c *= mix(0.26, 1.0, ahead * ahead) * mix(0.20, 1.0, polar);
       float a = uOpacity * mix(0.34, 1.0, ahead) * mix(0.30, 1.0, polar);
+      c *= uGain;
+      a = min(1.0, a * mix(1.0, uGain, 0.55));
       gl_FragColor = vec4(c, a);
     }`;
   const skyPhotoMat = new THREE.ShaderMaterial({
     uniforms: {
       uMap: { value: null }, uOpacity: { value: 0 }, uTime: { value: 0 },
-      uRatio: { value: 0.5625 }, uHas: { value: 0 }, uSwirl: { value: 0 },
+      uRatio: { value: 0.5625 }, uHas: { value: 0 }, uSwirl: { value: 0 }, uGain: { value: 1 },
     },
     vertexShader: DOME_VERT, fragmentShader: DOME_FRAG,
     transparent: true, depthWrite: false, side: THREE.BackSide, fog: false,
   });
   const skyPhoto = new THREE.Mesh(new THREE.SphereGeometry(250, 64, 48), skyPhotoMat);
   sky.add(skyPhoto);
-  function setSkyPhoto(url, opacity, ratio, swirl) {
+  function setSkyPhoto(url, opacity, ratio, swirl, gain) {
     const su = skyPhotoMat.uniforms;
     su.uSwirl.value = swirl || 0;
+    su.uGain.value = gain || 1;
     if (su.uMap.value) { su.uMap.value.dispose(); su.uMap.value = null; }
     su.uHas.value = 0; su.uOpacity.value = 0;
     su.uRatio.value = ratio || 0.5625;
@@ -1254,7 +1257,8 @@ async function boot() {
       W.rooms[0].sky || W.domeSrc || null,
       W.rooms[0].sky ? W.rooms[0].skyOpacity : W.domeOpacity,
       W.rooms[0].sky ? (W.rooms[0].skyRatio || 0.5) : W.domeRatio,
-      W.rooms[0].skySwirl || 0
+      W.rooms[0].skySwirl || 0,
+      W.rooms[0].skyGain || 1
     );
 
     // palette snap targets to the first room of the new world
