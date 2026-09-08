@@ -13,7 +13,7 @@
       "sky": "./asset-tv-grid.webp",
       "skyOpacity": 1,
       "skyRatio": 0.5625,
-      "skySwirl": 1,
+      "skySwirl": 0.35,
       "accentA": "#8a5cf6",
       "accentB": "#5f7bff",
       "fog": "#030207",
