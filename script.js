@@ -12,6 +12,11 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
+import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
+import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // boot beacon: index.html rescues the page if this module never runs
@@ -466,7 +471,23 @@ async function boot() {
     isMobile ? new THREE.Vector2(384, 384) : new THREE.Vector2(window.innerWidth, window.innerHeight),
     isMobile ? 0.5 : CONFIG.bloom.strength, CONFIG.bloom.radius, CONFIG.bloom.threshold
   ));
+  /* THE LENS. Bloom alone is a render; a lens is a photograph.
+     Colour splits a hair toward the edges, the frame falls off into its corners,
+     and grain sits over the whole thing — not nostalgia: it is the only thing that
+     stops a world this dark from banding into stripes on an 8-bit screen.
+     SMAA last, because the composer throws away the renderer's own antialiasing. */
+  if (!isMobile) {
+    const rgb = new ShaderPass(RGBShiftShader);
+    rgb.uniforms.amount.value = 0.00055;
+    composer.addPass(rgb);
+  }
+  const vig = new ShaderPass(VignetteShader);
+  vig.uniforms.offset.value = 1.05;
+  vig.uniforms.darkness.value = 1.15;
+  composer.addPass(vig);
+  composer.addPass(new FilmPass(isMobile ? 0.20 : 0.28));
   composer.addPass(new OutputPass());
+  composer.addPass(new SMAAPass(window.innerWidth, window.innerHeight));
 
   const sky = new THREE.Group();
   scene.add(sky);
@@ -1058,11 +1079,21 @@ async function boot() {
             group.add(hit);
             group.userData.hitMesh = hit;
           } else {
-            const coreGeo = new THREE.SphereGeometry(s * 0.34, 24, 24);
-            core = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({ color: col }));
+            // GLASS. Not a glowing ball — a lens with a fire inside it.
+            const coreGeo = new THREE.SphereGeometry(s * 0.34, 48, 48);
+            core = new THREE.Mesh(coreGeo, new THREE.MeshPhysicalMaterial({
+              color: 0xffffff, transmission: 1.0, thickness: s * 0.55, ior: 1.62,
+              roughness: 0.035, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.06,
+              iridescence: 1.0, iridescenceIOR: 1.9, iridescenceThicknessRange: [140, 560],
+              attenuationColor: new THREE.Color(col), attenuationDistance: s * 1.1,
+              envMapIntensity: 1.7, emissive: new THREE.Color(col), emissiveIntensity: 0.22,
+              transparent: true, depthWrite: false,
+            }));
+            const seed = new THREE.Mesh(new THREE.SphereGeometry(s * 0.11, 20, 20),
+              new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.95 }));
             const rim = new THREE.Mesh(coreGeo, rimMaterial(col, intensity * 1.2));
             rim.scale.setScalar(1.9);
-            group.add(core); group.add(rim);
+            group.add(core); group.add(seed); group.add(rim);
           }
           core.userData = spec.film
             ? { type: 'film', src: spec.film, title: spec.filmTitle || '', eyebrow: spec.filmEyebrow || 'A film' }
