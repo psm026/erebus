@@ -481,12 +481,14 @@ async function boot() {
     rgb.uniforms.amount.value = 0.00055;
     composer.addPass(rgb);
   }
-  const vig = new ShaderPass(VignetteShader);
-  vig.uniforms.offset.value = 1.05;
-  vig.uniforms.darkness.value = 1.15;
-  composer.addPass(vig);
-  composer.addPass(new FilmPass(isMobile ? 0.20 : 0.28));
   composer.addPass(new OutputPass());
+  // display-space from here: the vignette mixes toward black (darkness <= 1, never beyond),
+  // grain sits lightly, and SMAA cleans the final edges
+  const vig = new ShaderPass(VignetteShader);
+  vig.uniforms.offset.value = 0.95;
+  vig.uniforms.darkness.value = 1.0;
+  composer.addPass(vig);
+  composer.addPass(new FilmPass(isMobile ? 0.10 : 0.15));
   composer.addPass(new SMAAPass(window.innerWidth, window.innerHeight));
 
   const sky = new THREE.Group();
