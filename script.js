@@ -17,6 +17,7 @@ import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
 import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // boot beacon: index.html rescues the page if this module never runs
@@ -593,8 +594,9 @@ async function boot() {
   const shardMat = new THREE.MeshStandardMaterial({
     color: 0x0b0a12, roughness: 0.12, metalness: 0.92, flatShading: true, envMapIntensity: 0.9,
   });
-  const monoMat = new THREE.MeshStandardMaterial({
-    color: 0x08070d, roughness: 0.35, metalness: 0.7, envMapIntensity: 0.35,
+  const monoMat = new THREE.MeshPhysicalMaterial({
+    color: 0x0a0912, roughness: 0.22, metalness: 0.88, envMapIntensity: 1.25,
+    clearcoat: 0.6, clearcoatRoughness: 0.18,
   });
   const texLoader = new THREE.TextureLoader();
 
@@ -742,7 +744,7 @@ async function boot() {
           group.add(rim);
 
         } else if (spec.kind === 'monolith') {
-          const geo = new THREE.BoxGeometry(s * 0.22, s, s * 0.1);
+          const geo = new RoundedBoxGeometry(s * 0.22, s, s * 0.1, 4, s * 0.012);
           group.add(new THREE.Mesh(geo, monoMat));
           const rim = new THREE.Mesh(geo, rimMaterial(col, intensity * 0.7));
           rim.scale.setScalar(1.03);
@@ -1131,12 +1133,11 @@ async function boot() {
           }));
           halo.material.userData.counter = true;
           group.add(halo);
-          const pool = new THREE.Mesh(new THREE.CircleGeometry(s * 2.2, 48), new THREE.MeshBasicMaterial({
-            color: col, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+          // the door's ambient light: a faint additive sphere, not a disc — a disc seen edge-on is a straight line
+          const pool = new THREE.Mesh(new THREE.SphereGeometry(s * 1.45, 24, 16), new THREE.MeshBasicMaterial({
+            color: col, transparent: true, opacity: 0.045, blending: THREE.AdditiveBlending, depthWrite: false,
           }));
           pool.material.userData.still = true;
-          pool.rotation.x = -Math.PI / 2;
-          pool.position.y = -1.2;
           group.add(pool);
           if (group.userData.hitMesh) { group.userData.hitMesh.userData = core.userData; W.clickables.push(group.userData.hitMesh); }
           // every door gets a generous unseen reach
