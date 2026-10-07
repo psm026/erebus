@@ -4,6 +4,7 @@
     "version": 1,
     "note": "First sub-world. Entered through the portal in The Bloom. The last room's portal with to:'main' returns to the surface."
   },
+  "look": true,
   "rooms": [
     {
       "id": "roots",

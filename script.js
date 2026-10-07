@@ -224,7 +224,7 @@ const VEIL_VERT = /* glsl */ `
   void main() {
     vUv = uv;
     vec3 p = position;
-    p += normal * (sin(uv.x * 6.2831 + uTime * 0.28) * 1.4 + sin(uv.x * 15.0 - uTime * 0.2) * 0.6) * uv.y;
+    p += normal * (sin(uv.x * 6.2831 + uTime * 0.28) * 1.4 + sin(uv.x * 12.5664 - uTime * 0.2) * 0.6) * uv.y;
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     vFogDepth = -mv.z;
     gl_Position = projectionMatrix * mv;
@@ -253,13 +253,144 @@ const VEIL_FRAG = /* glsl */ `
     return v;
   }
   void main() {
-    float n = fbm2(vec2(vUv.x * 5.0 + uTime * 0.05, vUv.y * 1.6 - uTime * 0.03));
+    // v25.2: the curtain wraps all the way round, so the noise blends into itself
+    // at the join: no seam where the ends meet
+    vec2 q = vec2(vUv.x * 5.0 + uTime * 0.05, vUv.y * 1.6 - uTime * 0.03);
+    float wrap = smoothstep(0.75, 1.0, vUv.x);
+    float n = mix(fbm2(q), fbm2(q - vec2(5.0, 0.0)), wrap);
     float band = pow(max(0.0, 1.0 - vUv.y), 1.35);                 // bright hem fading upward
-    float rays = 0.5 + 0.5 * sin(vUv.x * 44.0 + n * 7.0);          // curtain striations
+    // the hem dissolves instead of stopping: a curtain has no rim, so you never see the bowl
+    float hem = smoothstep(0.0, 0.14 + 0.16 * n, vUv.y);
+    float rays = 0.5 + 0.5 * sin(vUv.x * 43.9823 + n * 7.0);       // curtain striations (whole turns: no join)
+    // curtains, not a ring: the light gathers into folds with dark between them
+    vec2 gq = vec2(vUv.x * 3.0 + uTime * 0.011, 7.31);
+    float gather = smoothstep(0.30, 0.62, mix(fbm2(gq), fbm2(gq - vec2(3.0, 0.0)), wrap));
     vec3 col = mix(uColA, uColB, n);
     float fogF = exp(-uFogDensity * uFogDensity * vFogDepth * vFogDepth * 1.442695);
-    float a = band * rays * smoothstep(0.25, 0.8, n) * uIntensity * uPresence * fogF;
+    float a = band * hem * rays * gather * smoothstep(0.25, 0.8, n) * uIntensity * uPresence * fogF * 1.2;
     gl_FragColor = vec4(col * a, a);
+  }
+`;
+
+
+/* LUMEN, LIVE. JC's Lumen Engine (fx.juliojimenez.com/lumen-engine.html) brought inside:
+   its Kaleidobloom fold wrapped around the whole room. The fold is mirror-symmetric, so it
+   closes on itself behind you with no seam. Computed per pixel: sharp at any size, never a picture.
+   Dark on dark: the field sits near black and only the filaments carry light. */
+const LUMEN_CORE = /* glsl */ `
+  uniform float uLFold, uLExp, uLScale, uLLift, uLSpin, uPalSRGB;
+  uniform vec3 uPa, uPb, uPc, uPd;
+  vec3 lpal(float x) {
+    vec3 c = max(uPa + uPb * cos(6.28318 * (uPc * x + uPd)), 0.0);
+    return uPalSRGB > 0.5 ? pow(c, vec3(2.2)) : c;
+  }
+  // Lumen's Kaleidobloom, line for line: fold, spin, gather the light that lands near the fold
+  float lkb(vec2 p, mat2 r) {
+    float acc = 0.0;
+    for (int i = 0; i < 12; i++) {
+      p = abs(p) / max(dot(p, p), 1e-4) - uLFold;
+      p = r * p;
+      acc += exp(-length(p) * 3.0);
+    }
+    return acc * 0.16;
+  }
+  vec3 lumenField(vec3 d, float t, float audio) {
+    float yaw = atan(d.x, -d.z);
+    float pitch = asin(clamp(d.y, -1.0, 1.0));
+    // the fold is mirror-symmetric, so laid on yaw and pitch it closes on itself behind you: no seam
+    vec2 uv = vec2(yaw, pitch) * uLScale + vec2(0.0, uLLift);
+    // the bloom turns back and forth through its richest shapes instead of spinning into empty ones
+    float a = 2.5 + 0.6 * sin(t * uLSpin);
+    float v = lkb(uv * 1.5, mat2(cos(a), -sin(a), sin(a), cos(a)));
+    // dark on dark: the haze is cut away, only the lace and its knots carry light
+    float lit = max(v - 0.18, 0.0) * 1.6 * (1.0 + audio * 0.6);
+    vec3 col = lpal(v + t * 0.01 + 0.5) * lit;
+    col = pow(col, vec3(2.0)) * uLExp;
+    return col * smoothstep(1.53, 1.2, abs(pitch));   // the poles fall away into black
+  }
+`;
+
+const LUMEN_FRAG = /* glsl */ `
+  precision highp float;
+  varying vec3 vDir;
+  uniform float uTime, uOpacity, uAudio;
+  ` + LUMEN_CORE + `
+  void main() {
+    vec3 col = lumenField(normalize(vDir), uTime, uAudio);
+    gl_FragColor = vec4(col, uOpacity);
+  }
+`;
+
+/* THE WINDOW. A door you can see through: the room on the other side, at its own depth.
+   Your line of sight passes the glass and lands on a sphere of space behind it, so the far
+   room shifts as you move, widens as you come close, and keeps its own slow clock. */
+const WINDOW_VERT = /* glsl */ `
+  varying vec3 vLocal;
+  varying vec3 vCam;
+  varying float vFogDepth;
+  void main() {
+    vLocal = position;
+    vCam = (inverse(modelMatrix) * vec4(cameraPosition, 1.0)).xyz;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vFogDepth = -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const WINDOW_FRAG = /* glsl */ `
+  precision highp float;
+  varying vec3 vLocal;
+  varying vec3 vCam;
+  varying float vFogDepth;
+  uniform sampler2D uMap;
+  uniform float uHas, uImg, uRatio, uMode, uTime, uPresence, uR, uGain, uDomeA, uLumen;
+  uniform vec3 uColA, uColB, uNebA, uNebB;
+  ` + LUMEN_CORE + `
+  float wfold(float x) { float m = mod(x, 2.0); return m > 1.0 ? 2.0 - m : m; }
+  float wh(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+  float wn(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(wh(i), wh(i + vec2(1.0, 0.0)), f.x), mix(wh(i + vec2(0.0, 1.0)), wh(i + vec2(1.0, 1.0)), f.x), f.y);
+  }
+  void main() {
+    vec3 p = vLocal;
+    vec3 rd = normalize(p - vCam);
+    if (rd.z > 0.0) { rd.z = -rd.z; rd.x = -rd.x; p.x = -p.x; }  // from behind: the same room, mirrored
+    float Rv = uR * 1.55;
+    float b = dot(p, rd);
+    float tt = -b + sqrt(max(b * b - (dot(p, p) - Rv * Rv), 0.0));
+    vec3 n = normalize(p + rd * tt);
+    float yaw = atan(n.x, -n.z) + sin(uTime * 0.05) * 0.035;     // the other room breathes on its own clock
+    float pitch = asin(clamp(n.y, -1.0, 1.0));
+    // its own sky, in its own colours
+    float m = wn(vec2(yaw, pitch) * 2.2 + uTime * 0.012) * 0.6 + wn(vec2(yaw, pitch) * 5.5 - uTime * 0.008) * 0.4;
+    vec3 col = mix(uNebA, uNebB, clamp(0.5 + 0.8 * n.y + 0.35 * (m - 0.5), 0.0, 1.0)) * (0.7 + 1.6 * m);
+    col += mix(uColA, uColB, m) * pow(m, 5.0) * 0.5;
+    if (uLumen > 0.5) col = col * 0.5 + lumenField(n, uTime, 0.0) * 1.8;
+    if (uHas > 0.5) {
+      vec2 uv;
+      if (uMode > 0.5) uv = vec2(fract(yaw / 6.28318 + 0.5), clamp(pitch / 3.14159 + 0.5, 0.001, 0.999));
+      else uv = vec2(wfold(yaw / 2.6 + 0.5), wfold(pitch / (2.6 * max(uRatio, 0.2)) + 0.5));
+      // the far room seen lit from the dark side of the door: less crushed than the room
+      // itself, so its picture reads at a glance. Step through and your eyes adjust.
+      vec3 img = pow(texture2D(uMap, uv).rgb, vec3(1.6)) * uGain * 2.6;
+      float a = uDomeA;
+      if (uMode > 1.5) a *= smoothstep(-0.05, 0.16, pitch);
+      col = mix(col, img, a * uImg);
+    }
+    // a few hard little stars on the far side
+    vec2 sg = vec2(yaw, pitch) * 40.0;
+    float st = wh(floor(sg));
+    col += vec3(0.8, 0.86, 1.0) * step(0.986, st) * smoothstep(0.22, 0.0, length(fract(sg) - 0.5)) * (0.55 + 0.45 * sin(uTime * 1.1 + st * 50.0)) * 0.9;
+    float r = length(vLocal.xy) / uR;
+    col *= mix(0.45, 1.0, smoothstep(1.0, 0.4, r));               // depth: the room falls away toward the frame
+    float ang = atan(vLocal.y, vLocal.x);
+    float film = smoothstep(0.88, 0.98, r) * (1.0 - smoothstep(0.98, 1.0, r));
+    col += uColA * film * (0.08 + 0.06 * sin(ang * 5.0 + uTime * 0.6));  // the membrane: the far room's colour at the rim
+    float alpha = 1.0 - smoothstep(0.972, 1.0, r);
+    float fogF = exp(-0.000132 * vFogDepth * vFogDepth * 1.442695);
+    gl_FragColor = vec4(col * mix(0.6, 1.0, uPresence) * fogF, alpha);
   }
 `;
 
@@ -527,13 +658,25 @@ async function boot() {
     precision highp float;
     varying vec3 vDir;
     uniform sampler2D uMap;
-    uniform float uOpacity, uTime, uRatio, uHas, uSwirl, uGain;
+    uniform float uOpacity, uTime, uRatio, uHas, uSwirl, uGain, uMode, uFadeYaw;
     float fold(float x) { float m = mod(x, 2.0); return m > 1.0 ? 2.0 - m : m; }
     void main() {
       if (uHas < 0.5 || uOpacity <= 0.001) discard;
       vec3 d = normalize(vDir);
       float yaw = atan(d.x, -d.z);
       float pitch = asin(clamp(d.y, -1.0, 1.0));
+      if (uMode > 0.5) {
+        // v25.2 TRUE SKY: a real 360 panorama is laid on as one, so it has no fold, no rim,
+        // no mirror. Mode 2 keeps only the heavens and lets the horizon melt into the room.
+        vec2 tuv = vec2(fract(yaw / 6.28318 + 0.5 + uTime * 0.0006), clamp(pitch / 3.14159 + 0.5, 0.001, 0.999));
+        vec3 tc = pow(texture2D(uMap, tuv).rgb, vec3(2.2));
+        float tahead = mix(0.62, 1.0, 0.5 + 0.5 * cos(yaw));
+        float ta = uOpacity * tahead;
+        if (uMode > 1.5) ta *= smoothstep(-0.05, 0.16, pitch);
+        gl_FragColor = vec4(tc * tahead * uGain, min(1.0, ta * mix(1.0, uGain, 0.55)));
+        return;
+      }
+      float yaw0 = yaw;
       float span = 2.60;
       if (uSwirl > 0.001) {
         float sw = uSwirl;
@@ -549,6 +692,12 @@ async function boot() {
       float polar = 1.0 - smoothstep(0.30, 1.35, abs(pitch));
       c *= mix(0.26, 1.0, ahead * ahead) * mix(0.20, 1.0, polar);
       float a = uOpacity * mix(0.34, 1.0, ahead) * mix(0.30, 1.0, polar);
+      // v25.2: a fold is a crease, not a cliff. Near each mirror line the picture thins and
+      // the dark comes through, so the eye reads depth instead of an edge.
+      float du = min(u, 1.0 - u), dv = min(v, 1.0 - v);
+      a *= mix(0.42, 1.0, smoothstep(0.0, 0.07, du)) * mix(0.55, 1.0, smoothstep(0.0, 0.07, dv));
+      // a room can let its picture end in the dark at the sides instead of folding back
+      if (uFadeYaw > 0.001) a *= 1.0 - smoothstep(uFadeYaw, uFadeYaw + 0.5, abs(yaw0));
       c *= uGain;
       a = min(1.0, a * mix(1.0, uGain, 0.55));
       gl_FragColor = vec4(c, a);
@@ -557,15 +706,18 @@ async function boot() {
     uniforms: {
       uMap: { value: null }, uOpacity: { value: 0 }, uTime: { value: 0 },
       uRatio: { value: 0.5625 }, uHas: { value: 0 }, uSwirl: { value: 0 }, uGain: { value: 1 },
+      uMode: { value: 0 }, uFadeYaw: { value: 0 },
     },
     vertexShader: DOME_VERT, fragmentShader: DOME_FRAG,
     transparent: true, depthWrite: false, side: THREE.BackSide, fog: false,
   });
   const skyPhoto = new THREE.Mesh(new THREE.SphereGeometry(250, 64, 48), skyPhotoMat);
   sky.add(skyPhoto);
-  function setSkyPhoto(url, opacity, ratio, swirl, gain) {
+  function setSkyPhoto(url, opacity, ratio, swirl, gain, map, fadeYaw) {
     const su = skyPhotoMat.uniforms;
     su.uSwirl.value = swirl || 0;
+    su.uMode.value = 0;
+    su.uFadeYaw.value = fadeYaw || 0;
     su.uGain.value = gain || 1;
     if (su.uMap.value) { su.uMap.value.dispose(); su.uMap.value = null; }
     su.uHas.value = 0; su.uOpacity.value = 0;
@@ -573,7 +725,11 @@ async function boot() {
     if (!url) return;
     texLoaderGlobal.load(url, (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
-      tex.wrapS = THREE.ClampToEdgeWrapping;
+      // a 2:1 picture is a real panorama: map it as one (rooms can force "fold", "equirect" or "zenith")
+      const aspect = tex.image && tex.image.width ? tex.image.height / tex.image.width : 0;
+      const mode = map === 'zenith' ? 2 : map === 'equirect' ? 1 : map === 'fold' ? 0 : (Math.abs(aspect - 0.5) < 0.012 ? 1 : 0);
+      su.uMode.value = mode;
+      tex.wrapS = mode > 0 ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
       tex.wrapT = THREE.ClampToEdgeWrapping;
       tex.minFilter = THREE.LinearFilter;
       tex.generateMipmaps = false;
@@ -584,6 +740,139 @@ async function boot() {
     });
   }
   const texLoaderGlobal = new THREE.TextureLoader();
+
+  /* --- LUMEN, LIVE: a room's whole sky can be the running visual --- */
+  const LUMEN_PALS = {
+    bone: [[.5,.48,.45],[.5,.48,.45],[.5,.5,.5],[.5,.5,.5]], ember: [[.5,.23,.06],[.5,.23,.06],[.5,.5,.5],[.5,.5,.5]],
+    slate: [[.42,.46,.5],[.42,.46,.5],[.5,.5,.5],[.5,.5,.5]], spectrum: [[.5,.5,.5],[.5,.5,.5],[1,1,1],[0,.33,.67]],
+    magma: [[.2,.05,.05],[.6,.2,.1],[1,.7,.4],[0,.15,.25]], ocean: [[.1,.3,.4],[.2,.4,.4],[1,1,1],[0,.15,.3]],
+    neon: [[.3,.1,.4],[.6,.4,.5],[1,1,1],[.8,.9,.3]], sunset: [[.5,.3,.2],[.5,.3,.3],[1,.8,.6],[0,.1,.2]],
+    acid: [[.4,.5,.2],[.5,.5,.3],[1,1,1],[.3,.6,.1]], ice: [[.6,.7,.8],[.3,.3,.4],[1,1,1],[0,.2,.5]],
+    candy: [[.7,.4,.6],[.3,.3,.3],[1,1,1],[0,.3,.6]], forest: [[.2,.3,.15],[.3,.4,.2],[1,1,1],[.1,.3,.2]],
+    gold: [[.4,.3,.1],[.5,.4,.2],[1,1,1],[.1,.2,.4]], cyber: [[.1,.1,.2],[.6,.3,.6],[1,1,1],[.6,.8,.2]],
+    mono: [[.4,.4,.4],[.4,.4,.4],[1,1,1],[0,0,0]],
+  };
+  const lumenUniforms = () => ({
+    uLFold: { value: 1.1 }, uLExp: { value: 1.8 }, uLScale: { value: 0.45 }, uLLift: { value: 0.95 }, uLSpin: { value: 0.02 }, uPalSRGB: { value: 0 },
+    uPa: { value: new THREE.Vector3(0.5, 0.5, 0.5) }, uPb: { value: new THREE.Vector3(0.5, 0.5, 0.5) },
+    uPc: { value: new THREE.Vector3(1, 1, 1) }, uPd: { value: new THREE.Vector3(0, 0.33, 0.67) },
+  });
+  // a room's Lumen settings into a material: Lumen's own palettes by name, or the room's two accents
+  function fillLumen(u, room) {
+    const L = (room && room.lumen) || {};
+    u.uLFold.value = L.fold != null ? L.fold : 1.1;
+    u.uLExp.value = L.exposure != null ? L.exposure : 1.8;
+    u.uLScale.value = L.scale != null ? L.scale : 0.45;
+    u.uLLift.value = L.lift != null ? L.lift : 0.95;
+    u.uLSpin.value = L.spin != null ? L.spin : 0.02;
+    const named = L.palette && LUMEN_PALS[L.palette];
+    if (named) {
+      u.uPa.value.fromArray(named[0]); u.uPb.value.fromArray(named[1]);
+      u.uPc.value.fromArray(named[2]); u.uPd.value.fromArray(named[3]);
+      u.uPalSRGB.value = 1;
+    } else {
+      const A = new THREE.Color((room && room.accentA) || ROOM_DEFAULTS.accentA);
+      const B = new THREE.Color((room && room.accentB) || ROOM_DEFAULTS.accentB);
+      u.uPa.value.set((A.r + B.r) / 2, (A.g + B.g) / 2, (A.b + B.b) / 2);
+      u.uPb.value.set((A.r - B.r) / 2, (A.g - B.g) / 2, (A.b - B.b) / 2);
+      u.uPc.value.set(1, 1, 1); u.uPd.value.set(0, 0, 0);
+      u.uPalSRGB.value = 0;
+    }
+  }
+  const lumenMat = new THREE.ShaderMaterial({
+    uniforms: Object.assign({ uTime: { value: 0 }, uOpacity: { value: 0 }, uAudio: { value: 0 } }, lumenUniforms()),
+    vertexShader: DOME_VERT, fragmentShader: LUMEN_FRAG,
+    transparent: true, depthWrite: false, side: THREE.BackSide, fog: false, blending: THREE.AdditiveBlending,
+  });
+  const lumenSky = new THREE.Mesh(new THREE.SphereGeometry(255, 64, 48), lumenMat);
+  lumenSky.renderOrder = -1;
+  lumenSky.visible = false;
+  sky.add(lumenSky);
+  let lumenRoom = null, lumenAudio = 0;
+
+  /* --- WINDOWS: every door shows the room it leads to --- */
+  const doorViews = new Map();   // world id -> what its sky looks like
+  const doorTextures = new Map(); // image -> sharp, mipmapped texture
+  function doorView(to) {
+    const id = (!to || to === '__back') ? 'main' : to;
+    if (!doorViews.has(id)) {
+      doorViews.set(id, fetchWorld(id).then((d) => {
+        const rooms = (d && Array.isArray(d.rooms)) ? d.rooms : [];
+        const r = rooms[0] || {};
+        let src = r.sky || null, ratio = r.sky ? (r.skyRatio || 0.5) : 0.5625;
+        let opacity = r.sky ? (r.skyOpacity != null ? r.skyOpacity : 0.94) : 0.94;
+        if (!src) {
+          // same rule the world itself uses: its backdrop becomes its sky
+          for (const room of rooms) for (const x of (room.structures || [])) {
+            if (x && x.kind === 'image' && x.backdrop && x.src) { src = x.src; ratio = x.ratio || 0.5625; opacity = x.opacity != null ? x.opacity : 0.94; }
+          }
+        }
+        return { src, ratio, opacity, map: r.skyMap || 'auto', gain: r.skyGain || 1, room: Object.assign({}, ROOM_DEFAULTS, r) };
+      }).catch(() => null));
+    }
+    return doorViews.get(id);
+  }
+  function doorTexture(src) {
+    if (!doorTextures.has(src)) {
+      doorTextures.set(src, new Promise((res) => {
+        const im = new Image();
+        im.decoding = 'async';
+        im.onload = () => {
+          try {
+            const k = Math.min(1, (isMobile ? 1024 : 2048) / im.naturalWidth);
+            const cv = document.createElement('canvas');
+            cv.width = Math.max(1, Math.round(im.naturalWidth * k));
+            cv.height = Math.max(1, Math.round(im.naturalHeight * k));
+            const cx = cv.getContext('2d');
+            cx.imageSmoothingQuality = 'high';
+            cx.drawImage(im, 0, 0, cv.width, cv.height);
+            const tex = new THREE.CanvasTexture(cv);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.generateMipmaps = true;
+            tex.minFilter = THREE.LinearMipmapLinearFilter;
+            tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+            res(tex);
+          } catch (e) { res(null); }
+        };
+        im.onerror = () => res(null);
+        im.src = src;
+      }));
+    }
+    return doorTextures.get(src);
+  }
+  function makeWindow(to, s, room) {
+    const R = s * 0.97;
+    const mat = new THREE.ShaderMaterial({
+      uniforms: Object.assign({
+        uMap: { value: null }, uHas: { value: 0 }, uImg: { value: 0 }, uRatio: { value: 0.5625 }, uMode: { value: 0 },
+        uTime: { value: 0 }, uPresence: { value: 1 }, uR: { value: R }, uGain: { value: 1 }, uDomeA: { value: 0.94 }, uLumen: { value: 0 },
+        uColA: { value: new THREE.Color(room.accentA) }, uColB: { value: new THREE.Color(room.accentB) },
+        uNebA: { value: new THREE.Color(room.nebulaA) }, uNebB: { value: new THREE.Color(room.nebulaB) },
+      }, lumenUniforms()),
+      vertexShader: WINDOW_VERT, fragmentShader: WINDOW_FRAG,
+      transparent: true, depthWrite: true, side: THREE.DoubleSide, fog: false,
+    });
+    const mesh = new THREE.Mesh(new THREE.CircleGeometry(R, 96), mat);
+    mesh.renderOrder = 2;
+    // the far room loads when you come near it, not all at once
+    const load = () => doorView(to).then((v) => {
+      if (!v) return;
+      const u = mat.uniforms;
+      u.uNebA.value.set(v.room.nebulaA); u.uNebB.value.set(v.room.nebulaB);
+      u.uColA.value.set(v.room.accentA); u.uColB.value.set(v.room.accentB);
+      u.uRatio.value = v.ratio; u.uGain.value = v.gain; u.uDomeA.value = v.opacity;
+      if (v.room.lumen) { fillLumen(u, v.room); u.uLumen.value = 1; }
+      if (!v.src) return;
+      return doorTexture(v.src).then((tex) => {
+        if (!tex) return;
+        const aspect = tex.image.height / tex.image.width;
+        const mode = v.map === 'zenith' ? 2 : v.map === 'equirect' ? 1 : v.map === 'fold' ? 0 : (Math.abs(aspect - 0.5) < 0.012 ? 1 : 0);
+        if (mode > 0 && tex.wrapS !== THREE.RepeatWrapping) { tex.wrapS = THREE.RepeatWrapping; tex.needsUpdate = true; }
+        u.uMap.value = tex; u.uMode.value = mode; u.uHas.value = 1;
+      });
+    });
+    return { mesh, load };
+  }
   const stars = pointsCloud(
     CONFIG.starCount,
     () => new THREE.Vector3().randomDirection().multiplyScalar(rand(90, 240)),
@@ -1082,6 +1371,13 @@ async function boot() {
             const hit = new THREE.Mesh(new THREE.CircleGeometry(s * 1.7, 24), new THREE.MeshBasicMaterial({ visible: false }));
             group.add(hit);
             group.userData.hitMesh = hit;
+          } else if (spec.to && !spec.film && spec.window !== false) {
+            // v25.2 THE WINDOW: you see the room before you go
+            const win = makeWindow(spec.to, s, room);
+            core = win.mesh;
+            group.add(core);
+            group.userData.window = core;
+            group.userData.windowLoad = win.load;
           } else {
             // GLASS. Not a glowing ball — a lens with a fire inside it.
             const coreGeo = new THREE.SphereGeometry(s * 0.34, 48, 48);
@@ -1149,7 +1445,12 @@ async function boot() {
           if (W.immersive) {
             // exit gate floats behind your entry gaze — turn around to leave
             if (spec.z != null) { group.position.set(spec.x || 0, spec.y != null ? spec.y : 1.2, spec.z); }
-            else if (isPortrait()) group.position.set(rand(-1.5, 1.5), rand(0, 2), rand(15, 19));
+            else if (isPortrait()) {
+              // phones: the first gate sits behind you; any others fan out beside it instead of stacking on top of it
+              const k3 = (room.__doors = (room.__doors || 0) + 1) - 1;
+              if (k3 === 0) group.position.set(rand(-1.5, 1.5), rand(0, 2), rand(15, 19));
+              else { const a3 = (k3 % 2 ? 1 : -1) * 0.95 * Math.ceil(k3 / 2); group.position.set(Math.sin(a3) * 17, rand(0, 2.5), Math.cos(a3) * 17); }
+            }
             else { const k2 = (room.__doors = (room.__doors || 0) + 1) - 1, a = k2 * 2.3; group.position.set(Math.sin(a) * 20, rand(-1, 3), Math.cos(a) * 20); }
           } else if (spec.anchor !== false) {
             const stopIdx = Math.min(room.firstStop + 1, room.lastStop);
@@ -1163,6 +1464,13 @@ async function boot() {
           group.userData.breathe = true;
           group.userData.breatheMin = 0.82; // portals pulse, never hide
           registerGroup(group, group.position.y, 0.12, 0.3);
+          if (group.userData.window) {
+            // a window must stay a window: it turns toward you instead of tumbling
+            W.animated[W.animated.length - 1].rotSpeed = 0;
+            const base = W.immersive ? group.position.clone().negate().normalize() : new THREE.Vector3(0, 0, 1);
+            group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), base);
+            W.windows.push({ group, mat: group.userData.window.material, base, phase: Math.random() * 6.283, load: group.userData.windowLoad, loaded: false });
+          }
           if (spec.z != null && W.immersive) {
             // a pinned deck rides the lens: always before you, never lost to the drift
             camera.add(group);
@@ -1188,6 +1496,10 @@ async function boot() {
     W.wakeAt = clock ? clock.getElapsedTime() : 0;
     document.body.classList.toggle('immersive', W.immersive);
     document.body.classList.toggle('hud-off', data.hud === false);
+    // v25.2 a rail world can let you turn your head ("look": true)
+    W.look = !W.immersive && !!data.look;
+    document.body.classList.toggle('look-rail', W.look);
+    W.windows = [];
     // a world may carry ambient sound: starts on the visitor's first touch,
     // loops quietly, dies when they leave. Wordless — no player, no controls.
     if (data.audio) {
@@ -1292,8 +1604,13 @@ async function boot() {
       W.rooms[0].sky ? W.rooms[0].skyOpacity : W.domeOpacity,
       W.rooms[0].sky ? (W.rooms[0].skyRatio || 0.5) : W.domeRatio,
       W.rooms[0].skySwirl || 0,
-      W.rooms[0].skyGain || 1
+      W.rooms[0].skyGain || 1,
+      W.rooms[0].skyMap || 'auto',
+      W.rooms[0].skyFade || 0
     );
+    // a live Lumen sky fades up fresh in every world that carries one
+    lumenMat.uniforms.uOpacity.value = 0;
+    lumenRoom = null;
 
     // palette snap targets to the first room of the new world
     const r0 = W.rooms[0];
@@ -1379,6 +1696,8 @@ async function boot() {
   let dragging = false, lastX = 0, lastY = 0, lastMoveAt = 0;
   let tiltYaw = 0, tiltPitch = 0, tiltArmed = false;
   let targetFov = 58;
+  /* rail look: drag turns your head off the line of flight, and it drifts home when you let go */
+  let railYaw = 0, railPitch = 0, railYawVel = 0, railPitchVel = 0, railDrag = false, railLastX = 0, railLastY = 0, railMoveAt = 0;
 
   window.addEventListener('pointermove', (e) => {
     if (W.immersive) {
@@ -1392,13 +1711,21 @@ async function boot() {
       lastMoveAt = performance.now();
       return;
     }
+    if (railDrag) {
+      const dx = e.clientX - railLastX, dy = e.clientY - railLastY;
+      railLastX = e.clientX; railLastY = e.clientY;
+      const kx = 2.4 / window.innerWidth, ky = 1.7 / window.innerHeight;
+      railYaw -= dx * kx; railYawVel = -dx * kx;
+      if (e.pointerType !== 'touch') { railPitch -= dy * ky; railPitchVel = -dy * ky; }
+      railMoveAt = performance.now();
+    }
     if (e.pointerType === 'touch') return;
     mouseTX = (e.clientX / window.innerWidth - 0.5) * 2;
     mouseTY = (e.clientY / window.innerHeight - 0.5) * 2;
   }, { passive: true });
 
-  window.addEventListener('pointerup', () => { dragging = false; });
-  window.addEventListener('pointercancel', () => { dragging = false; });
+  window.addEventListener('pointerup', () => { dragging = false; railDrag = false; });
+  window.addEventListener('pointercancel', () => { dragging = false; railDrag = false; });
 
   window.addEventListener('wheel', (e) => {
     if (!W.immersive) return;
@@ -1423,7 +1750,7 @@ async function boot() {
     } catch (err) { /* the dark forgives */ }
   }
 
-  function resetLook() { yaw = 0; pitch = 0; yawVel = 0; pitchVel = 0; tiltYaw = 0; tiltPitch = 0; targetFov = 58; }
+  function resetLook() { yaw = 0; pitch = 0; yawVel = 0; pitchVel = 0; tiltYaw = 0; tiltPitch = 0; targetFov = 58; railYaw = 0; railPitch = 0; railYawVel = 0; railPitchVel = 0; railDrag = false; }
 
   const raycaster = new THREE.Raycaster();
   const clickNDC = new THREE.Vector2();
@@ -1450,6 +1777,9 @@ async function boot() {
     if (W.immersive && !(e.target.closest && e.target.closest('.hud, #hud-exit, #egg-veil'))) {
       dragging = true; lastX = e.clientX; lastY = e.clientY; lastMoveAt = performance.now();
       armTilt();
+    }
+    if (W.look && !W.immersive && !(e.target.closest && e.target.closest('.panel, .hud, .hud-bottom, #hud-exit, #egg-veil, #listen, #cinema, .dm, a, button'))) {
+      railDrag = true; railLastX = e.clientX; railLastY = e.clientY; railMoveAt = performance.now();
     }
     if (swapping || !W.clickables.length) return;
     if (document.body.classList.contains('egg-open')) return;
@@ -1672,6 +2002,7 @@ async function boot() {
   const camPos = new THREE.Vector3();
   const lookPos = new THREE.Vector3();
   const tangent = new THREE.Vector3();
+  const _winP = new THREE.Vector3(), _winD = new THREE.Vector3(), _winN = new THREE.Vector3(), _winQ = new THREE.Quaternion(), _winZ = new THREE.Vector3(0, 0, 1);
 
   function tick() {
     if (!running) return;
@@ -1710,6 +2041,16 @@ async function boot() {
       camera.lookAt(lookPos);
       camera.rotateY(-mouseX * CONFIG.lookYaw);
       camera.rotateX(-mouseY * CONFIG.lookPitch);
+      if (W.look) {
+        if (!railDrag) {
+          railYaw += railYawVel; railPitch += railPitchVel;
+          railYawVel *= 0.92; railPitchVel *= 0.92;
+          if (performance.now() - railMoveAt > 2600) { railYaw = Math.atan2(Math.sin(railYaw), Math.cos(railYaw)) * 0.975; railPitch *= 0.975; }
+        }
+        railPitch = Math.max(-0.85, Math.min(0.85, railPitch));
+        camera.rotateY(railYaw);
+        camera.rotateX(railPitch);
+      }
       camera.rotateZ(-tangent.x * CONFIG.bank);
     }
 
@@ -1766,6 +2107,36 @@ async function boot() {
         else if (g.kind === 'veil') { g.mat.uniforms.uPresence.value = presence; g.mat.uniforms.uTime.value = t; }
         else if (g.kind === 'points') { g.mat.uniforms.uAlpha.value = g.base * presence; g.mat.uniforms.uTime.value = t; }
         else if (g.kind === 'basic') g.mat.opacity = g.mat.userData.still ? g.base : g.base * (g.mat.userData.counter ? Math.max(0, 1.25 - presence) : presence);
+      }
+    }
+    // windows: each door turns mostly toward you, loads its far room as you near it, and fades the picture in
+    if (W.windows && W.windows.length) {
+      for (const w of W.windows) {
+        w.group.getWorldPosition(_winP);
+        _winD.copy(camera.position).sub(_winP);
+        const dist = _winD.length();
+        if (!w.loaded && (W.immersive || dist < 95)) { w.loaded = true; if (w.load) w.load(); }
+        _winD.multiplyScalar(1 / Math.max(dist, 1e-4));
+        _winN.copy(w.base).lerp(_winD, 0.65);
+        if (W.immersive && !reduced) { _winN.x += Math.sin(t * 0.11 + w.phase) * 0.09; _winN.y += Math.cos(t * 0.083 + w.phase) * 0.05; }
+        _winQ.setFromUnitVectors(_winZ, _winN.normalize());
+        w.group.quaternion.slerp(_winQ, 0.06);
+        const wu = w.mat.uniforms;
+        if (wu.uHas.value > 0.5 && wu.uImg.value < 1) wu.uImg.value = Math.min(1, wu.uImg.value + 0.015);
+      }
+    }
+    // live Lumen sky: follows whichever room you are in, breathes with the room's hum
+    {
+      const lr = room && room.lumen ? room : null;
+      if (lr && lr !== lumenRoom) { lumenRoom = lr; fillLumen(lumenMat.uniforms, lr); }
+      const lu = lumenMat.uniforms;
+      const target = lr ? (lr.lumen.opacity != null ? lr.lumen.opacity : 1) : 0;
+      lu.uOpacity.value += (target - lu.uOpacity.value) * 0.025;
+      lumenSky.visible = lu.uOpacity.value > 0.003;
+      if (lumenSky.visible) {
+        lumenAudio += ((W.audioLevel || 0) - lumenAudio) * 0.08;
+        lu.uAudio.value = lumenAudio;
+        lu.uTime.value = t;
       }
     }
     if (W.planetGroup) W.planetGroup.rotation.y += 0.0003;

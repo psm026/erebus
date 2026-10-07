@@ -12,6 +12,7 @@
       "sector": "DIVE // THE STATIC OCEAN",
       "sky": "./asset-ocean-sky.webp",
       "skyOpacity": 0.55,
+      "skyMap": "zenith",
       "accentA": "#8fd8ff",
       "accentB": "#c9a2ff",
       "fog": "#010206",
@@ -95,6 +96,16 @@
           ],
           "rim": "A",
           "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "to": "the-fold",
+          "scale": [
+            1.9,
+            1.9
+          ],
+          "rim": "B",
+          "intensity": 1.3
         }
       ]
     }

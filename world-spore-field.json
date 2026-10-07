@@ -4,6 +4,7 @@
     "version": 1,
     "note": "Grown by the growth protocol from WORLD-LOG intention, 2026-07-15. Entered through the portal in The Mycelium. Contains EGG-002 (The Hush)."
   },
+  "look": true,
   "rooms": [
     {
       "id": "spore-field",

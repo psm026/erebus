@@ -649,3 +649,11 @@ body.cinema-open #markers, body.egg-open #markers { display: none; }
 
 /* v20-no-index-counter */
 #hud-index { display: none !important; }
+
+/* ---------- v25.2 the deck is a strip, not a billboard ---------- */
+.lst-embed { min-height: 152px; }
+.lst-embed iframe, .lst-panel iframe { height: 152px; }
+@media (max-width: 720px) { .lst-embed { min-height: 152px; } .lst-embed iframe, .lst-panel iframe { height: 152px; } }
+
+/* rail worlds you can look around in: sideways drags turn your head, vertical ones still scroll */
+body.look-rail { touch-action: pan-y; }

@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "title": "EREBUS · The Fold",
+    "version": 1,
+    "note": "Dive room beneath The Static Ocean. The whole sky is live Lumen: the Lumen Engine's Kaleidobloom fold wrapped around the room, dark on dark, breathing with the ocean's hum. No image anywhere, so it stays sharp at any resolution. Tune the lumen block: fold (shape, try 1.0 to 1.3), exposure (brightness), scale (size of the lace), lift (which part of the bloom faces you), spin (how fast it turns), palette ('room' uses the two accents, or a Lumen palette name: ember, magma, ocean, neon, cyber, gold, ice, bone, slate, mono)."
+  },
+  "mode": "immersive",
+  "returnTo": "static-ocean",
+  "rooms": [
+    {
+      "id": "the-fold",
+      "sector": "DIVE // THE FOLD",
+      "lumen": {
+        "scene": "kaleidobloom",
+        "palette": "room",
+        "fold": 1.1,
+        "exposure": 1.8,
+        "scale": 0.45,
+        "lift": 0.95,
+        "spin": 0.02,
+        "opacity": 1
+      },
+      "accentA": "#c9a2ff",
+      "accentB": "#7de8ff",
+      "fog": "#020208",
+      "nebulaA": "#0a0618",
+      "nebulaB": "#020a12",
+      "dust": "#c9a2ff",
+      "stops": [
+        {
+          "variant": "room-title",
+          "eyebrow": "Beneath the ocean",
+          "title": "The Fold",
+          "body": "Where the dark repeats itself, smaller each time, all the way down. It moves when the ocean hums. The ring behind you carries you back."
+        }
+      ],
+      "structures": [
+        {
+          "kind": "portal",
+          "to": "static-ocean",
+          "scale": [
+            2.2,
+            2.2
+          ],
+          "rim": "A",
+          "intensity": 1.3
+        }
+      ]
+    }
+  ],
+  "audio": "./asset-audio-static-ocean.m4a"
+}
