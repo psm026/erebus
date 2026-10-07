@@ -2,7 +2,7 @@
   "meta": {
     "title": "EREBUS — The Static Ocean",
     "version": 1,
-    "note": "Charon's first signed growth, from his own seed card. Dive room beneath The Hollow (bloom-depths). New engine kinds debut here: veil (aurora curtains) + sea (still particle floor)."
+    "note": "Charon's first signed growth, from his own seed card. Dive room beneath The Hollow (bloom-depths). New engine kinds debut here: veil (aurora curtains) + sea (still particle floor). 2026-10-07: the 2K Teide night-sky panorama that sat over this room is gone; the room shows its own aurora over still water (bg-static-ocean.webp, 3200px) as its whole sky."
   },
   "mode": "immersive",
   "returnTo": "bloom-depths",
@@ -10,9 +10,6 @@
     {
       "id": "static-ocean",
       "sector": "DIVE // THE STATIC OCEAN",
-      "sky": "./asset-ocean-sky.webp",
-      "skyOpacity": 0.55,
-      "skyMap": "zenith",
       "accentA": "#8fd8ff",
       "accentB": "#c9a2ff",
       "fog": "#010206",

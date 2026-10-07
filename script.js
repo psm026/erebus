@@ -25,6 +25,10 @@ window.__erebusBooted = true;
 
 const PR_CAP = 1.5;
 const VERSION = 5;
+// v25.3 sky colour test: ?sky=split shows each room's sky half as it renders now (left) and half
+// decoded once, as the picture was made (right). ?sky=true shows the whole sky decoded once.
+// Rooms can adopt it for good with "skyTrue": true. Normal visitors see no change.
+const SKY_MODE = (new URLSearchParams(location.search).get('sky') || '').toLowerCase();
 
 /* ---------- tuning ---------- */
 const CONFIG = {
@@ -658,10 +662,12 @@ async function boot() {
     precision highp float;
     varying vec3 vDir;
     uniform sampler2D uMap;
-    uniform float uOpacity, uTime, uRatio, uHas, uSwirl, uGain, uMode, uFadeYaw;
+    uniform float uOpacity, uTime, uRatio, uHas, uSwirl, uGain, uMode, uFadeYaw, uTrue, uSplit;
     float fold(float x) { float m = mod(x, 2.0); return m > 1.0 ? 2.0 - m : m; }
     void main() {
       if (uHas < 0.5 || uOpacity <= 0.001) discard;
+      // decoded once (true) or twice (how every sky has rendered so far)
+      float tmix = max(uTrue, uSplit > 0.5 ? step(uSplit, gl_FragCoord.x) : 0.0);
       vec3 d = normalize(vDir);
       float yaw = atan(d.x, -d.z);
       float pitch = asin(clamp(d.y, -1.0, 1.0));
@@ -669,7 +675,8 @@ async function boot() {
         // v25.2 TRUE SKY: a real 360 panorama is laid on as one, so it has no fold, no rim,
         // no mirror. Mode 2 keeps only the heavens and lets the horizon melt into the room.
         vec2 tuv = vec2(fract(yaw / 6.28318 + 0.5 + uTime * 0.0006), clamp(pitch / 3.14159 + 0.5, 0.001, 0.999));
-        vec3 tc = pow(texture2D(uMap, tuv).rgb, vec3(2.2));
+        vec3 tc0 = texture2D(uMap, tuv).rgb;
+        vec3 tc = mix(pow(tc0, vec3(2.2)), tc0, tmix);
         float tahead = mix(0.62, 1.0, 0.5 + 0.5 * cos(yaw));
         float ta = uOpacity * tahead;
         if (uMode > 1.5) ta *= smoothstep(-0.05, 0.16, pitch);
@@ -687,7 +694,8 @@ async function boot() {
       }
       float u = fold(yaw / span + 0.5 + sin(uTime * 0.008) * 0.010);
       float v = fold(pitch / (span * max(uRatio, 0.2)) + 0.5);
-      vec3 c = pow(texture2D(uMap, vec2(u, v)).rgb, vec3(2.2));
+      vec3 c0 = texture2D(uMap, vec2(u, v)).rgb;
+      vec3 c = mix(pow(c0, vec3(2.2)), c0, tmix);
       float ahead = 0.5 + 0.5 * cos(yaw);
       float polar = 1.0 - smoothstep(0.30, 1.35, abs(pitch));
       c *= mix(0.26, 1.0, ahead * ahead) * mix(0.20, 1.0, polar);
@@ -706,15 +714,18 @@ async function boot() {
     uniforms: {
       uMap: { value: null }, uOpacity: { value: 0 }, uTime: { value: 0 },
       uRatio: { value: 0.5625 }, uHas: { value: 0 }, uSwirl: { value: 0 }, uGain: { value: 1 },
-      uMode: { value: 0 }, uFadeYaw: { value: 0 },
+      uMode: { value: 0 }, uFadeYaw: { value: 0 }, uTrue: { value: 0 }, uSplit: { value: 0 },
     },
     vertexShader: DOME_VERT, fragmentShader: DOME_FRAG,
     transparent: true, depthWrite: false, side: THREE.BackSide, fog: false,
   });
   const skyPhoto = new THREE.Mesh(new THREE.SphereGeometry(250, 64, 48), skyPhotoMat);
   sky.add(skyPhoto);
-  function setSkyPhoto(url, opacity, ratio, swirl, gain, map, fadeYaw) {
+  function skySplitX() { return SKY_MODE === 'split' ? Math.round(window.innerWidth * renderer.getPixelRatio() * 0.5) : 0; }
+  function setSkyPhoto(url, opacity, ratio, swirl, gain, map, fadeYaw, trueColor) {
     const su = skyPhotoMat.uniforms;
+    su.uTrue.value = (SKY_MODE === 'true' || trueColor) ? 1 : 0;
+    su.uSplit.value = skySplitX();
     su.uSwirl.value = swirl || 0;
     su.uMode.value = 0;
     su.uFadeYaw.value = fadeYaw || 0;
@@ -1606,7 +1617,8 @@ async function boot() {
       W.rooms[0].skySwirl || 0,
       W.rooms[0].skyGain || 1,
       W.rooms[0].skyMap || 'auto',
-      W.rooms[0].skyFade || 0
+      W.rooms[0].skyFade || 0,
+      !!W.rooms[0].skyTrue
     );
     // a live Lumen sky fades up fresh in every world that carries one
     lumenMat.uniforms.uOpacity.value = 0;
@@ -1640,7 +1652,7 @@ async function boot() {
       onScroll();
       if (!W.immersive) setActiveStop(0);
       if (pushHash) {
-        history.pushState({ w: id }, '', id === 'main' ? location.pathname : '#w=' + id);
+        history.pushState({ w: id }, '', id === 'main' ? location.pathname + location.search : '#w=' + id);
       }
     } catch (err) {
       console.error('[erebus] world swap failed:', err);
@@ -2071,6 +2083,7 @@ async function boot() {
 
     nebulaMat.uniforms.uTime.value = t;
     skyPhotoMat.uniforms.uTime.value = t;
+    if (SKY_MODE === 'split') skyPhotoMat.uniforms.uSplit.value = renderer.domElement.width * 0.5; // the seam follows the canvas, whatever size it is
     stars.material.uniforms.uTime.value = t;
     if (W.dust) W.dust.material.uniforms.uTime.value = t;
     for (const s of W.animated) {
@@ -2199,9 +2212,18 @@ async function boot() {
       composer.setPixelRatio(pr);
     }
     stars.material.uniforms.uPixelRatio.value = pr;
+    skyPhotoMat.uniforms.uSplit.value = skySplitX();
     if (W.dust) W.dust.material.uniforms.uPixelRatio.value = pr;
     onScroll();
   });
+
+  if (SKY_MODE === 'split') {
+    const bar = document.createElement('div');
+    bar.setAttribute('aria-hidden', 'true');
+    bar.style.cssText = 'position:fixed;top:0;bottom:0;left:50%;width:1px;background:rgba(230,228,242,.35);z-index:40;pointer-events:none';
+    const tag = (txt, side) => { const t = document.createElement('div'); t.textContent = txt; t.style.cssText = 'position:fixed;top:18px;' + side + ':calc(50% + 14px);z-index:40;pointer-events:none;font:10px/1 "Space Grotesk",system-ui,sans-serif;letter-spacing:.32em;text-transform:uppercase;color:rgba(230,228,242,.7)'; return t; };
+    document.body.append(bar, tag('sky now', 'right'), tag('as made', 'left'));
+  }
 
   /* --- go --- */
   const startId = worldIdFromHash();

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>EREBUS · sky check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; background: #050408; color: #cfcbe0; font: 13px/1.5 'Space Grotesk', system-ui, sans-serif; }
+    header { padding: 40px 40px 12px; max-width: 980px; }
+    .eyebrow { font-size: 10px; letter-spacing: .38em; text-transform: uppercase; color: #8f88ad; margin: 0 0 10px; }
+    h1 { font: 400 clamp(30px, 4vw, 44px)/1.1 'Instrument Serif', serif; margin: 0 0 12px; color: #efeaf8; }
+    header p { margin: 0 0 8px; color: #9d97b3; }
+    code { color: #c9a2ff; }
+    .row { padding: 22px 40px 6px; }
+    .row h2 { font-size: 10px; letter-spacing: .32em; text-transform: uppercase; color: #8f88ad; margin: 0 0 10px; font-weight: 500; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    figure { margin: 0; }
+    canvas { width: 100%; display: block; background: #000; }
+    figcaption { margin-top: 8px; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: #7d7799; }
+    @media (max-width: 720px) { header, .row { padding-left: 18px; padding-right: 18px; } .pair { grid-template-columns: 1fr; } }
+  </style>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }</script>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">EREBUS // sky check</p>
+    <h1>Decoded twice, decoded once</h1>
+    <p>Left: each room's sky as it renders now. The picture's colours get converted twice, so it comes out darker and harsher than it was made. Right: the same picture converted once, as made.</p>
+    <p>Both sides use the room's own opacity, gain, background colour and the site's tone mapping. Stars, fog, bloom and grain are left out so only the colour differs. To see it inside a room, add <code>?sky=split</code> to the address, for example <code>/?sky=split#w=hifi-temple</code>.</p>
+  </header>
+  <main id="rows"></main>
+  <script type="module">
+    import * as THREE from 'three';
+    const WORLDS = ['hifi-temple', 'bloom-depths', 'spore-field', 'static-ocean', 'under-the-rain', 'inside-network', 'undercode', 'inside-cocoon', 'broadcast', 'gift-shop'];
+    const WIDTH = 1280;
+    const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true });
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setPixelRatio(1);
+    const scene = new THREE.Scene();
+    const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const mat = new THREE.ShaderMaterial({
+      uniforms: { map: { value: null }, uTrue: { value: 0 }, uGain: { value: 1 }, uOpacity: { value: 0.94 }, uBack: { value: new THREE.Color() } },
+      vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      fragmentShader: [
+        'uniform sampler2D map; uniform float uTrue, uGain, uOpacity; uniform vec3 uBack; varying vec2 vUv;',
+        'void main() {',
+        '  vec3 c0 = texture2D(map, vUv).rgb;',
+        '  vec3 c = mix(pow(c0, vec3(2.2)), c0, uTrue) * uGain;',      // the same line the sky shader runs
+        '  float a = min(1.0, uOpacity * mix(1.0, uGain, 0.55));',
+        '  gl_FragColor = vec4(c * a + uBack * (1.0 - a), 1.0);',
+        '  #include <tonemapping_fragment>',
+        '  #include <colorspace_fragment>',
+        '}',
+      ].join('\n'),
+    });
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+    const loader = new THREE.TextureLoader();
+    const host = document.getElementById('rows');
+
+    function skyOf(d) {
+      const rooms = Array.isArray(d.rooms) ? d.rooms : [];
+      const r = rooms[0] || {};
+      let src = r.sky || null, ratio = r.sky ? (r.skyRatio || 0.5) : 0.5625, opacity = r.sky ? (r.skyOpacity != null ? r.skyOpacity : 0.94) : 0.94;
+      if (!src) for (const room of rooms) for (const x of (room.structures || [])) {
+        if (x && x.kind === 'image' && x.backdrop && x.src) { src = x.src; ratio = x.ratio || 0.5625; opacity = x.opacity != null ? x.opacity : 0.94; }
+      }
+      const back = new THREE.Color(r.nebulaA || '#1a1048').lerp(new THREE.Color(r.nebulaB || '#0a2a33'), 0.5).multiplyScalar(0.6);
+      return { src, ratio, opacity, gain: r.skyGain || 1, back, title: (rooms[0] && rooms[0].stops && rooms[0].stops[0] && rooms[0].stops[0].title) || '' };
+    }
+    function frame(label) {
+      const f = document.createElement('figure');
+      const c = document.createElement('canvas');
+      const cap = document.createElement('figcaption');
+      cap.textContent = label;
+      f.append(c, cap);
+      return { f, c };
+    }
+    for (const id of WORLDS) {
+      try {
+        const d = await fetch('./world-' + id + '.json', { cache: 'no-store' }).then((r) => r.json());
+        const sky = skyOf(d);
+        if (!sky.src) continue;
+        const tex = await loader.loadAsync(sky.src);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        const ratio = tex.image.height / tex.image.width;
+        const H = Math.round(WIDTH * ratio);
+        renderer.setSize(WIDTH, H, false);
+        const row = document.createElement('section');
+        row.className = 'row';
+        const h = document.createElement('h2');
+        h.textContent = (sky.title || id) + '  ·  ' + sky.src.replace('./', '');
+        const pair = document.createElement('div');
+        pair.className = 'pair';
+        const a = frame('now: decoded twice'), b = frame('as made: decoded once');
+        pair.append(a.f, b.f);
+        row.append(h, pair);
+        host.append(row);
+        mat.uniforms.map.value = tex; mat.uniforms.uGain.value = sky.gain; mat.uniforms.uOpacity.value = sky.opacity; mat.uniforms.uBack.value.copy(sky.back);
+        for (const [cv, t] of [[a.c, 0], [b.c, 1]]) {
+          mat.uniforms.uTrue.value = t;
+          renderer.render(scene, cam);
+          cv.width = WIDTH; cv.height = H;
+          cv.getContext('2d').drawImage(renderer.domElement, 0, 0);
+        }
+        tex.dispose();
+      } catch (e) { console.warn('sky check skipped ' + id, e); }
+    }
+  </script>
+</body>
+</html>
