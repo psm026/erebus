@@ -1,15 +1,15 @@
 {
   "meta": {
-    "title": "EREBUS — The Gift Shop",
-    "version": 2,
-    "note": "Door lives in The Relics. The room is a dome, not a plane: sky wraps 360. Plinths and cases give parallax when you turn your head. Products ship on transparent backgrounds so they float."
+    "title": "EREBUS · Duty Free",
+    "version": 3,
+    "note": "Duty Free: the last stop before the surface. Door lives at the end of the main drift so every journey finishes here. Sky wraps 360. Drops sell through Stripe payment links."
   },
   "mode": "immersive",
   "returnTo": "main",
   "rooms": [
     {
       "id": "gift-shop",
-      "sector": "EREBUS // GIFT SHOP",
+      "sector": "EREBUS // DUTY FREE",
       "accentA": "#ff9d5c",
       "accentB": "#ffd27d",
       "fog": "#070403",
@@ -22,15 +22,15 @@
       "stops": [
         {
           "variant": "room-title",
-          "eyebrow": "Trading post at the rim of the dark",
-          "title": "The Gift Shop",
-          "body": "Nothing in Erebus is manufactured. Things are cultivated, fruit once, and are let go. Drag to turn your head — the hall runs all the way around you. What floats here is for sale. What has stopped floating already found its owner."
+          "eyebrow": "Last stop before the surface",
+          "title": "Duty Free",
+          "body": "Nobody leaves the dark empty-handed. Everything here was grown in Erebus, fruited once, and let go. What floats is for sale. What stopped floating already found its owner."
         },
         {
           "num": "◆",
           "title": "What grows on these shelves",
           "tags": "Drops / One-offs / Souvenirs",
-          "body": "Wearables that remember the dark. Prints pulled straight off the walls of rooms you have already walked. Objects with no listed function — celestial beings rarely need one. Stock arrives the way mushrooms do: several at once, then nothing for a season. Checkout happens here. You never leave the dark to pay.",
+          "body": "Wearables that remember the dark. Prints pulled straight off the walls of rooms you already walked. Objects with no listed function, because celestial beings rarely need one. Stock arrives the way mushrooms do: several at once, then nothing for a season.",
           "link": {
             "label": "Tell me when the doors open",
             "href": "mailto:psm026@gmail.com?subject=EREBUS%20Gift%20Shop"
