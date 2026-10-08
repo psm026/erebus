@@ -1,15 +1,15 @@
 {
   "meta": {
-    "title": "EREBUS · Duty Free",
+    "title": "EREBUS · Souvenir Relics",
     "version": 3,
-    "note": "Duty Free: the last stop before the surface. Door lives at the end of the main drift so every journey finishes here. Sky wraps 360. Drops sell through Stripe payment links."
+    "note": "Souvenir Relics: the last stop before the surface. Door lives at the end of the main drift so every journey finishes here. Sky wraps 360. Drops sell through Stripe payment links."
   },
   "mode": "immersive",
   "returnTo": "main",
   "rooms": [
     {
       "id": "gift-shop",
-      "sector": "EREBUS // DUTY FREE",
+      "sector": "EREBUS // SOUVENIR RELICS",
       "accentA": "#ff9d5c",
       "accentB": "#ffd27d",
       "fog": "#070403",
@@ -23,7 +23,7 @@
         {
           "variant": "room-title",
           "eyebrow": "Last stop before the surface",
-          "title": "Duty Free",
+          "title": "Souvenir Relics",
           "body": "Nobody leaves the dark empty-handed. Everything here was grown in Erebus, fruited once, and let go. What floats is for sale. What stopped floating already found its owner."
         },
         {
@@ -33,7 +33,7 @@
           "body": "Wearables that remember the dark. Prints pulled straight off the walls of rooms you already walked. Objects with no listed function, because celestial beings rarely need one. Stock arrives the way mushrooms do: several at once, then nothing for a season.",
           "link": {
             "label": "Tell me when the doors open",
-            "href": "mailto:psm026@gmail.com?subject=EREBUS%20Gift%20Shop"
+            "href": "mailto:psm026@gmail.com?subject=EREBUS%20Souvenir%20Relics"
           }
         }
       ],

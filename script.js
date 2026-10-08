@@ -1666,6 +1666,10 @@ async function boot() {
   window.addEventListener('popstate', () => {
     swapWorld(worldIdFromHash(), false);
   });
+  // a plain link to #w=<id> (like the Relics button) travels too
+  window.addEventListener('hashchange', () => {
+    swapWorld(worldIdFromHash(), false);
+  });
 
   /* --- palette state --- */
   const fogTarget = new THREE.Color(ROOM_DEFAULTS.fog);
