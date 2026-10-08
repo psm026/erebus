@@ -71,6 +71,19 @@
           ],
           "rim": "A",
           "opacity": 0.18
+        },
+        {
+          "kind": "portal",
+          "film": "./film-roots.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "The Roots",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     },
@@ -104,9 +117,9 @@
         },
         {
           "kind": "portal",
-          "film": "./asset-video-ocean.mp4?v=2",
+          "film": "./film-hollow.mp4",
           "filmEyebrow": "A film from beneath",
-          "filmTitle": "The Inverted Ocean",
+          "filmTitle": "The Hollow",
           "scale": [
             2.2,
             2.2

@@ -110,6 +110,19 @@
           ],
           "rim": "B",
           "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "film": "./film-inside-network.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "The Network",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     }

@@ -95,6 +95,19 @@
           ],
           "rim": "A",
           "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "film": "./film-under-the-rain.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "Under the Rain",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     }

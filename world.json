@@ -139,6 +139,19 @@
           ],
           "rim": "B",
           "intensity": 1.5
+        },
+        {
+          "kind": "portal",
+          "film": "./film-bloom.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "The Bloom",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     },
@@ -230,6 +243,19 @@
           ],
           "rim": "A",
           "intensity": 1.3
+        },
+        {
+          "kind": "portal",
+          "film": "./film-chrysalis.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "The Chrysalis",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     },
@@ -303,6 +329,19 @@
           ],
           "rim": "B",
           "intensity": 0.4
+        },
+        {
+          "kind": "portal",
+          "film": "./film-relics.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "The Relics",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     },
@@ -531,6 +570,19 @@
             "title": "Soaked.",
             "body": "You waited in the rain and it noticed. Keep whatever it washed off you."
           }
+        },
+        {
+          "kind": "portal",
+          "film": "./film-purple-rain.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "Purple Rain",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     },
@@ -577,6 +629,19 @@
           "rim": "A",
           "intensity": 1.7,
           "anchor": true
+        },
+        {
+          "kind": "portal",
+          "film": "./film-approach.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "Last Stop",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     }

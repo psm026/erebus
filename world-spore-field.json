@@ -145,6 +145,19 @@
           ],
           "rim": "A",
           "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "film": "./film-the-hush.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "The Hush",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     }

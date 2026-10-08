@@ -104,6 +104,19 @@
           ],
           "rim": "B",
           "intensity": 1.3
+        },
+        {
+          "kind": "portal",
+          "film": "./film-static-ocean.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "The Static Ocean",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     }

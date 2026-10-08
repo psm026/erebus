@@ -121,6 +121,19 @@
           ],
           "rim": "B",
           "intensity": 1.4
+        },
+        {
+          "kind": "portal",
+          "film": "./film-inside-cocoon.mp4",
+          "filmEyebrow": "Filmed here",
+          "filmTitle": "Inside the Cocoon",
+          "scale": [
+            1.8,
+            1.8
+          ],
+          "rim": "B",
+          "intensity": 1.3,
+          "anchor": false
         }
       ]
     }
