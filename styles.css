@@ -657,3 +657,14 @@ body.cinema-open #markers, body.egg-open #markers { display: none; }
 
 /* rail worlds you can look around in: sideways drags turn your head, vertical ones still scroll */
 body.look-rail { touch-action: pan-y; }
+
+/* ---------- v25.5 the deck closes from its corner too ---------- */
+.lst-panel { position: relative; }
+.lst-x {
+  position: absolute; top: 10px; right: 12px;
+  width: 34px; height: 34px; border: 0; border-radius: 50%;
+  background: transparent; color: #f0e2d0; opacity: 0.7;
+  font: 300 22px/1 'Space Grotesk', system-ui, sans-serif; cursor: pointer;
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+.lst-x:hover, .lst-x:focus-visible { opacity: 1; background: rgba(234, 162, 94, 0.14); }

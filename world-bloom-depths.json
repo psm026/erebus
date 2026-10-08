@@ -15,6 +15,7 @@
       "nebulaA": "#241206",
       "nebulaB": "#10081f",
       "dust": "#d98e50",
+      "skyGain": 1.2,
       "stops": [
         {
           "variant": "room-title",

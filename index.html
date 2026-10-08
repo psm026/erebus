@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=22" />
+  <link rel="stylesheet" href="styles.css?v=23" />
 
   <script type="importmap">
     {
@@ -24,7 +24,7 @@
       }
     }
   </script>
-  <script type="module" src="script.js?v=36"></script>
+  <script type="module" src="script.js?v=37"></script>
   <script>
     // rescue hatch: if the module/CDN never loads, don't strand visitors on the loader
     setTimeout(function () {
@@ -51,6 +51,7 @@
   <!-- The listening room: Spotify deck in wood-dark chrome -->
   <div id="listen" aria-hidden="true">
     <div class="lst-panel">
+      <button class="lst-x" type="button" aria-label="Close the deck">×</button>
       <p class="lst-eyebrow"></p>
       <h2 class="lst-title"></h2>
       <div class="lst-embed"></div>

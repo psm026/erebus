@@ -25,6 +25,18 @@ window.__erebusBooted = true;
 
 const PR_CAP = 1.5;
 const VERSION = 5;
+// v25.5 the rooms' music sits lower and arrives slowly, through a soft low-pass: calmer
+const ROOM_VOLUME = 0.22;
+function fadeAudio(el, to, ms) {
+  if (!el) return;
+  clearInterval(el.__fade);
+  const from = el.volume, t0 = performance.now();
+  el.__fade = setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / ms);
+    el.volume = Math.max(0, Math.min(1, from + (to - from) * k * k * (3 - 2 * k)));
+    if (k >= 1) clearInterval(el.__fade);
+  }, 50);
+}
 // v25.3 sky colour test: ?sky=split shows each room's sky half as it renders now (left) and half
 // decoded once, as the picture was made (right). ?sky=true shows the whole sky decoded once.
 // Rooms can adopt it for good with "skyTrue": true. Normal visitors see no change.
@@ -662,7 +674,7 @@ async function boot() {
     precision highp float;
     varying vec3 vDir;
     uniform sampler2D uMap;
-    uniform float uOpacity, uTime, uRatio, uHas, uSwirl, uGain, uMode, uFadeYaw, uTrue, uSplit;
+    uniform float uOpacity, uTime, uRatio, uHas, uSwirl, uGain, uMode, uFadeYaw, uTrue, uSplit, uDecode;
     float fold(float x) { float m = mod(x, 2.0); return m > 1.0 ? 2.0 - m : m; }
     void main() {
       if (uHas < 0.5 || uOpacity <= 0.001) discard;
@@ -676,7 +688,7 @@ async function boot() {
         // no mirror. Mode 2 keeps only the heavens and lets the horizon melt into the room.
         vec2 tuv = vec2(fract(yaw / 6.28318 + 0.5 + uTime * 0.0006), clamp(pitch / 3.14159 + 0.5, 0.001, 0.999));
         vec3 tc0 = texture2D(uMap, tuv).rgb;
-        vec3 tc = mix(pow(tc0, vec3(2.2)), tc0, tmix);
+        vec3 tc = mix(pow(tc0, vec3(uDecode)), tc0, tmix);
         float tahead = mix(0.62, 1.0, 0.5 + 0.5 * cos(yaw));
         float ta = uOpacity * tahead;
         if (uMode > 1.5) ta *= smoothstep(-0.05, 0.16, pitch);
@@ -695,7 +707,7 @@ async function boot() {
       float u = fold(yaw / span + 0.5 + sin(uTime * 0.008) * 0.010);
       float v = fold(pitch / (span * max(uRatio, 0.2)) + 0.5);
       vec3 c0 = texture2D(uMap, vec2(u, v)).rgb;
-      vec3 c = mix(pow(c0, vec3(2.2)), c0, tmix);
+      vec3 c = mix(pow(c0, vec3(uDecode)), c0, tmix);
       float ahead = 0.5 + 0.5 * cos(yaw);
       float polar = 1.0 - smoothstep(0.30, 1.35, abs(pitch));
       c *= mix(0.26, 1.0, ahead * ahead) * mix(0.20, 1.0, polar);
@@ -715,6 +727,8 @@ async function boot() {
       uMap: { value: null }, uOpacity: { value: 0 }, uTime: { value: 0 },
       uRatio: { value: 0.5625 }, uHas: { value: 0 }, uSwirl: { value: 0 }, uGain: { value: 1 },
       uMode: { value: 0 }, uFadeYaw: { value: 0 }, uTrue: { value: 0 }, uSplit: { value: 0 },
+      // the dark look everywhere; small screens crush near-black, so phones open the shadows a little
+      uDecode: { value: isMobile ? 1.85 : 2.2 },
     },
     vertexShader: DOME_VERT, fragmentShader: DOME_FRAG,
     transparent: true, depthWrite: false, side: THREE.BackSide, fog: false,
@@ -772,7 +786,7 @@ async function boot() {
   function fillLumen(u, room) {
     const L = (room && room.lumen) || {};
     u.uLFold.value = L.fold != null ? L.fold : 1.1;
-    u.uLExp.value = L.exposure != null ? L.exposure : 1.8;
+    u.uLExp.value = (L.exposure != null ? L.exposure : 1.8) * (isMobile ? 1.3 : 1);
     u.uLScale.value = L.scale != null ? L.scale : 0.45;
     u.uLLift.value = L.lift != null ? L.lift : 0.95;
     u.uLSpin.value = L.spin != null ? L.spin : 0.02;
@@ -1517,19 +1531,25 @@ async function boot() {
       const au = document.createElement('audio');
       au.src = data.audio;
       au.loop = true;
-      au.volume = 0.32;
+      au.volume = 0;
       au.crossOrigin = 'anonymous';
       W.worldAudio = au;
       addEventListener('pointerdown', () => {
         if (W.worldAudio !== au) return;
-        if (!document.body.classList.contains('listen-open')) au.play().catch(() => {});
+        if (!document.body.classList.contains('listen-open') && !document.body.classList.contains('cinema-open')) {
+          au.play().then(() => fadeAudio(au, ROOM_VOLUME, 4000)).catch(() => {});
+        }
         try {
           if (!W.audioCtx) W.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           if (W.audioCtx.state === 'suspended') W.audioCtx.resume();
           const src = W.audioCtx.createMediaElementSource(au);
           const an = W.audioCtx.createAnalyser();
           an.fftSize = 64;
-          src.connect(an);
+          // a soft low-pass takes the edge off the hum
+          const lp = W.audioCtx.createBiquadFilter();
+          lp.type = 'lowpass'; lp.frequency.value = 2600; lp.Q.value = 0.4;
+          src.connect(lp);
+          lp.connect(an);
           an.connect(W.audioCtx.destination);
           W.analyser = an;
           W.audioData = new Uint8Array(an.frequencyBinCount);
@@ -1640,6 +1660,9 @@ async function boot() {
   async function swapWorld(id, pushHash) {
     if (swapping || id === W.id) return;
     swapping = true;
+    // leaving a room closes whatever was playing in it
+    closeListen();
+    closeCinema();
     document.body.classList.add('world-jump');
     try {
       const data = await fetchWorld(id);
@@ -1862,6 +1885,8 @@ async function boot() {
   }
   function openCinema(data) {
     if (!cinema || !cinFilm) return;
+    W.humWas = !!(W.worldAudio && !W.worldAudio.paused);
+    if (W.worldAudio) W.worldAudio.pause();
     cinema.querySelector('.cin-eyebrow').textContent = data.eyebrow || '';
     cinema.querySelector('.cin-title').textContent = data.title || '';
     cinFilm.src = data.src;
@@ -1885,6 +1910,11 @@ async function boot() {
       cinFilm.pause();
       cinFilm.removeAttribute('src');
       cinFilm.load();
+      if (W.humWas && W.worldAudio && !document.body.classList.contains('listen-open')) {
+        W.worldAudio.volume = 0;
+        W.worldAudio.play().then(() => fadeAudio(W.worldAudio, ROOM_VOLUME, 3000)).catch(() => {});
+      }
+      W.humWas = false;
     }, 900);
   }
   const listen = document.getElementById('listen');
@@ -1919,8 +1949,9 @@ async function boot() {
     };
     document.body.classList.add('listen-open');
     requestAnimationFrame(() => listen.classList.add('on'));
-    // the room's hum steps aside while the records spin
+    // the room's hum steps aside while the records spin, and so does anything else with sound
     if (W.worldAudio) W.worldAudio.pause();
+    document.querySelectorAll('video, audio').forEach((m) => { if (!m.muted && !m.paused) { try { m.pause(); } catch (e) {} } });
     if (window.SpotifyIframeApi) mount();
     else {
       window.onSpotifyIframeApiReady = (api) => { window.SpotifyIframeApi = api; mount(); };
@@ -1945,11 +1976,16 @@ async function boot() {
       if (listenCtrl) { try { listenCtrl.destroy(); } catch (e) {} listenCtrl = null; }
       const host = listen.querySelector('.lst-embed');
       if (host) host.innerHTML = '';
+      // hand the keyboard back to the room (the player had it)
+      try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (e) {}
       // the hum stays out once records have spun — silence until the next descent
     }, 700);
   }
   if (listen) {
     listen.querySelector('.lst-exit').addEventListener('click', closeListen);
+    const lstX = listen.querySelector('.lst-x');
+    if (lstX) lstX.addEventListener('click', closeListen);
+    listen.addEventListener('click', (e) => { if (e.target === listen) closeListen(); });
     window.addEventListener('blur', () => { if (document.body.classList.contains('listen-open') && W.worldAudio) W.worldAudio.pause(); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeListen(); });
   }

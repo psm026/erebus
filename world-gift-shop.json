@@ -16,6 +16,7 @@
       "nebulaA": "#2b1206",
       "nebulaB": "#1f0a14",
       "dust": "#ff9d5c",
+      "skyGain": 2.4,
       "sky": "./bg-relics.webp",
       "skyRatio": 0.558,
       "skyOpacity": 0.95,
